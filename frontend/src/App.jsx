@@ -8,21 +8,13 @@
  */
 import { BrowserRouter, Routes, Route, NavLink, useLocation } from 'react-router-dom';
 
-// Placeholder screen components — will be implemented in later tasks.
-// Each returns a simple centered message so the app is immediately runnable.
-const Placeholder = ({ title, icon }) => (
-    <div className="flex flex-col items-center justify-center h-full px-4 text-center">
-        <span className="text-5xl mb-4">{icon}</span>
-        <h1 className="text-xl font-semibold text-body">{title}</h1>
-        <p className="text-secondary mt-2">Coming soon</p>
-    </div>
-);
-
-const HomeScreen = () => <Placeholder title="Home" icon="🏠" />;
-const ChatScreen = () => <Placeholder title="Chat" icon="💬" />;
-const TripsScreen = () => <Placeholder title="Trips" icon="🗺️" />;
-const HistoryScreen = () => <Placeholder title="History" icon="📋" />;
-const LLMLogsScreen = () => <Placeholder title="LLM Logs" icon="📊" />;
+// Screen components
+import HomeScreen from './screens/HomeScreen';
+import ChatScreen from './screens/ChatScreen';
+import PreviewScreen from './screens/PreviewScreen';
+import TripsScreen from './screens/TripsScreen';
+import HistoryScreen from './screens/HistoryScreen';
+import LLMLogsScreen from './screens/LLMLogsScreen';
 
 // ── Tab config ───────────────────────────────
 
@@ -66,7 +58,7 @@ function BottomTabBar() {
 function AppShell() {
     const location = useLocation();
 
-    // Hide bottom nav on screens that need full viewport (e.g. preview)
+    // Hide bottom nav on preview screen (needs full viewport)
     const hideTabBar = location.pathname.startsWith('/preview');
 
     return (
@@ -76,6 +68,7 @@ function AppShell() {
                 <Routes>
                     <Route path="/" element={<HomeScreen />} />
                     <Route path="/chat" element={<ChatScreen />} />
+                    <Route path="/preview" element={<PreviewScreen />} />
                     <Route path="/trips" element={<TripsScreen />} />
                     <Route path="/history" element={<HistoryScreen />} />
                     <Route path="/admin/logs" element={<LLMLogsScreen />} />
