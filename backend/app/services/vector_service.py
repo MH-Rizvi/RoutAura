@@ -1,1 +1,208 @@
 
+from __future__ import annotations
+
+from typing import Any, Dict, List
+
+import chromadb
+from chromadb.config import Settings as ChromaSettings
+from sentence_transformers import SentenceTransformer
+
+from app.config import settings
+
+
+# Load embedding model once at module import time (local, no API calls).
+embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+
+
+# Persistent ChromaDB client. Path is relative to where uvicorn is run (backend/).
+chroma_client = chromadb.PersistentClient(
+    path=settings.chroma_db_path,
+    settings=ChromaSettings(anonymized_telemetry=False),
+)
+
+
+# Collections for saved stops, trips, and trip history (for RAG).
+stops_collection = chroma_client.get_or_create_collection(
+    name="saved_stops",
+    metadata={"hnsw:space": "cosine"},
+)
+
+trips_collection = chroma_client.get_or_create_collection(
+    name="saved_trips",
+    metadata={"hnsw:space": "cosine"},
+)
+
+history_collection = chroma_client.get_or_create_collection(
+    name="trip_history",
+    metadata={"hnsw:space": "cosine"},
+)
+
+
+def embed(text: str) -> List[float]:
+    """Return embedding vector for a single text string."""
+    return embedding_model.encode(text).tolist()
+
+
+def add_stop(
+    stop_id: int,
+    trip_id: int,
+    label: str,
+    resolved: str,
+    lat: float,
+    lng: float,
+) -> str:
+    """
+    Embed and store a stop.
+
+    Document = resolved address.
+    Metadata = { stop_id, trip_id, label, lat, lng }.
+    Returns the ChromaDB document ID.
+    """
+    doc_id = f"stop_{stop_id}"
+    text = f"{label} {resolved}"
+
+    stops_collection.add(
+        ids=[doc_id],
+        embeddings=[embed(text)],
+        documents=[resolved],
+        metadatas=[
+            {
+                "stop_id": stop_id,
+                "trip_id": trip_id,
+                "label": label,
+                "lat": lat,
+                "lng": lng,
+            }
+        ],
+    )
+    return doc_id
+
+
+def add_trip(trip_id: int, name: str, stops: List[Dict[str, Any]]) -> str:
+    """
+    Embed and store a trip.
+
+    Document = trip name + all stop labels concatenated.
+    """
+    doc_id = f"trip_{trip_id}"
+    stop_labels = " ".join(str(s.get("label", "")) for s in stops)
+    document = f"{name} {stop_labels}".strip()
+
+    trips_collection.add(
+        ids=[doc_id],
+        embeddings=[embed(document)],
+        documents=[document],
+        metadatas=[
+            {
+                "trip_id": trip_id,
+                "name": name,
+                "stop_count": len(stops),
+            }
+        ],
+    )
+    return doc_id
+
+
+def add_history_entry(
+    history_id: int,
+    trip_id: int | None,
+    trip_name: str,
+    stops: List[Dict[str, Any]],
+    launched_at: str,
+) -> str:
+    """
+    Create a natural language summary of a launched trip and embed it for RAG.
+    """
+    stop_labels = " → ".join(str(s.get("label", "")) for s in stops)
+    document = f"On {launched_at}, drove {trip_name}: {stop_labels}".strip()
+    doc_id = f"history_{history_id}"
+
+    history_collection.add(
+        ids=[doc_id],
+        embeddings=[embed(document)],
+        documents=[document],
+        metadatas=[
+            {
+                "history_id": history_id,
+                "trip_id": trip_id,
+                "trip_name": trip_name,
+                "launched_at": launched_at,
+            }
+        ],
+    )
+    return doc_id
+
+
+def search_stops(query: str, top_k: int = 3) -> List[Dict[str, Any]]:
+    """Semantic search over saved stops."""
+    results = stops_collection.query(
+        query_embeddings=[embed(query)],
+        n_results=top_k,
+    )
+    return _format_results(results)
+
+
+def search_trips(query: str, top_k: int = 3) -> List[Dict[str, Any]]:
+    """Semantic search over saved trips."""
+    results = trips_collection.query(
+        query_embeddings=[embed(query)],
+        n_results=top_k,
+    )
+    return _format_results(results)
+
+
+def search_history(query: str, top_k: int = 5) -> List[Dict[str, Any]]:
+    """Semantic search over trip history entries for the RAG pipeline."""
+    results = history_collection.query(
+        query_embeddings=[embed(query)],
+        n_results=top_k,
+    )
+    return _format_results(results)
+
+
+def delete_stop(chroma_id: str) -> None:
+    """Delete a stop document from the saved_stops collection."""
+    if chroma_id:
+        stops_collection.delete(ids=[chroma_id])
+
+
+def delete_trip(chroma_id: str) -> None:
+    """Delete a trip document from the saved_trips collection."""
+    if chroma_id:
+        trips_collection.delete(ids=[chroma_id])
+
+
+def _format_results(chroma_results: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """
+    Convert ChromaDB query results into a list of dicts with similarity scores.
+
+    Chroma returns cosine distances (lower = more similar).
+    We convert to similarity via: similarity = 1 - distance.
+    """
+    if not chroma_results.get("ids"):
+        return []
+
+    formatted: List[Dict[str, Any]] = []
+    ids = chroma_results.get("ids", [[]])[0]
+    documents = chroma_results.get("documents", [[]])[0]
+    metadatas = chroma_results.get("metadatas", [[]])[0]
+    distances = chroma_results.get("distances", [[]])[0]
+
+    for idx, doc_id in enumerate(ids):
+        distance = distances[idx] if idx < len(distances) else None
+        similarity: float | None = None
+        if distance is not None:
+            similarity = 1 - float(distance)
+
+        formatted.append(
+            {
+                "id": doc_id,
+                "document": documents[idx] if idx < len(documents) else None,
+                "metadata": metadatas[idx] if idx < len(metadatas) else None,
+                "similarity": similarity,
+            }
+        )
+
+    return formatted
+
+
