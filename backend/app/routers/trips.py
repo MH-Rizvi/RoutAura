@@ -3,16 +3,47 @@ from __future__ import annotations
 
 from typing import List
 
-from fastapi import APIRouter, Depends, HTTPException, Response, status  # pyright: ignore[reportMissingImports]
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status  # pyright: ignore[reportMissingImports]
 from sqlalchemy.orm import Session  # pyright: ignore[reportMissingImports]
 
 from app import models, schemas
 from app.database import get_db
-from app.services import trips_service
+from app.services import trips_service, vector_service
 
 
 router = APIRouter(tags=["trips"])
 
+
+# ── Semantic search (MUST be before /trips/{trip_id} to avoid "search" being matched as an ID) ──
+
+@router.get("/trips/search", response_model=schemas.TripsSearchResponse)
+async def search_trips(
+    q: str = Query(..., min_length=1, description="Semantic search query"),
+    db: Session = Depends(get_db),
+) -> schemas.TripsSearchResponse:
+    """Semantic search over saved trips using ChromaDB vector similarity."""
+    results = vector_service.search_trips(q, top_k=10)
+
+    # Enrich with SQLite data (stop_count, etc.) and build response
+    search_results: List[schemas.TripSearchResult] = []
+    for r in results:
+        metadata = r.get("metadata", {})
+        trip_id = metadata.get("trip_id")
+        if trip_id is None:
+            continue
+        search_results.append(
+            schemas.TripSearchResult(
+                id=trip_id,
+                name=metadata.get("name", ""),
+                stop_count=metadata.get("stop_count", 0),
+                similarity=round(r.get("similarity", 0), 4),
+            )
+        )
+
+    return schemas.TripsSearchResponse(results=search_results)
+
+
+# ── CRUD ────────────────────────────────────────────────────────────────────────
 
 @router.get("/trips", response_model=List[schemas.Trip])
 async def list_trips(db: Session = Depends(get_db)) -> List[schemas.Trip]:
@@ -40,6 +71,21 @@ async def create_trip(
     return trip
 
 
+@router.put("/trips/{trip_id}", response_model=schemas.Trip)
+async def update_trip(
+    trip_id: int,
+    trip_data: schemas.TripUpdate,
+    db: Session = Depends(get_db),
+) -> schemas.Trip:
+    trip = await trips_service.update_trip(db, trip_id, trip_data)
+    if not trip:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Trip not found.",
+        )
+    return trip
+
+
 @router.delete("/trips/{trip_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_trip(trip_id: int, db: Session = Depends(get_db)) -> Response:
     success = await trips_service.delete_trip(db, trip_id)
@@ -60,5 +106,3 @@ async def launch_trip(trip_id: int, db: Session = Depends(get_db)) -> schemas.Tr
             detail="Trip not found.",
         )
     return history
-
-

@@ -10,7 +10,7 @@ from app.services import rag_service
 router = APIRouter(tags=["rag"])
 
 
-@router.post("/rag/ask", response_model=schemas.HistoryQuestionResponse)
+@router.post("/rag/query", response_model=schemas.HistoryQuestionResponse)
 async def ask_history_question(
     request: schemas.HistoryQuestionRequest,
 ) -> schemas.HistoryQuestionResponse:

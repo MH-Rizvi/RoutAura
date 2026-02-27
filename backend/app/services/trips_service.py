@@ -92,6 +92,102 @@ async def list_trips(db: Session) -> List[models.Trip]:
     return trips
 
 
+async def update_trip(
+    db: Session, trip_id: int, trip_data: schemas.TripUpdate
+) -> Optional[models.Trip]:
+    """
+    Update a trip's name, notes, and optionally replace its stops.
+
+    When stops are supplied:
+    1. Delete old stops from ChromaDB.
+    2. Delete old Stop rows from SQLite.
+    3. Insert new stops to SQLite + ChromaDB.
+    4. Update the trip document in ChromaDB with the new stop labels.
+    """
+    trip = db.query(models.Trip).filter(models.Trip.id == trip_id).first()
+    if not trip:
+        return None
+
+    # Update scalar fields
+    if trip_data.name is not None:
+        trip.name = trip_data.name
+    if trip_data.notes is not None:
+        trip.notes = trip_data.notes
+
+    # Replace stops if provided
+    if trip_data.stops is not None:
+        # Delete old stops from ChromaDB
+        for stop in trip.stops:
+            if stop.chroma_id:
+                try:
+                    vector_service.delete_stop(stop.chroma_id)
+                except Exception as exc:
+                    logger.error("Failed to delete stop chroma_id=%s: %s", stop.chroma_id, exc)
+
+        # Delete old Stop rows (cascade won't fire here, do it manually)
+        for stop in trip.stops:
+            db.delete(stop)
+        db.flush()
+
+        # Insert new stops
+        stops_payload: List[dict] = []
+        for stop_data in trip_data.stops:
+            db_stop = models.Stop(
+                trip_id=trip.id,
+                position=stop_data.position,
+                label=stop_data.label,
+                resolved=stop_data.resolved,
+                lat=stop_data.lat,
+                lng=stop_data.lng,
+                note=stop_data.note,
+            )
+            db.add(db_stop)
+            db.flush()
+
+            chroma_id = vector_service.add_stop(
+                stop_id=db_stop.id,
+                trip_id=trip.id,
+                label=db_stop.label,
+                resolved=db_stop.resolved,
+                lat=db_stop.lat,
+                lng=db_stop.lng,
+            )
+            db_stop.chroma_id = chroma_id
+
+            stops_payload.append({"label": db_stop.label})
+
+        # Update the trip document in ChromaDB
+        if trip.chroma_id:
+            try:
+                vector_service.delete_trip(trip.chroma_id)
+            except Exception:
+                pass
+        trip_chroma_id = vector_service.add_trip(
+            trip_id=trip.id,
+            name=trip.name,
+            stops=stops_payload,
+        )
+        trip.chroma_id = trip_chroma_id
+    else:
+        # Even if only name changed, update the ChromaDB trip document
+        if trip.chroma_id and trip_data.name is not None:
+            try:
+                vector_service.delete_trip(trip.chroma_id)
+            except Exception:
+                pass
+            stops_payload = [{"label": s.label} for s in trip.stops]
+            trip_chroma_id = vector_service.add_trip(
+                trip_id=trip.id,
+                name=trip.name,
+                stops=stops_payload,
+            )
+            trip.chroma_id = trip_chroma_id
+
+    db.commit()
+    db.refresh(trip)
+    return trip
+
+
 async def delete_trip(db: Session, trip_id: int) -> bool:
     """
     Delete a trip from SQLite and ChromaDB.
