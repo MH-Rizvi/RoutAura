@@ -16,7 +16,7 @@ export default function SaveTripModal({ stops, onClose, onSaved }) {
         setError(null);
         const tripData = {
             name: name.trim(), notes: notes.trim() || null,
-            stops: stops.map((s, i) => ({ label: s.label, resolved: s.resolved, lat: s.lat, lng: s.lng, note: s.note || null, approach_direction: s.approach_direction || null, position: i })),
+            stops: stops.map((s, i) => ({ label: s.label, resolved: s.resolved, lat: s.lat, lng: s.lng, note: s.note || null, position: i })),
         };
         const saved = await saveTrip(tripData);
         if (saved) onSaved?.(saved);

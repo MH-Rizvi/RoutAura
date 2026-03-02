@@ -67,7 +67,6 @@ class Stop(Base):
     lat: Mapped[float] = mapped_column(Float, nullable=False)
     lng: Mapped[float] = mapped_column(Float, nullable=False)
     note: Mapped[str | None] = mapped_column(Text, nullable=True)
-    approach_direction: Mapped[str | None] = mapped_column(Text, nullable=True)
     chroma_id: Mapped[str | None] = mapped_column(String, unique=True, index=True)
 
     trip: Mapped["Trip"] = relationship("Trip", back_populates="stops")

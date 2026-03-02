@@ -1,6 +1,7 @@
 
 from __future__ import annotations
 
+import math
 import logging
 from typing import Any, Dict
 
@@ -89,6 +90,7 @@ async def geocode(query: str) -> Dict[str, Any]:
             "address": search_query,
             "key": settings.google_maps_api_key,
             "region": "us",
+            "components": "administrative_area:NY|country:US",
         }
         if lat_center is not None and lng_center is not None:
             params["location"] = f"{lat_center},{lng_center}"
@@ -108,10 +110,8 @@ async def geocode(query: str) -> Dict[str, Any]:
     default_city_name = default_parts[0] if default_parts else ""
     default_state = default_parts[-1] if len(default_parts) > 1 else ""
 
-    # 2. Prepare search query
-    search_query = query.strip()
-    if "," not in search_query:
-        search_query = f"{search_query}, {settings.default_city}"
+    # 2. Prepare search query (Always append DEFAULT_CITY)
+    search_query = f"{query.strip()}, {settings.default_city}"
 
     # First attempt
     data = await _fetch_geocode(search_query)
@@ -162,6 +162,37 @@ async def geocode(query: str) -> Dict[str, Any]:
             "formatted_address": None,
             "confidence": "low",
             "error": "Geocoding response was incomplete.",
+        }
+
+    def _haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+        R = 3958.8 # miles
+        phi1, phi2 = math.radians(lat1), math.radians(lat2)
+        dphi = math.radians(lat2 - lat1)
+        dlam = math.radians(lon2 - lon1)
+        a = math.sin(dphi/2)**2 + math.cos(phi1)*math.cos(phi2)*math.sin(dlam/2)**2
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+        return R * c
+
+    # 5. Validation Check
+    is_invalid = False
+    if "City Hall" in formatted_address:
+        is_invalid = True
+    elif ", New York," in formatted_address or formatted_address.startswith("New York,"):
+        is_invalid = True
+
+    if lat_center is not None and lng_center is not None:
+        dist = _haversine(lat_center, lng_center, float(lat), float(lng))
+        if dist > 30.0:
+            is_invalid = True
+
+    if is_invalid:
+        return {
+            "success": False,
+            "lat": None,
+            "lng": None,
+            "formatted_address": None,
+            "confidence": "low",
+            "error": "Could not find this stop in your area",
         }
 
     return {

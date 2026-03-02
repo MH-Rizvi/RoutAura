@@ -43,6 +43,8 @@ def geocode_stop_tool(query: str) -> Dict[str, Any]:
     Output: { success, lat, lng, formatted_address, error }.
     """
     result = _run_async(geocoding_service.geocode(query))
+    if not result.get("success"):
+        return {"error": result.get("error", "This stop could not be found. Please ask the driver for a better description of this specific stop only.")}
     if result.get("success") and result.get("confidence") == "low":
         result["warning"] = "LOW CONFIDENCE RESOLUTION. The agent MUST ask the driver to explicitly confirm this formatted_address before proceeding."
     return result

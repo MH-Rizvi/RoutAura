@@ -81,28 +81,47 @@ const useChatStore = create((set, get) => ({
                 const match = line.match(/^\s*\d+\.\s+(.+)$/);
                 if (match) {
                     const text = match[1];
-                    const dashIdx = text.indexOf('-');
+                    // Look for the last ' - ' to avoid splitting on negative coordinate signs like -73.0
+                    const dashIdx = text.lastIndexOf(' - ');
                     let label = text.trim();
                     let resolved = text.trim();
                     if (dashIdx !== -1) {
                         label = text.substring(0, dashIdx).trim();
-                        resolved = text.substring(dashIdx + 1).trim();
+                        resolved = text.substring(dashIdx + 3).trim();
                     }
+
+                    // Strip optional (lat, lng) from the frontend display label if present
+                    label = label.replace(/\s*\(-?\d+\.?\d*,\s*-?\d+\.?\d*\)\s*/g, ' ').trim();
+
                     parsedStops.push({ label, resolved });
                 }
             });
 
             let messageStops = null;
-            if (parsedStops.length >= 2) {
-                // Recover lat/lng manually by cross-referencing known coordinates
+            if (response.stops && parsedStops.length >= 2 && response.stops.length === parsedStops.length) {
+                // Perfect mapping: backend successfully parsed the exact route from the agent's text.
+                // Use the backend's precise coordinates natively, bypassing flaky string matching!
+                messageStops = response.stops.map((bs, idx) => ({
+                    ...bs,
+                    label: parsedStops[idx].label, // Give frontend label precedence for display
+                    resolved: parsedStops[idx].resolved || bs.resolved
+                }));
+            } else if (parsedStops.length >= 2) {
+                // Fallback manual recovery for edge cases
                 const allKnownStops = [...(response.stops || []), ...(get().lastRoute?.stops || [])];
 
                 messageStops = parsedStops.map((ps, idx) => {
-                    const known = allKnownStops.find(ks =>
-                        (ks.label && ps.label && ks.label.toLowerCase().includes(ps.label.toLowerCase())) ||
-                        (ks.resolved && ps.resolved && ks.resolved.toLowerCase().includes(ps.resolved.toLowerCase())) ||
-                        (ps.label && ks.label && ps.label.toLowerCase().includes(ks.label.toLowerCase()))
-                    );
+                    // Robust fuzzy match ignoring punctuation and capitalization
+                    const normalize = (str) => (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+                    const pNorm = normalize(ps.label);
+                    const pResNorm = normalize(ps.resolved);
+
+                    const known = allKnownStops.find(ks => {
+                        const kNorm = normalize(ks.label);
+                        const kResNorm = normalize(ks.resolved);
+                        return (kNorm && pNorm && (kNorm.includes(pNorm) || pNorm.includes(kNorm))) ||
+                            (kResNorm && pResNorm && (kResNorm.includes(pResNorm) || pResNorm.includes(kResNorm)));
+                    });
 
                     return {
                         label: ps.label,

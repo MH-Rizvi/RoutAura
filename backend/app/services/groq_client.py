@@ -214,11 +214,11 @@ class LLMKeyRotator:
     def get_chat_llm(self, **kwargs: Any) -> Any:
         """Return either ChatGroq or ChatGoogleGenerativeAI based on current active key."""
         if self.current_provider == "groq":
-            defaults = {"model": "llama-3.3-70b-versatile", "temperature": 0}
+            defaults = {"model": "llama-3.3-70b-versatile", "temperature": 0, "model_kwargs": {"top_p": 0.1}}
             defaults.update(kwargs)
             return ChatGroq(api_key=self.current_key, **defaults)
         else:
-            defaults = {"model": "gemini-2.0-flash-lite", "temperature": 0}
+            defaults = {"model": "gemini-2.0-flash-lite", "temperature": 0, "top_p": 0.1}
             # Remove model from kwargs since callers pass Groq models like "llama..."
             if "model" in kwargs:
                 kwargs.pop("model")

@@ -22,9 +22,6 @@ export default function PreviewScreen() {
 
     const handleReorder = (reordered) => setStops(reordered);
     const handleDeleteStop = (index) => setStops((prev) => prev.filter((_, i) => i !== index));
-    const handleUpdateStop = (index, updatedStop) => {
-        setStops((prev) => prev.map((s, i) => (i === index ? updatedStop : s)));
-    };
 
     const handleOverwriteCurrent = async () => {
         if (!tripId || stops.length < 2) return;
@@ -82,23 +79,7 @@ export default function PreviewScreen() {
                             </div>
                         )}
 
-                        <StopList stops={stops} onReorder={handleReorder} onDelete={handleDeleteStop} onUpdate={handleUpdateStop} />
-
-                        {stops.some((s) => s.approach_direction) && (
-                            <div className="mt-6 p-4 rounded-xl bg-[#F59E0B]/10 border border-[#F59E0B]/30">
-                                <h3 className="text-sm font-bold text-[#F59E0B] flex items-center gap-2 mb-2 uppercase tracking-wide">
-                                    🚌 Approach Reminders
-                                </h3>
-                                <div className="space-y-1">
-                                    {stops.map((s, i) => s.approach_direction && (
-                                        <p key={i} className="text-sm text-[#F59E0B]">
-                                            <span className="font-mono opacity-60 mr-1">Stop {i + 1} — {s.label}:</span>
-                                            <span className="font-semibold">{s.approach_direction}</span>
-                                        </p>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
+                        <StopList stops={stops} onReorder={handleReorder} onDelete={handleDeleteStop} />
 
                         <div className="flex flex-col gap-3 mt-6">
                             {tripId ? (
