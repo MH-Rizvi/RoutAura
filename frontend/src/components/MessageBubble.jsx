@@ -19,7 +19,7 @@ export default function MessageBubble({ role, content, timestamp, routeStops, on
                 : 'bg-surface border-l-2 border-l-accent border border-border rounded-bl-md'
                 }`}>
                 <p className="text-base text-text-primary whitespace-pre-wrap break-words leading-relaxed">
-                    {content}
+                    {isUser ? content : content.replace(/\s*\(-?\d+\.?\d*,\s*-?\d+\.?\d*\)\s*/g, ' ').trim()}
                 </p>
                 {timestamp && (
                     <p className={`text-[11px] mt-1.5 font-mono ${isUser ? 'text-text-muted' : 'text-text-muted'}`}>

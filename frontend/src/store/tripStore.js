@@ -114,6 +114,9 @@ const useTripStore = create((set, get) => ({
         get()._startLoading();
         try {
             const result = await launchTrip(tripId);
+            // Refresh trips and history state so it's instantly available without remounting
+            get().fetchTrips();
+            get().fetchHistory();
             set({ loading: false });
             return result;
         } catch (err) {

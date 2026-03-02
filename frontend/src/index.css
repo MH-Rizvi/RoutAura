@@ -70,6 +70,14 @@
     padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
+.pb-safe-tabbar {
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+.bottom-safe-fab {
+    bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)) !important;
+}
+
 /* ── Touch targets ────────────────────────── */
 
 button,

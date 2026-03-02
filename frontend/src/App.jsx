@@ -78,7 +78,7 @@ function AppShell() {
     return (
         <div className="flex flex-col min-h-screen relative">
             <Toast />
-            <main className={`flex-1 flex flex-col overflow-y-auto ${hideTabBar ? '' : 'pb-[72px]'}`}>
+            <main className={`flex-1 flex flex-col overflow-y-auto ${hideTabBar ? '' : 'pb-safe-tabbar'}`}>
                 <Routes>
                     <Route path="/" element={<HomeScreen />} />
                     <Route path="/chat" element={<ChatScreen />} />

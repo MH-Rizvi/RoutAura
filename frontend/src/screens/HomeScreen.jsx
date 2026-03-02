@@ -101,7 +101,7 @@ export default function HomeScreen() {
                 {trips.length > 0 && (
                     <button
                         onClick={() => navigate('/chat')}
-                        className="fixed bottom-24 right-5 z-40 w-14 h-14 rounded-full btn-accent text-2xl shadow-glow flex items-center justify-center animate-glow-pulse"
+                        className="fixed bottom-safe-fab right-5 z-40 w-14 h-14 rounded-full btn-accent text-2xl shadow-glow flex items-center justify-center animate-glow-pulse"
                         aria-label="Plan a new route"
                     >
                         +

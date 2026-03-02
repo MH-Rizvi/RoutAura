@@ -9,6 +9,20 @@ import Header from '../components/Header';
 
 const RAG_EXAMPLES = ['What route did I do last Friday?', 'Have I been to Oak Avenue?', 'How many stops does my morning run have?', 'What was my most recent trip?'];
 
+function formatRagText(text) {
+    if (!text) return '';
+    return text.replace(/\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z?)?/g, (match) => {
+        try {
+            // If it's just a date without time, append T12:00:00 to avoid timezone shift pushing it back a day
+            const dateStr = match.includes('T') ? match : `${match}T12:00:00`;
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        } catch (e) {
+            return match;
+        }
+    });
+}
+
 export default function HistoryScreen() {
     const { history, loading: histLoading, fetchHistory, removeHistoryItem, clearHistory } = useTripStore();
     const [ragQuestion, setRagQuestion] = useState('');
@@ -19,9 +33,14 @@ export default function HistoryScreen() {
 
     useEffect(() => { fetchHistory(); }, [fetchHistory]);
 
-    const handleAskRAG = async (question) => {
-        const q = question || ragQuestion.trim();
+    const handleAskRAG = async (questionToAsk) => {
+        const q = typeof questionToAsk === 'string' ? questionToAsk : ragQuestion.trim();
         if (!q) return;
+
+        if (typeof questionToAsk === 'string') {
+            setRagQuestion(questionToAsk);
+        }
+
         setRagError(null); setRagAnswer(null); setRagLoading(true);
         try {
             const result = await queryRAG(q);
@@ -83,9 +102,11 @@ export default function HistoryScreen() {
                                 <span className="text-accent text-sm font-bold">AI Answer</span>
                                 <span className="text-xs text-text-muted">• Based on your history</span>
                             </div>
-                            <p className="text-base text-text-primary whitespace-pre-wrap">
-                                {typeof ragAnswer === 'string' ? ragAnswer : ragAnswer.answer || JSON.stringify(ragAnswer)}
-                            </p>
+                            <div className="max-h-[200px] overflow-y-auto pr-2 custom-scrollbar">
+                                <p className="text-base text-text-primary whitespace-pre-wrap">
+                                    {formatRagText(typeof ragAnswer === 'string' ? ragAnswer : ragAnswer.answer || JSON.stringify(ragAnswer))}
+                                </p>
+                            </div>
                             {ragAnswer.sources_used > 0 && (
                                 <p className="text-xs text-text-muted mt-2 font-mono">{ragAnswer.sources_used} source{ragAnswer.sources_used !== 1 ? 's' : ''}</p>
                             )}

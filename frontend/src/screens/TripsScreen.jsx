@@ -14,9 +14,25 @@ function TripRow({ trip, onDelete, onTap }) {
     const [swiping, setSwiping] = useState(false);
     const startX = useRef(0);
 
-    const handleTouchStart = (e) => { startX.current = e.touches[0].clientX; setSwiping(true); };
-    const handleTouchMove = (e) => { if (!swiping) return; const d = startX.current - e.touches[0].clientX; if (d > 0) setOffset(Math.min(d, 100)); };
-    const handleTouchEnd = () => { setSwiping(false); if (offset > 60) onDelete(trip.id); setOffset(0); };
+    const getClientX = (e) => e.touches ? e.touches[0].clientX : e.clientX;
+
+    const handleDragStart = (e) => {
+        startX.current = getClientX(e);
+        setSwiping(true);
+    };
+
+    const handleDragMove = (e) => {
+        if (!swiping) return;
+        const d = startX.current - getClientX(e);
+        if (d > 0) setOffset(Math.min(d, 100));
+    };
+
+    const handleDragEnd = () => {
+        if (!swiping) return;
+        setSwiping(false);
+        if (offset > 60) onDelete(trip.id);
+        setOffset(0);
+    };
 
     const stopCount = trip.stops?.length || trip.stop_count || 0;
     const lastUsed = trip.last_used
@@ -34,9 +50,13 @@ function TripRow({ trip, onDelete, onTap }) {
             <div
                 className="relative glass-card rounded-xl p-4 cursor-pointer flex items-center justify-between group"
                 style={{ transform: `translateX(-${offset}px)` }}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
+                onTouchStart={handleDragStart}
+                onTouchMove={handleDragMove}
+                onTouchEnd={handleDragEnd}
+                onMouseDown={handleDragStart}
+                onMouseMove={handleDragMove}
+                onMouseUp={handleDragEnd}
+                onMouseLeave={handleDragEnd}
                 onClick={() => onTap(trip.id)}
                 role="button"
                 tabIndex={0}

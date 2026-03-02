@@ -1,4 +1,4 @@
-const CACHE_NAME = 'routeeasy-v1';
+const CACHE_NAME = 'routigo-v1';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',
@@ -16,10 +16,23 @@ self.addEventListener('fetch', (event) => {
     // Only handle GET requests
     if (event.request.method !== 'GET') return;
 
+    // NEVER cache API requests or Chrome extension requests
+    const url = new URL(event.request.url);
+    if (!url.protocol.startsWith('http') || url.pathname.startsWith('/api') || url.pathname.includes(':8000')) {
+        return fetch(event.request);
+    }
+
     event.respondWith(
         caches.match(event.request).then((response) => {
             // Return cached response if found
             if (response) {
+                // Fetch in background to update cache for next time (Stale-while-revalidate)
+                fetch(event.request).then(networkResponse => {
+                    if (networkResponse && networkResponse.status === 200) {
+                        caches.open(CACHE_NAME).then(cache => cache.put(event.request, networkResponse.clone()));
+                    }
+                }).catch(() => { });
+
                 return response;
             }
 

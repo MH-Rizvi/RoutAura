@@ -10,6 +10,9 @@ const api = axios.create({
     timeout: 120000, // 120 s — agent calls can take a while with key rotation retries
     headers: {
         'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
     },
 });
 
