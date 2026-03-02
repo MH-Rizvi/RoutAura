@@ -7,6 +7,38 @@ from typing import List, Literal, Optional
 from pydantic import BaseModel, ConfigDict
 
 
+# ----- User / Auth schemas -----
+
+
+class SignupRequest(BaseModel):
+    email: str
+    password: str
+    city: str
+    state: str
+    zip_code: str
+
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: Literal["bearer"] = "bearer"
+
+
+class UserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    email: str
+    city: str
+    state: str
+    full_location: str
+
+
 # ----- Shared / utility schemas -----
 
 

@@ -23,6 +23,8 @@ class Settings(BaseSettings):
 
     google_maps_api_key: str | None = Field(default=None, env="GOOGLE_MAPS_API_KEY")
 
+    jwt_secret: str = ""
+
     database_url: str = Field(
         default="sqlite:///./routeeasy.db",
         env="DATABASE_URL",
