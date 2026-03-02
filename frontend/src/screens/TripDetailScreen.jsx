@@ -7,6 +7,7 @@ import useTripStore from '../store/tripStore';
 import MapPreview from '../components/MapPreview';
 import { buildGoogleMapsUrl, buildAppleMapsUrl } from '../utils/mapsLinks';
 import useToastStore from '../store/toastStore';
+import Header from '../components/Header';
 
 export default function TripDetailScreen() {
     const { tripId } = useParams();
@@ -86,21 +87,14 @@ export default function TripDetailScreen() {
 
     return (
         <div className="min-h-full pb-6">
-            <div className="h-14 flex items-center justify-between px-5 border-b border-[#1F2937] shrink-0">
-                <div className="flex items-center gap-[10px]">
-                    <img
-                        src="/logo2_nobg.png"
-                        alt="RouteEasy Icon"
-                        className="w-[48px] h-[48px] object-contain"
-                        style={{ filter: 'brightness(1.2) drop-shadow(0 0 4px rgba(245,158,11,0.3))' }}
-                    />
-                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '20px' }}>
-                        <span className="text-white font-bold tracking-tight">Route</span>
-                        <span className="text-[#F59E0B] font-bold tracking-tight">Easy</span>
-                    </div>
-                </div>
-                <button onClick={() => navigate(-1)} className="min-h-touch flex items-center gap-1 text-accent font-semibold text-sm">← Back</button>
-            </div>
+            <Header
+                rightElement={
+                    <button onClick={() => navigate(-1)} className="min-h-touch flex items-center gap-[4px] text-accent font-bold tracking-wide text-sm hover:opacity-80 transition-opacity">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5" /><path d="M12 19l-7-7 7-7" /></svg>
+                        Back
+                    </button>
+                }
+            />
 
             <div className="px-5 mt-5 animate-fade-up">
                 <h1 className="text-2xl font-bold text-text-primary mb-1">{currentTrip.name}</h1>

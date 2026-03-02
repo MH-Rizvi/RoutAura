@@ -7,6 +7,7 @@ import useChatStore from '../store/chatStore';
 import MessageBubble from '../components/MessageBubble';
 import ChatInput from '../components/ChatInput';
 import useToastStore from '../store/toastStore';
+import Header from '../components/Header';
 
 const PROMPTS = [
     'Morning school run',
@@ -37,26 +38,13 @@ export default function ChatScreen() {
 
     return (
         <div className="flex flex-col h-full">
-            {/* Header */}
-            <div className="h-14 flex items-center justify-between px-5 border-b border-[#1F2937] shrink-0">
-                <div className="flex items-center gap-[10px]">
-                    <img
-                        src="/logo2_nobg.png"
-                        alt="RouteEasy Icon"
-                        className="w-[48px] h-[48px] object-contain"
-                        style={{ filter: 'brightness(1.2) drop-shadow(0 0 4px rgba(245,158,11,0.3))' }}
-                    />
-                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '20px' }}>
-                        <span className="text-white font-bold tracking-tight">Route</span>
-                        <span className="text-[#F59E0B] font-bold tracking-tight">Easy</span>
-                    </div>
-                </div>
-                {messages.length > 0 && (
-                    <button onClick={resetChat} className="min-h-touch px-3 text-sm text-accent font-medium hover:underline">
+            <Header
+                rightElement={messages.length > 0 && (
+                    <button onClick={resetChat} className="min-h-touch px-3 text-sm text-accent font-bold tracking-wide hover:opacity-80 transition-opacity drop-shadow-md">
                         New Chat
                     </button>
                 )}
-            </div>
+            />
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto px-4 py-4">

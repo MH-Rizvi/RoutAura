@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import useTripStore from '../store/tripStore';
 import { queryRAG } from '../api/client';
 import useToastStore from '../store/toastStore';
+import Header from '../components/Header';
 
 const RAG_EXAMPLES = ['What route did I do last Friday?', 'Have I been to Oak Avenue?', 'How many stops does my morning run have?', 'What was my most recent trip?'];
 
@@ -32,34 +33,11 @@ export default function HistoryScreen() {
 
     return (
         <div className="min-h-full pb-4">
-            {/* Header */}
-            <div className="h-14 flex items-center justify-between px-5 border-b border-[#1F2937] shrink-0">
-                <div className="flex items-center gap-[10px]">
-                    <img
-                        src="/logo2_nobg.png"
-                        alt="RouteEasy Icon"
-                        className="w-[48px] h-[48px] object-contain"
-                        style={{ filter: 'brightness(1.2) drop-shadow(0 0 4px rgba(245,158,11,0.3))' }}
-                    />
-                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '20px' }}>
-                        <span className="text-white font-bold tracking-tight">Route</span>
-                        <span className="text-[#F59E0B] font-bold tracking-tight">Easy</span>
-                    </div>
-                </div>
-                <div className="flex items-center gap-4">
-                    <span className="text-[#4B5563] text-[13px] font-medium hidden sm:inline">History</span>
-                    {history.length > 0 && (
-                        <button onClick={async () => {
-                            if (window.confirm("Are you sure you want to delete all history?")) {
-                                await clearHistory();
-                                useToastStore.getState().showToast('All history cleared.', 'success');
-                            }
-                        }} className="text-danger text-xs font-semibold px-2 py-1 rounded-md bg-danger/10 hover:bg-danger/20 transition-colors">
-                            Clear All
-                        </button>
-                    )}
-                </div>
-            </div>
+            <Header
+                rightElement={
+                    <span className="text-accent text-[12px] font-bold tracking-widest uppercase hidden sm:inline">History</span>
+                }
+            />
 
             <div className="px-5 mt-5">
 
@@ -118,7 +96,19 @@ export default function HistoryScreen() {
 
                 {/* Timeline */}
                 <section>
-                    <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-4">Recent Launches</h2>
+                    <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-xs font-semibold text-text-muted uppercase tracking-wider">Recent Launches</h2>
+                        {history.length > 0 && (
+                            <button onClick={async () => {
+                                if (window.confirm("Are you sure you want to delete all history?")) {
+                                    await clearHistory();
+                                    useToastStore.getState().showToast('All history cleared.', 'success');
+                                }
+                            }} className="text-danger text-[11px] font-bold px-2 py-1 uppercase tracking-wider rounded-md bg-danger/10 hover:bg-danger/20 transition-colors">
+                                Clear All
+                            </button>
+                        )}
+                    </div>
 
                     {histLoading && history.length === 0 && (
                         <div className="space-y-3">{[1, 2, 3].map(i => <div key={i} className="skeleton rounded-2xl h-16" />)}</div>

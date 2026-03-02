@@ -7,6 +7,7 @@ import useTripStore from '../store/tripStore';
 import SemanticSearchBar from '../components/SemanticSearchBar';
 import { buildGoogleMapsUrl, buildAppleMapsUrl } from '../utils/mapsLinks';
 import useToastStore from '../store/toastStore';
+import Header from '../components/Header';
 
 function TripRow({ trip, onDelete, onTap }) {
     const [offset, setOffset] = useState(0);
@@ -120,25 +121,14 @@ export default function TripsScreen() {
 
     return (
         <div className="min-h-full pb-6 flex flex-col">
-            {/* Header */}
-            <div className="h-16 flex items-center justify-between px-5 border-b border-border/50 shrink-0 bg-base/80 backdrop-blur-md sticky top-0 z-30">
-                <div className="flex items-center gap-[10px]">
-                    <img
-                        src="/logo2_nobg.png"
-                        alt="RouteEasy Icon"
-                        className="w-[48px] h-[48px] object-contain"
-                        style={{ filter: 'brightness(1.2) drop-shadow(0 0 4px rgba(245,158,11,0.3))' }}
-                    />
-                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '20px' }}>
-                        <span className="text-white font-bold tracking-tight">Route</span>
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent to-orange-500 font-bold tracking-tight">Easy</span>
+            <Header
+                rightElement={
+                    <div className="flex flex-col items-end">
+                        <span className="text-text-primary text-[14px] font-bold tracking-tight">My Trips</span>
+                        <span className="text-accent text-[11px] font-mono tracking-widest">{trips.length} Total</span>
                     </div>
-                </div>
-                <div className="flex flex-col items-end">
-                    <span className="text-text-primary text-[14px] font-bold">My Trips</span>
-                    <span className="text-text-muted text-[11px] font-mono">{trips.length} Total</span>
-                </div>
-            </div>
+                }
+            />
 
             <div className="px-5 mt-6 flex-1">
                 <div className="mb-6"><SemanticSearchBar /></div>
@@ -206,9 +196,9 @@ export default function TripsScreen() {
                 )}
 
                 {!isSearching && trips.length > 0 && (
-                    <div className="flex justify-center mt-10 mb-4 opacity-50">
-                        <p className="text-xs font-mono text-text-muted flex items-center gap-2 bg-surface px-4 py-2 rounded-full border border-border">
-                            <span className="tracking-widest capitalize">Swipe left on a card to delete</span>
+                    <div className="flex justify-center mt-10 mb-4 opacity-70">
+                        <p className="text-xs font-mono text-white flex items-center gap-2 bg-surface px-4 py-2 rounded-full border border-border shadow-lg">
+                            <span className="tracking-widest capitalize font-bold">Swipe left on a card to delete</span>
                         </p>
                     </div>
                 )}

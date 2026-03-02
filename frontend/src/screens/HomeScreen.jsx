@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import useTripStore from '../store/tripStore';
 import TripCard from '../components/TripCard';
 import useToastStore from '../store/toastStore';
+import Header from '../components/Header';
 
 export default function HomeScreen() {
     const navigate = useNavigate();
@@ -38,21 +39,7 @@ export default function HomeScreen() {
 
     return (
         <div className="min-h-full pb-4 flex flex-col">
-            {/* Header */}
-            <div className="h-14 flex items-center justify-between px-5 border-b border-[#1F2937] shrink-0">
-                <div className="flex items-center gap-[10px]">
-                    <img
-                        src="/logo2_nobg.png"
-                        alt="RouteEasy Icon"
-                        className="w-[48px] h-[48px] object-contain"
-                        style={{ filter: 'brightness(1.2) drop-shadow(0 0 4px rgba(245,158,11,0.3))' }}
-                    />
-                    <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '20px' }}>
-                        <span className="text-white font-bold tracking-tight">Route</span>
-                        <span className="text-[#F59E0B] font-bold tracking-tight">Easy</span>
-                    </div>
-                </div>
-            </div>
+            <Header />
 
             {/* Greeting */}
             <div className="px-5 pt-6 animate-fade-up">
