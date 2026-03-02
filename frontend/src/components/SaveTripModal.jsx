@@ -3,24 +3,30 @@
  */
 import { useState } from 'react';
 import useTripStore from '../store/tripStore';
+import useToastStore from '../store/toastStore';
 
 export default function SaveTripModal({ stops, onClose, onSaved }) {
     const { saveTrip, loading } = useTripStore();
     const defaultName = stops?.length >= 2 ? `${stops[0].label} → ${stops[stops.length - 1].label}` : 'My Trip';
     const [name, setName] = useState(defaultName);
     const [notes, setNotes] = useState('');
-    const [error, setError] = useState(null);
 
     const handleSave = async () => {
-        if (!name.trim()) { setError('Please enter a trip name.'); return; }
-        setError(null);
+        if (!name.trim()) {
+            useToastStore.getState().showToast('Please enter a trip name.', 'error');
+            return;
+        }
         const tripData = {
             name: name.trim(), notes: notes.trim() || null,
             stops: stops.map((s, i) => ({ label: s.label, resolved: s.resolved, lat: s.lat, lng: s.lng, note: s.note || null, position: i })),
         };
         const saved = await saveTrip(tripData);
-        if (saved) onSaved?.(saved);
-        else setError('Something went wrong.');
+        if (saved) {
+            useToastStore.getState().showToast('✅ Trip saved successfully!', 'success');
+            onSaved?.(saved);
+        } else {
+            useToastStore.getState().showToast('Something went wrong.', 'error');
+        }
     };
 
     return (
@@ -39,8 +45,6 @@ export default function SaveTripModal({ stops, onClose, onSaved }) {
                     <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3}
                         className="w-full rounded-xl border border-border bg-elevated px-4 py-3 text-base text-text-primary placeholder:text-text-muted mb-4 resize-none"
                         placeholder="Any notes about this route…" />
-
-                    {error && <p className="text-danger text-sm mb-3 animate-fade-up">⚠ {error}</p>}
 
                     <div className="flex gap-3">
                         <button onClick={onClose} disabled={loading} className="flex-1 min-h-touch rounded-xl btn-surface text-base">Cancel</button>

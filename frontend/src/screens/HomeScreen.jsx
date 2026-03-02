@@ -5,12 +5,20 @@ import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useTripStore from '../store/tripStore';
 import TripCard from '../components/TripCard';
+import useToastStore from '../store/toastStore';
 
 export default function HomeScreen() {
     const navigate = useNavigate();
     const { trips, loading, error, fetchTrips, clearError } = useTripStore();
 
     useEffect(() => { fetchTrips(); }, [fetchTrips]);
+
+    useEffect(() => {
+        if (error) {
+            useToastStore.getState().showToast(error, 'error');
+            clearError();
+        }
+    }, [error, clearError]);
 
     const topTrips = [...trips]
         .sort((a, b) => {
@@ -59,14 +67,6 @@ export default function HomeScreen() {
                     <StatCard label="Total Stops" value={totalStops} />
                     <StatCard label="Saved Routes" value={trips.length} />
                 </div>
-
-                {/* Error */}
-                {error && (
-                    <div className="card p-4 mb-4 border-danger/30 animate-fade-up">
-                        <p className="text-danger text-sm">⚠ {error}</p>
-                        <button onClick={clearError} className="text-sm text-accent mt-1 underline min-h-touch">Dismiss</button>
-                    </div>
-                )}
 
                 {/* Loading */}
                 {loading && trips.length === 0 && (

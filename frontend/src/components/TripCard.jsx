@@ -4,6 +4,7 @@
 import { useNavigate } from 'react-router-dom';
 import useTripStore from '../store/tripStore';
 import { buildGoogleMapsUrl, buildAppleMapsUrl } from '../utils/mapsLinks';
+import useToastStore from '../store/toastStore';
 
 export default function TripCard({ trip }) {
     const navigate = useNavigate();
@@ -19,6 +20,7 @@ export default function TripCard({ trip }) {
         if (!trip.stops || trip.stops.length < 2) { navigate(`/trips/${trip.id}`); return; }
 
         launchCurrentTrip(trip.id).catch(err => console.error("Failed to track launch", err));
+        useToastStore.getState().showToast('🚌 Opening Google Maps...', 'info');
 
         const url = buildGoogleMapsUrl(trip.stops);
         if (url) window.location.href = url;
@@ -29,6 +31,7 @@ export default function TripCard({ trip }) {
         if (!trip.stops || trip.stops.length < 2) { navigate(`/trips/${trip.id}`); return; }
 
         launchCurrentTrip(trip.id).catch(err => console.error("Failed to track launch", err));
+        useToastStore.getState().showToast('🚌 Opening Apple Maps...', 'info');
 
         const url = buildAppleMapsUrl(trip.stops);
         if (url) window.location.href = url;

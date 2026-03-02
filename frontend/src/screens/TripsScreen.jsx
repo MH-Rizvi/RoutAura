@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import useTripStore from '../store/tripStore';
 import SemanticSearchBar from '../components/SemanticSearchBar';
 import { buildGoogleMapsUrl, buildAppleMapsUrl } from '../utils/mapsLinks';
+import useToastStore from '../store/toastStore';
 
 function TripRow({ trip, onDelete, onTap }) {
     const [offset, setOffset] = useState(0);
@@ -58,6 +59,7 @@ function TripRow({ trip, onDelete, onTap }) {
                                 e.stopPropagation();
                                 if (!trip.stops || trip.stops.length < 2) return;
                                 useTripStore.getState().launchCurrentTrip(trip.id).catch(err => console.error(err));
+                                useToastStore.getState().showToast('🚌 Opening Apple Maps...', 'info');
                                 const url = buildAppleMapsUrl(trip.stops);
                                 if (url) window.location.href = url;
                             }}
@@ -73,6 +75,7 @@ function TripRow({ trip, onDelete, onTap }) {
                                 e.stopPropagation();
                                 if (!trip.stops || trip.stops.length < 2) return;
                                 useTripStore.getState().launchCurrentTrip(trip.id).catch(err => console.error(err));
+                                useToastStore.getState().showToast('🚌 Opening Google Maps...', 'info');
                                 const url = buildGoogleMapsUrl(trip.stops);
                                 if (url) window.location.href = url;
                             }}
@@ -95,6 +98,13 @@ export default function TripsScreen() {
     const { trips, searchResults, loading, error, fetchTrips, removeTrip, clearError } = useTripStore();
 
     useEffect(() => { fetchTrips(); }, [fetchTrips]);
+
+    useEffect(() => {
+        if (error) {
+            useToastStore.getState().showToast(error, 'error');
+            clearError();
+        }
+    }, [error, clearError]);
 
     const isSearching = searchResults.length > 0;
     const displayTrips = isSearching ? searchResults : trips;
@@ -121,13 +131,6 @@ export default function TripsScreen() {
             <div className="px-5 mt-5">
                 <div className="mb-4"><SemanticSearchBar /></div>
 
-                {error && (
-                    <div className="card p-4 mb-4 border-danger/30 animate-fade-up">
-                        <p className="text-danger text-sm">⚠ {error}</p>
-                        <button onClick={clearError} className="text-sm text-accent mt-1 underline min-h-touch">Dismiss</button>
-                    </div>
-                )}
-
                 {loading && displayTrips.length === 0 && (
                     <div className="space-y-3">{[1, 2, 3].map(i => <div key={i} className="skeleton rounded-2xl h-20" />)}</div>
                 )}
@@ -148,7 +151,10 @@ export default function TripsScreen() {
                 <div className="space-y-3">
                     {displayTrips.map((trip, i) => (
                         <div key={trip.id} className="animate-fade-up" style={{ animationDelay: `${i * 40}ms` }}>
-                            <TripRow trip={trip} onDelete={(id) => removeTrip(id)} onTap={(id) => navigate(`/trips/${id}`)} />
+                            <TripRow trip={trip} onDelete={async (id) => {
+                                await removeTrip(id);
+                                useToastStore.getState().showToast('Trip deleted', 'success');
+                            }} onTap={(id) => navigate(`/trips/${id}`)} />
                         </div>
                     ))}
                 </div>

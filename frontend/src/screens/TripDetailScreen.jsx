@@ -6,6 +6,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import useTripStore from '../store/tripStore';
 import MapPreview from '../components/MapPreview';
 import { buildGoogleMapsUrl, buildAppleMapsUrl } from '../utils/mapsLinks';
+import useToastStore from '../store/toastStore';
 
 export default function TripDetailScreen() {
     const { tripId } = useParams();
@@ -15,10 +16,17 @@ export default function TripDetailScreen() {
 
     useEffect(() => { if (tripId) fetchTrip(Number(tripId)); }, [tripId, fetchTrip]);
 
+    useEffect(() => {
+        if (error) {
+            useToastStore.getState().showToast(error, 'error');
+        }
+    }, [error]);
+
     const handleGoogleMaps = () => {
         if (!currentTrip?.stops?.length) return;
 
         launchCurrentTrip(currentTrip.id).catch(err => console.error("Failed to track launch", err));
+        useToastStore.getState().showToast('🚌 Opening Google Maps...', 'info');
 
         const url = buildGoogleMapsUrl(currentTrip.stops);
         if (url) window.location.href = url;
@@ -28,6 +36,7 @@ export default function TripDetailScreen() {
         if (!currentTrip?.stops?.length) return;
 
         launchCurrentTrip(currentTrip.id).catch(err => console.error("Failed to track launch", err));
+        useToastStore.getState().showToast('🚌 Opening Apple Maps...', 'info');
 
         const url = buildAppleMapsUrl(currentTrip.stops);
         if (url) window.location.href = url;
@@ -38,6 +47,7 @@ export default function TripDetailScreen() {
         setDeleting(true);
         await removeTrip(currentTrip.id);
         setDeleting(false);
+        useToastStore.getState().showToast('Trip deleted', 'success');
         navigate('/trips');
     };
 
@@ -58,7 +68,7 @@ export default function TripDetailScreen() {
         return (
             <div className="min-h-full px-4 pt-4">
                 <button onClick={() => navigate(-1)} className="min-h-touch text-accent font-semibold text-sm mb-4">← Back</button>
-                <div className="card p-4 border-danger/30"><p className="text-danger">⚠ {error}</p></div>
+                <div className="card p-4 border-danger/30"><p className="text-danger flex items-center justify-center py-4">Going back...</p></div>
             </div>
         );
     }

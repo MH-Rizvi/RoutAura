@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import useChatStore from '../store/chatStore';
 import MessageBubble from '../components/MessageBubble';
 import ChatInput from '../components/ChatInput';
+import useToastStore from '../store/toastStore';
 
 const PROMPTS = [
     'Morning school run',
@@ -20,6 +21,13 @@ export default function ChatScreen() {
     const scrollRef = useRef(null);
 
     useEffect(() => { scrollRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages, loading]);
+
+    useEffect(() => {
+        if (error) {
+            useToastStore.getState().showToast(error, 'error');
+            clearError();
+        }
+    }, [error, clearError]);
 
     const handlePreviewRoute = (stops) => {
         if (!stops) return;
@@ -92,13 +100,6 @@ export default function ChatScreen() {
                         <div className="bg-surface border border-border rounded-2xl rounded-bl-md px-5 py-4">
                             <div className="typing-dots"><span /><span /><span /></div>
                         </div>
-                    </div>
-                )}
-
-                {error && (
-                    <div className="card p-3 mb-3 border-danger/30 animate-fade-up">
-                        <p className="text-danger text-sm">⚠ {error}</p>
-                        <button onClick={clearError} className="text-xs text-accent mt-1 underline min-h-touch">Dismiss</button>
                     </div>
                 )}
 

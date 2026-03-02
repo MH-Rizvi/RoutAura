@@ -9,6 +9,7 @@ import TripsScreen from './screens/TripsScreen';
 import TripDetailScreen from './screens/TripDetailScreen';
 import HistoryScreen from './screens/HistoryScreen';
 import LLMLogsScreen from './screens/LLMLogsScreen';
+import Toast from './components/Toast';
 
 const TABS = [
     {
@@ -76,6 +77,7 @@ function AppShell() {
 
     return (
         <div className="flex flex-col min-h-screen">
+            <Toast />
             <main className={`flex-1 overflow-y-auto ${hideTabBar ? '' : 'pb-20'}`}>
                 <Routes>
                     <Route path="/" element={<HomeScreen />} />
