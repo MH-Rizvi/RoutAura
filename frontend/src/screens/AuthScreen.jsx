@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { login, signup } from '../api/client';
 import useAuthStore from '../store/authStore';
 import useToastStore from '../store/toastStore';
+import US_STATES from '../utils/usStates';
+import CityAutocomplete from '../components/CityAutocomplete';
 
 const Icons = {
     Mail: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" /><polyline points="22,6 12,13 2,6" /></svg>,
@@ -67,7 +69,9 @@ export default function AuthScreen() {
     const handleSignupStep2 = (e) => {
         e.preventDefault();
         setError('');
-        if (!city || !stateInput || !zipCode) return setError('All location fields required.');
+        if (!city || !stateInput) return setError('City and state are required.');
+        if (!city) return setError('Please select a city from the suggestions.');
+        if (zipCode && !/^\d{5}$/.test(zipCode)) return setError('Zip code must be exactly 5 digits.');
         setSignupStep(3);
     };
 
@@ -271,33 +275,49 @@ export default function AuthScreen() {
                                     <form onSubmit={handleSignupStep2} className="flex flex-col gap-5">
                                         <p className="text-[14px] text-white/50 text-center mb-2">Set your default routing start location.</p>
                                         <div className="space-y-1.5">
-                                            <label className="text-[12px] font-semibold text-white/60 uppercase tracking-widest pl-1">City</label>
+                                            <label className="text-[12px] font-semibold text-white/60 uppercase tracking-widest pl-1">State</label>
                                             <div className="relative">
-                                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/40"><Icons.Building /></div>
-                                                <input type="text" required className="w-full pl-12 pr-4 py-3.5 bg-black/20 border border-white/[0.08] rounded-xl text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent min-h-touch text-[16px] transition-colors" placeholder="e.g. Hicksville" value={city} onChange={(e) => setCity(e.target.value)} />
+                                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/40"><Icons.MapPin /></div>
+                                                <select
+                                                    required
+                                                    className="w-full pl-12 pr-4 py-3.5 bg-black/20 border border-white/[0.08] rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent min-h-touch text-[16px] transition-colors appearance-none cursor-pointer"
+                                                    value={stateInput}
+                                                    onChange={(e) => { setStateInput(e.target.value); setCity(''); }}
+                                                >
+                                                    <option value="" className="bg-[#111827] text-white/50">Select a state...</option>
+                                                    {US_STATES.map(s => (
+                                                        <option key={s.abbr} value={s.abbr} className="bg-[#111827] text-white">
+                                                            {s.name} ({s.abbr})
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-white/30">
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div className="flex gap-4">
-                                            <div className="space-y-1.5 flex-1">
-                                                <label className="text-[12px] font-semibold text-white/60 uppercase tracking-widest pl-1">State</label>
-                                                <div className="relative">
-                                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/40"><Icons.MapPin /></div>
-                                                    <input type="text" required className="w-full pl-12 pr-4 py-3.5 bg-black/20 border border-white/[0.08] rounded-xl text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent min-h-touch text-[16px] transition-colors uppercase" placeholder="NY" maxLength={2} value={stateInput} onChange={(e) => setStateInput(e.target.value)} />
-                                                </div>
-                                            </div>
-                                            <div className="space-y-1.5 flex-[1.2]">
-                                                <label className="text-[12px] font-semibold text-white/60 uppercase tracking-widest pl-1">Zip Code</label>
-                                                <div className="relative">
-                                                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/40"><Icons.Hash /></div>
-                                                    <input type="text" inputMode="numeric" required className="w-full pl-12 pr-4 py-3.5 bg-black/20 border border-white/[0.08] rounded-xl text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent min-h-touch text-[16px] transition-colors" placeholder="11801" value={zipCode} onChange={(e) => setZipCode(e.target.value)} />
-                                                </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-[12px] font-semibold text-white/60 uppercase tracking-widest pl-1">City</label>
+                                            <CityAutocomplete
+                                                value={city}
+                                                onChange={setCity}
+                                                stateAbbr={stateInput}
+                                                inputClassName="w-full pl-12 pr-4 py-3.5 bg-black/20 border border-white/[0.08] rounded-xl text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent min-h-touch text-[16px] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                                                className="relative"
+                                            />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-[12px] font-semibold text-white/60 uppercase tracking-widest pl-1">Zip Code <span className="text-white/30 normal-case">(optional)</span></label>
+                                            <div className="relative">
+                                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-white/40"><Icons.Hash /></div>
+                                                <input type="text" inputMode="numeric" maxLength={5} className="w-full pl-12 pr-4 py-3.5 bg-black/20 border border-white/[0.08] rounded-xl text-white placeholder:text-white/20 focus:outline-none focus:ring-2 focus:ring-accent/50 focus:border-accent min-h-touch text-[16px] transition-colors" placeholder="11801" value={zipCode} onChange={(e) => { const v = e.target.value.replace(/\D/g, ''); setZipCode(v); }} />
                                             </div>
                                         </div>
                                         <div className="flex gap-3 mt-4">
                                             <button type="button" onClick={() => setSignupStep(1)} disabled={loading} className="w-1/3 flex items-center justify-center gap-2 bg-white/[0.03] border border-white/[0.08] text-white hover:bg-white/[0.08] py-3.5 px-4 rounded-xl font-bold transition-all active:scale-[0.98] min-h-touch text-[16px] disabled:opacity-50">
                                                 Back
                                             </button>
-                                            <button type="submit" disabled={loading} className="flex-1 flex items-center justify-center gap-2 bg-white/[0.08] text-white py-3.5 px-4 rounded-xl font-bold hover:bg-white/[0.12] transition-all active:scale-[0.98] disabled:opacity-70 disabled:active:scale-100 min-h-touch text-[16px]">
+                                            <button type="submit" disabled={loading || !city} className="flex-1 flex items-center justify-center gap-2 bg-white/[0.08] text-white py-3.5 px-4 rounded-xl font-bold hover:bg-white/[0.12] transition-all active:scale-[0.98] disabled:opacity-70 disabled:active:scale-100 min-h-touch text-[16px]">
                                                 Next Step →
                                             </button>
                                         </div>

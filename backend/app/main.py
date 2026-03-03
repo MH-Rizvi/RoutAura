@@ -10,7 +10,7 @@ from fastapi.responses import JSONResponse  # pyright: ignore[reportMissingImpor
 from app.agent import core as agent_core  # noqa: F401  # ensure agent modules are imported
 from app.config import settings
 from app.database import Base, engine
-from app.routers import agent, trips, history, rag, admin, voice, auth, stats
+from app.routers import agent, trips, history, rag, admin, voice, auth, stats, places
 from app.services import vector_service  # noqa: F401  # ensure collections are created
 
 
@@ -74,3 +74,4 @@ app.include_router(admin.router, prefix="/api/v1")
 app.include_router(voice.router, prefix="/api/v1")
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(stats.router, prefix="/api/v1")
+app.include_router(places.router, prefix="/api/v1")

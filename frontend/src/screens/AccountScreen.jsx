@@ -10,6 +10,8 @@ import Header from '../components/Header';
 import useAuthStore from '../store/authStore';
 import useToastStore from '../store/toastStore';
 import { updateProfile, changePassword, deleteAccount, logout } from '../api/client';
+import US_STATES from '../utils/usStates';
+import CityAutocomplete from '../components/CityAutocomplete';
 
 /* ── Inline SVG Icons ─────────────────────────── */
 const Icon = {
@@ -287,12 +289,47 @@ export default function AccountScreen() {
                         <InputField label="Last Name" required value={editForm.last_name} onChange={e => setEditForm({ ...editForm, last_name: e.target.value })} />
                     </div>
                     <InputField label="Birthday" type="date" value={editForm.birthday} onChange={e => setEditForm({ ...editForm, birthday: e.target.value })} />
-                    <div className="grid grid-cols-3 gap-3">
-                        <div className="col-span-3 sm:col-span-1">
-                            <InputField label="City" required value={editForm.city} onChange={e => setEditForm({ ...editForm, city: e.target.value })} />
+                    <div className="space-y-1.5">
+                        <label className="text-[11px] font-bold text-white/40 uppercase tracking-[0.12em] pl-1">State</label>
+                        <div className="relative">
+                            <select
+                                required
+                                className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl text-[14px] text-white focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500/30 transition-all duration-200 appearance-none cursor-pointer"
+                                value={editForm.state}
+                                onChange={e => setEditForm({ ...editForm, state: e.target.value, city: '' })}
+                            >
+                                <option value="" className="bg-[#111827] text-white/50">Select a state...</option>
+                                {US_STATES.map(s => (
+                                    <option key={s.abbr} value={s.abbr} className="bg-[#111827] text-white">
+                                        {s.name} ({s.abbr})
+                                    </option>
+                                ))}
+                            </select>
+                            <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-white/30">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
+                            </div>
                         </div>
-                        <InputField label="State" required maxLen={2} uppercase value={editForm.state} onChange={e => setEditForm({ ...editForm, state: e.target.value })} />
-                        <InputField label="Zip Code" required value={editForm.zip_code} onChange={e => setEditForm({ ...editForm, zip_code: e.target.value })} />
+                    </div>
+                    <div className="space-y-1.5">
+                        <label className="text-[11px] font-bold text-white/40 uppercase tracking-[0.12em] pl-1">City</label>
+                        <CityAutocomplete
+                            value={editForm.city}
+                            onChange={val => setEditForm({ ...editForm, city: val })}
+                            stateAbbr={editForm.state}
+                            inputClassName="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl text-[14px] text-white placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500/30 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed"
+                        />
+                    </div>
+                    <div className="space-y-1.5">
+                        <label className="text-[11px] font-bold text-white/40 uppercase tracking-[0.12em] pl-1">Zip Code</label>
+                        <input
+                            type="text"
+                            inputMode="numeric"
+                            maxLength={5}
+                            placeholder="11801"
+                            className="w-full px-4 py-3 bg-white/[0.03] border border-white/[0.08] rounded-xl text-[14px] text-white placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-amber-500/40 focus:border-amber-500/30 transition-all duration-200"
+                            value={editForm.zip_code}
+                            onChange={e => { const v = e.target.value.replace(/\D/g, ''); setEditForm({ ...editForm, zip_code: v }); }}
+                        />
                     </div>
                     <div className="flex gap-3 pt-3">
                         <button type="button" onClick={() => setActivePanel('overview')} className="flex-1 py-3 bg-white/[0.04] border border-white/[0.08] rounded-xl font-bold text-white/80 text-[14px] hover:bg-white/[0.08] transition-all">Cancel</button>

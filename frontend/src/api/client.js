@@ -316,4 +316,13 @@ export const getStatsDaily = async (days = 30) => {
     return data;
 };
 
+// ─────────────────────────────────────────────
+// Places Autocomplete
+// ─────────────────────────────────────────────
+
+export const autocompleteCities = async (input, state = '') => {
+    const { data } = await api.get('/places/autocomplete', { params: { input, state } });
+    return data.predictions || [];
+};
+
 export default api;
