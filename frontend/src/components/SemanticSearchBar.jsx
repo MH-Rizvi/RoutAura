@@ -22,7 +22,7 @@ export default function SemanticSearchBar() {
             <svg className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
             <input
                 type="text" value={query} onChange={handleChange}
-                placeholder="Search trips by meaning…"
+                placeholder="Search saved routes…"
                 className="w-full min-h-touch rounded-xl border border-border bg-surface pl-10 pr-10 py-3 text-base text-text-primary placeholder:text-text-muted"
             />
             {query && (

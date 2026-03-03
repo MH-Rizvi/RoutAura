@@ -24,6 +24,7 @@ const useTripStore = create((set, get) => ({
     currentTrip: null,
     history: [],
     searchResults: [],
+    isSearchActive: false,
     loading: false,
     error: null,
 
@@ -125,20 +126,23 @@ const useTripStore = create((set, get) => ({
         }
     },
 
-    /** Semantic search trips. */
-    searchTrips: async (query) => {
+    /** Local normal word matching search. */
+    searchTrips: (query) => {
         if (!query || !query.trim()) {
-            set({ searchResults: [] });
+            set({ searchResults: [], isSearchActive: false });
             return;
         }
-        get()._startLoading();
-        try {
-            const data = await searchTrips(query);
-            set({ searchResults: data.results || [], loading: false });
-        } catch (err) {
-            get()._setError(err);
-        }
+        const q = query.trim().toLowerCase();
+        const trips = get().trips || [];
+        const results = trips.filter(t => {
+            const nameMatch = (t.trip_name || '').toLowerCase().includes(q);
+            const stopsMatch = (t.stops_json || '').toLowerCase().includes(q);
+            return nameMatch || stopsMatch;
+        });
+        set({ searchResults: results, isSearchActive: true });
     },
+
+    clearSearch: () => set({ searchResults: [], isSearchActive: false }),
 
     /** Fetch recent launch history. */
     fetchHistory: async () => {

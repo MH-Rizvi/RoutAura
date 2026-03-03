@@ -73,11 +73,6 @@ function TripRow({ trip, onDelete, onTap }) {
                 </div>
 
                 <div className="flex items-center gap-3 shrink-0">
-                    {trip.similarity !== undefined && (
-                        <span className="px-2.5 py-1 rounded-full bg-accent/10 text-accent text-xs font-bold font-mono border border-accent/30">
-                            {Math.round(trip.similarity * 100)}%
-                        </span>
-                    )}
                     <div className="flex items-center gap-1.5 shrink-0">
                         <button
                             onClick={(e) => {
@@ -120,7 +115,7 @@ function TripRow({ trip, onDelete, onTap }) {
 
 export default function TripsScreen() {
     const navigate = useNavigate();
-    const { trips, searchResults, loading, error, fetchTrips, removeTripOptimistic, undoRemoveTrip, commitRemoveTrip, clearError } = useTripStore();
+    const { trips, searchResults, isSearchActive, loading, error, fetchTrips, removeTripOptimistic, undoRemoveTrip, commitRemoveTrip, clearError } = useTripStore();
 
     useEffect(() => { fetchTrips(); }, [fetchTrips]);
 
@@ -131,7 +126,7 @@ export default function TripsScreen() {
         }
     }, [error, clearError]);
 
-    const isSearching = searchResults.length > 0;
+    const isSearching = isSearchActive;
     const displayTrips = isSearching ? searchResults : trips;
 
     const tripsThisWeek = displayTrips.filter((t) => {
