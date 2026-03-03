@@ -72,7 +72,7 @@ async def search_saved_stops_tool(query: str) -> List[Dict[str, Any]]:
     Output: list of similar saved stops with similarity scores.
     """
     user_id = user_id_ctx.get()
-    if not user_id:
+    if user_id is None:
         return []
     return vector_service.search_stops(query, user_id, top_k=3)
 
@@ -86,7 +86,7 @@ async def search_saved_trips_tool(query: str) -> List[Dict[str, Any]]:
     Output: list of similar saved trips with similarity scores.
     """
     user_id = user_id_ctx.get()
-    if not user_id:
+    if user_id is None:
         return []
     return vector_service.search_trips(query, user_id, top_k=3)
 
@@ -105,7 +105,7 @@ async def get_trip_by_id_tool(trip_id_str: str) -> Dict[str, Any]:
         return {"error": "trip_id must be an integer string."}
 
     user_id = user_id_ctx.get()
-    if not user_id:
+    if user_id is None:
         return {"error": "Authentication required."}
         
     db = SessionLocal()
@@ -146,7 +146,7 @@ async def get_recent_history_tool(days_str: str = "7") -> List[Dict[str, Any]]:
     cutoff = datetime.utcnow() - timedelta(days=days)
 
     user_id = user_id_ctx.get()
-    if not user_id:
+    if user_id is None:
         return []
 
     db = SessionLocal()
@@ -186,7 +186,7 @@ async def save_trip_tool(trip_data_json: str) -> str:
     """
     user_id = user_id_ctx.get()
     
-    if not user_id:
+    if user_id is None:
         return "Authentication required to save trips."
 
     try:
