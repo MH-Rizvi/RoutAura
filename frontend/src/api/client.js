@@ -263,6 +263,12 @@ export const login = async (email, password) => {
     return data;
 };
 
+/** Get Google OAuth URL */
+export const loginWithGoogle = async () => {
+    const { data } = await api.post('/auth/google', {});
+    return data;
+};
+
 /** Signup new user */
 export const signup = async (first_name, last_name, birthday, email, password, city, state, zip_code) => {
     const { data } = await api.post('/auth/signup', { first_name, last_name, birthday, email, password, city, state, zip_code });
