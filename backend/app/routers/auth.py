@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Request, Response
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from typing import Dict, Any
+from pydantic import BaseModel
 
 from app.database import get_db
 from app import models, schemas
@@ -153,11 +154,76 @@ async def me(current_user: Any = Depends(get_current_user), db: Session = Depend
     """Return the current user's profile based on the validated Supabase access token."""
     profile = db.query(models.UserProfile).filter(models.UserProfile.user_id == current_user.id).first()
     
+    # Implicitly handle new Google/OAuth signups by creating a blank profile if it doesn't exist
+    if not profile:
+        profile = models.UserProfile(
+            user_id=str(current_user.id),
+            first_name=current_user.user_metadata.get("full_name", "").split(" ")[0] if current_user.user_metadata else "",
+            last_name=" ".join(current_user.user_metadata.get("full_name", "").split(" ")[1:]) if current_user.user_metadata else "",
+            city="Set your city",
+            state="??",
+            zip_code="00000",
+            full_location="Update your location"
+        )
+        db.add(profile)
+        db.commit()
+        db.refresh(profile)
+    
+    is_new = profile.city == "Set your city"
+    
     return {
-        "id": current_user.id,
+        "id": str(current_user.id),
         "email": current_user.email,
-        "city": profile.city if profile else "",
-        "state": profile.state if profile else "",
-        "zip_code": profile.zip_code if profile else "",
-        "full_location": profile.full_location if profile else ""
+        "first_name": profile.first_name,
+        "last_name": profile.last_name,
+        "birthday": profile.birthday,
+        "city": profile.city,
+        "state": profile.state,
+        "zip_code": profile.zip_code,
+        "full_location": profile.full_location,
+        "is_new_user": is_new
+    }
+
+
+class ProfileUpdate(BaseModel):
+    first_name: str | None = None
+    last_name: str | None = None
+    city: str | None = None
+    state: str | None = None
+    zip_code: str | None = None
+    birthday: str | None = None
+
+
+@router.patch("/me", response_model=dict)
+async def update_profile(request: ProfileUpdate, current_user: Any = Depends(get_current_user), db: Session = Depends(get_db)):
+    """Update the current user's profile information."""
+    profile = db.query(models.UserProfile).filter(models.UserProfile.user_id == str(current_user.id)).first()
+    if not profile:
+        profile = models.UserProfile(user_id=str(current_user.id))
+        db.add(profile)
+
+    if request.first_name is not None: profile.first_name = request.first_name
+    if request.last_name is not None: profile.last_name = request.last_name
+    if request.city is not None: profile.city = request.city
+    if request.state is not None: profile.state = request.state
+    if request.zip_code is not None: profile.zip_code = request.zip_code
+    if request.birthday is not None: profile.birthday = request.birthday
+    
+    if profile.city and profile.state:
+        profile.full_location = f"{profile.city}, {profile.state}"
+    
+    db.commit()
+    db.refresh(profile)
+    
+    return {
+        "id": str(current_user.id),
+        "email": current_user.email,
+        "first_name": profile.first_name,
+        "last_name": profile.last_name,
+        "birthday": profile.birthday,
+        "city": profile.city,
+        "state": profile.state,
+        "zip_code": profile.zip_code,
+        "full_location": profile.full_location,
+        "is_new_user": False
     }

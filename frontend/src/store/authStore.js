@@ -1,28 +1,44 @@
 import { create } from 'zustand';
-import { getMe } from '../api/client';
+import { supabase } from '../supabaseClient';
+import { setTokens, getMe } from '../api/client';
 
 const useAuthStore = create((set) => ({
     user: null,
     isAuthenticated: false,
     isHydrating: true,
 
-    // Auth actions
     setUser: (user) => set({ user, isAuthenticated: !!user }),
-
     clearUser: () => set({ user: null, isAuthenticated: false }),
 
     /**
-     * Check if the user is authenticated on app mount.
-     * Note: Since tokens are strictly in-memory (module-level), a hard page
-     * refresh will clear them. This try-block will only succeed if the token 
-     * is already in the api client memory or if a cookie-based refresh exists.
+     * Hydrate auth state on app load.
+     * 
+     * IMPORTANT: We ask Supabase JS for its persisted session FIRST.
+     * If a session exists, we extract the access_token, feed it to
+     * the axios client, and THEN call our backend /auth/me.
+     * 
+     * This replaces the old approach that called getMe() blind and
+     * relied on a custom /auth/refresh endpoint that no longer exists.
      */
     hydrate: async () => {
         try {
+            // Step 1: Ask Supabase JS if it has a stored session
+            const { data: { session } } = await supabase.auth.getSession();
+
+            if (!session) {
+                // No Supabase session → user is not logged in
+                set({ user: null, isAuthenticated: false, isHydrating: false });
+                return;
+            }
+
+            // Step 2: Push the Supabase tokens into our axios client
+            setTokens(session.access_token, session.refresh_token);
+
+            // Step 3: Fetch our backend profile
             const userData = await getMe();
             set({ user: userData, isAuthenticated: true, isHydrating: false });
         } catch (error) {
-            console.error('Auth hydration failed. User needs to login.');
+            console.error('[AuthStore] Hydration failed:', error);
             set({ user: null, isAuthenticated: false, isHydrating: false });
         }
     }

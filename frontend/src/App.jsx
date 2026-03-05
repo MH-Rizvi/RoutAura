@@ -2,7 +2,7 @@
  * App.jsx — Root with dark enterprise tab bar.
  */
 import { useState, useEffect, useRef } from 'react';
-import { BrowserRouter, Routes, Route, NavLink, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, NavLink, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import HomeScreen from './screens/HomeScreen';
 import ChatScreen from './screens/ChatScreen';
 import PreviewScreen from './screens/PreviewScreen';
@@ -13,6 +13,8 @@ import StatsScreen from './screens/StatsScreen';
 import AuthScreen from './screens/AuthScreen';
 import AccountScreen from './screens/AccountScreen';
 import LandingPage from './screens/LandingPage';
+import AuthCallbackScreen from './screens/AuthCallbackScreen';
+import CompleteProfileScreen from './screens/CompleteProfileScreen';
 import Toast from './components/Toast';
 import ProtectedRoute from './components/ProtectedRoute';
 import useAuthStore from './store/authStore';
@@ -86,8 +88,23 @@ function BottomTabBar() {
 
 function AppShell() {
     const location = useLocation();
-    const hideTabBar = location.pathname.startsWith('/preview') || location.pathname === '/login' || location.pathname === '/';
+    const hideTabBar = location.pathname.startsWith('/preview') ||
+        location.pathname === '/login' ||
+        location.pathname === '/' ||
+        location.pathname === '/complete-profile' ||
+        location.pathname === '/auth/callback';
     const hydrate = useAuthStore((state) => state.hydrate);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        // PKCE Redirect: If we land on root with a ?code= param, 
+        // redirect to /auth/callback to handle the exchange.
+        const params = new URLSearchParams(location.search);
+        const code = params.get('code');
+        if (location.pathname === '/' && code) {
+            navigate(`/auth/callback?code=${code}`, { replace: true });
+        }
+    }, [location, navigate]);
 
     useEffect(() => {
         hydrate();
@@ -99,6 +116,8 @@ function AppShell() {
             <main className={`flex-1 flex flex-col overflow-y-auto ${hideTabBar ? '' : 'pb-safe-tabbar'}`}>
                 <Routes>
                     <Route path="/login" element={<AuthScreen />} />
+                    <Route path="/auth/callback" element={<AuthCallbackScreen />} />
+                    <Route path="/complete-profile" element={<CompleteProfileScreen />} />
                     <Route path="/" element={<LandingPage />} />
 
                     <Route element={<ProtectedRoute />}>

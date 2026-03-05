@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { login, signup, loginWithGoogle } from '../api/client';
+import { supabase } from '../supabaseClient';
 import useAuthStore from '../store/authStore';
 import useToastStore from '../store/toastStore';
 import US_STATES from '../utils/usStates';
@@ -60,8 +61,15 @@ export default function AuthScreen() {
     const handleGoogleLogin = async () => {
         try {
             setLoading(true);
-            const data = await loginWithGoogle();
-            window.location.href = data.url;
+            // Initiate OAuth directly from the frontend so the JS SDK 
+            // can handle the PKCE code verifier automatically.
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: `${window.location.origin}/auth/callback`
+                }
+            });
+            if (error) throw error;
         } catch (err) {
             console.error(err);
             setError('Failed to initialize Google login.');

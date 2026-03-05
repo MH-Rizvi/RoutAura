@@ -2,12 +2,18 @@
  * API Client — Centralized axios instance for all backend calls.
  * All API calls in the app go through this module — never use
  * fetch() or axios directly in components.
+ * 
+ * TOKEN MANAGEMENT:
+ * Supabase JS is the source of truth for tokens.
+ * This module stores them in-memory for axios to attach to requests.
+ * On 401, we ask Supabase for a fresh session instead of calling
+ * a custom /auth/refresh endpoint.
  */
 import axios from 'axios';
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,
-    timeout: 120000, // 120 s — agent calls can take a while with key rotation retries
+    timeout: 120000,
     withCredentials: true,
     headers: {
         'Content-Type': 'application/json',
@@ -18,16 +24,19 @@ const api = axios.create({
 });
 
 let _accessToken = null;
+let _refreshToken = null;
 
-export const setTokens = (access) => {
+export const setTokens = (access, refresh) => {
     if (access) _accessToken = access;
+    if (refresh) _refreshToken = refresh;
 };
 
 export const clearTokens = () => {
     _accessToken = null;
+    _refreshToken = null;
 };
 
-// Request Interceptor: Attach Bearer token to all requests if present
+// Request Interceptor: Attach Bearer token to all requests
 api.interceptors.request.use((config) => {
     if (_accessToken) {
         config.headers.Authorization = `Bearer ${_accessToken}`;
@@ -37,33 +46,18 @@ api.interceptors.request.use((config) => {
 
 let isRefreshing = false;
 
-// Response Interceptor: Handle 401s by attempting to refresh the token automatically
+// Response Interceptor: On 401, ask Supabase JS for a fresh session
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
 
-        // Only attempt refresh if it's a 401 and we haven't retried yet
         if (error.response?.status === 401 && !originalRequest._retry) {
-
-            // If the failed request was a login, just reject
+            // Never retry login requests
             if (originalRequest.url.includes('/auth/login')) {
                 return Promise.reject(error);
             }
 
-            // If the failed request WAS the refresh endpoint itself, we are completely logged out
-            if (originalRequest.url.includes('/auth/refresh')) {
-                clearTokens();
-                // Only redirect if on a protected page — never on / or /login
-                const path = window.location.pathname;
-                if (path !== '/login' && path !== '/') {
-                    window.location.href = '/login';
-                }
-                return Promise.reject(error);
-            }
-
-            // If a refresh is already in flight, reject the other concurrent requests 
-            // to avoid spamming the refresh endpoint. (Can be improved with a queue later)
             if (isRefreshing) {
                 return Promise.reject(error);
             }
@@ -72,23 +66,31 @@ api.interceptors.response.use(
             isRefreshing = true;
 
             try {
-                // Call refresh endpoint directly with axios to avoid interceptor loop
-                // Cookie will automatically be included due to withCredentials
-                const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/auth/refresh`, {}, {
-                    withCredentials: true
-                });
+                // Dynamically import supabase to avoid circular dependency
+                const { supabase } = await import('../supabaseClient');
+                const { data: { session } } = await supabase.auth.getSession();
 
-                // Update in-memory token and retry the failed request
-                _accessToken = data.access_token;
-                originalRequest.headers.Authorization = `Bearer ${_accessToken}`;
-                isRefreshing = false;
-                return api(originalRequest);
+                if (session) {
+                    _accessToken = session.access_token;
+                    _refreshToken = session.refresh_token;
+                    originalRequest.headers.Authorization = `Bearer ${_accessToken}`;
+                    isRefreshing = false;
+                    return api(originalRequest);
+                } else {
+                    // No session at all — user truly needs to log in
+                    isRefreshing = false;
+                    clearTokens();
+                    const path = window.location.pathname;
+                    if (path !== '/login' && path !== '/' && path !== '/auth/callback') {
+                        window.location.href = '/login';
+                    }
+                    return Promise.reject(error);
+                }
             } catch (refreshError) {
-                // If refresh fails, clear tokens but only redirect on protected pages
                 isRefreshing = false;
                 clearTokens();
                 const path = window.location.pathname;
-                if (path !== '/login' && path !== '/') {
+                if (path !== '/login' && path !== '/' && path !== '/auth/callback') {
                     window.location.href = '/login';
                 }
                 return Promise.reject(refreshError);
@@ -97,17 +99,11 @@ api.interceptors.response.use(
         return Promise.reject(error);
     }
 );
+
 // ─────────────────────────────────────────────
 // Agent
 // ─────────────────────────────────────────────
 
-/**
- * Send a message to the LangChain ReAct agent.
- * @param {string} message  — driver's natural language input
- * @param {Array}  conversationHistory — [{role, content}, ...]
- * @param {string} sessionId — unique session identifier
- * @returns {Promise<Object>} — { reply, stops, trip_found, trip_id, needs_confirmation, agent_steps }
- */
 export const sendAgentMessage = async (message, conversationHistory = [], sessionId = '') => {
     const { data } = await api.post('/agent/chat', {
         message,
@@ -117,12 +113,6 @@ export const sendAgentMessage = async (message, conversationHistory = [], sessio
     return data;
 };
 
-/**
- * Send a message to the public demo agent (no auth required).
- * @param {string} message
- * @param {Array}  conversationHistory — [{role, content}, ...]
- * @returns {Promise<Object>} — same shape as sendAgentMessage + requires_auth flag
- */
 export const sendDemoMessage = async (message, conversationHistory = []) => {
     const { data } = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/agent/demo-chat`, {
         message,
@@ -135,11 +125,6 @@ export const sendDemoMessage = async (message, conversationHistory = []) => {
 // RAG — History Q&A
 // ─────────────────────────────────────────────
 
-/**
- * Ask a natural language question about trip history (RAG pipeline).
- * @param {string} question
- * @returns {Promise<Object>} — { answer, sources_used }
- */
 export const queryRAG = async (question) => {
     const { data } = await api.post('/rag/query', { question });
     return data;
@@ -149,37 +134,31 @@ export const queryRAG = async (question) => {
 // Trips CRUD
 // ─────────────────────────────────────────────
 
-/** List all saved trips. */
 export const getTrips = async () => {
     const { data } = await api.get('/trips');
     return data;
 };
 
-/** Get a single trip with all stops. */
 export const getTripById = async (tripId) => {
     const { data } = await api.get(`/trips/${tripId}`);
     return data;
 };
 
-/** Save a new trip (writes to SQLite + ChromaDB). */
 export const createTrip = async (tripData) => {
     const { data } = await api.post('/trips', tripData);
     return data;
 };
 
-/** Update trip name / notes / stops. */
 export const updateTrip = async (tripId, tripData) => {
     const { data } = await api.put(`/trips/${tripId}`, tripData);
     return data;
 };
 
-/** Delete a trip (removes from SQLite + ChromaDB). */
 export const deleteTrip = async (tripId) => {
     const { data } = await api.delete(`/trips/${tripId}`);
     return data;
 };
 
-/** Record a trip launch — update stats, add to history + ChromaDB. */
 export const launchTrip = async (tripId) => {
     const { data } = await api.post(`/trips/${tripId}/launch`);
     return data;
@@ -189,11 +168,6 @@ export const launchTrip = async (tripId) => {
 // Semantic Search
 // ─────────────────────────────────────────────
 
-/**
- * Semantic search trips by query string.
- * @param {string} query — e.g. "school run"
- * @returns {Promise<Object>} — { results: [{ id, name, stop_count, similarity }] }
- */
 export const searchTrips = async (query) => {
     const { data } = await api.get('/trips/search', { params: { q: query } });
     return data;
@@ -203,19 +177,16 @@ export const searchTrips = async (query) => {
 // History
 // ─────────────────────────────────────────────
 
-/** Get recent trip launch history. */
 export const getHistory = async () => {
     const { data } = await api.get('/history');
     return data;
 };
 
-/** Delete a single history entry */
 export const deleteHistoryItem = async (historyId) => {
     const { data } = await api.delete(`/history/${historyId}`);
     return data;
 };
 
-/** Clear all history entries */
 export const clearAllHistory = async () => {
     const { data } = await api.delete('/history');
     return data;
@@ -225,7 +196,6 @@ export const clearAllHistory = async () => {
 // Admin / LLMOps
 // ─────────────────────────────────────────────
 
-/** Get LLM call logs (token usage, latency, errors). */
 export const getLLMLogs = async () => {
     const { data } = await api.get('/admin/llm-logs');
     return data;
@@ -235,11 +205,6 @@ export const getLLMLogs = async () => {
 // Voice
 // ─────────────────────────────────────────────
 
-/**
- * Transcribe recorded audio blob using Groq Whisper.
- * @param {Blob} audioBlob
- * @returns {Promise<Object>} — { text: "transcription" }
- */
 export const transcribeVoice = async (audioBlob) => {
     const formData = new FormData();
     formData.append('file', audioBlob, 'recording.mp4');
@@ -263,7 +228,7 @@ export const login = async (email, password) => {
     return data;
 };
 
-/** Get Google OAuth URL */
+/** Get Google OAuth URL (legacy — kept for compatibility) */
 export const loginWithGoogle = async () => {
     const { data } = await api.post('/auth/google', {});
     return data;
@@ -277,7 +242,7 @@ export const signup = async (first_name, last_name, birthday, email, password, c
 };
 
 export const updateProfile = async (profileData) => {
-    const { data } = await api.patch('/auth/profile', profileData);
+    const { data } = await api.patch('/auth/me', profileData);
     return data;
 };
 
@@ -294,9 +259,16 @@ export const deleteAccount = async () => {
 /** Logout user */
 export const logout = async () => {
     try {
+        // Sign out from Supabase JS (clears persisted session)
+        const { supabase } = await import('../supabaseClient');
+        await supabase.auth.signOut();
+    } catch (e) {
+        console.error('Supabase signOut failed:', e);
+    }
+    try {
         await api.post('/auth/logout');
     } catch (e) {
-        console.error('Logout failed:', e);
+        console.error('Backend logout failed:', e);
     }
     clearTokens();
     window.location.href = '/login';
