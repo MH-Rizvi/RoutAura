@@ -5,9 +5,7 @@
  * 
  * TOKEN MANAGEMENT:
  * Supabase JS is the source of truth for tokens.
- * This module stores them in-memory for axios to attach to requests.
- * On 401, we ask Supabase for a fresh session instead of calling
- * a custom /auth/refresh endpoint.
+ * This module fetches them dynamically from Supabase on every request.
  */
 import axios from 'axios';
 
@@ -23,23 +21,17 @@ const api = axios.create({
     },
 });
 
-let _accessToken = null;
-let _refreshToken = null;
+// Request Interceptor: Attach Bearer token from Supabase
+api.interceptors.request.use(async (config) => {
+    try {
+        const { supabase } = await import('../supabaseClient');
+        const { data: { session } } = await supabase.auth.getSession();
 
-export const setTokens = (access, refresh) => {
-    if (access) _accessToken = access;
-    if (refresh) _refreshToken = refresh;
-};
-
-export const clearTokens = () => {
-    _accessToken = null;
-    _refreshToken = null;
-};
-
-// Request Interceptor: Attach Bearer token to all requests
-api.interceptors.request.use((config) => {
-    if (_accessToken) {
-        config.headers.Authorization = `Bearer ${_accessToken}`;
+        if (session?.access_token) {
+            config.headers.Authorization = `Bearer ${session.access_token}`;
+        }
+    } catch (e) {
+        console.error('Error fetching session:', e);
     }
     return config;
 });
@@ -68,18 +60,16 @@ api.interceptors.response.use(
             try {
                 // Dynamically import supabase to avoid circular dependency
                 const { supabase } = await import('../supabaseClient');
-                const { data: { session } } = await supabase.auth.getSession();
+                // getSession automatically repopulates/refreshes tokens inside the Supabase client
+                const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-                if (session) {
-                    _accessToken = session.access_token;
-                    _refreshToken = session.refresh_token;
-                    originalRequest.headers.Authorization = `Bearer ${_accessToken}`;
+                if (session && !sessionError) {
+                    originalRequest.headers.Authorization = `Bearer ${session.access_token}`;
                     isRefreshing = false;
                     return api(originalRequest);
                 } else {
-                    // No session at all — user truly needs to log in
+                    // No valid session at all — user truly needs to log in
                     isRefreshing = false;
-                    clearTokens();
                     const path = window.location.pathname;
                     if (path !== '/login' && path !== '/' && path !== '/auth/callback') {
                         window.location.href = '/login';
@@ -88,7 +78,6 @@ api.interceptors.response.use(
                 }
             } catch (refreshError) {
                 isRefreshing = false;
-                clearTokens();
                 const path = window.location.pathname;
                 if (path !== '/login' && path !== '/' && path !== '/auth/callback') {
                     window.location.href = '/login';
@@ -224,7 +213,15 @@ export const transcribeVoice = async (audioBlob) => {
 /** Login with email and password */
 export const login = async (email, password) => {
     const { data } = await api.post('/auth/login', { email, password });
-    setTokens(data.access_token);
+
+    if (data.access_token && data.refresh_token) {
+        const { supabase } = await import('../supabaseClient');
+        await supabase.auth.setSession({
+            access_token: data.access_token,
+            refresh_token: data.refresh_token
+        });
+    }
+
     return data;
 };
 
@@ -237,7 +234,15 @@ export const loginWithGoogle = async () => {
 /** Signup new user */
 export const signup = async (first_name, last_name, birthday, email, password, city, state, zip_code) => {
     const { data } = await api.post('/auth/signup', { first_name, last_name, birthday, email, password, city, state, zip_code });
-    setTokens(data.access_token);
+
+    if (data.access_token) {
+        const { supabase } = await import('../supabaseClient');
+        await supabase.auth.setSession({
+            access_token: data.access_token,
+            refresh_token: data.refresh_token || data.access_token
+        });
+    }
+
     return data;
 };
 
@@ -270,7 +275,6 @@ export const logout = async () => {
     } catch (e) {
         console.error('Backend logout failed:', e);
     }
-    clearTokens();
     window.location.href = '/login';
 };
 

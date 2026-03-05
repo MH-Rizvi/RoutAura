@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
-import { setTokens, getMe } from '../api/client';
+import { getMe } from '../api/client';
 import useAuthStore from '../store/authStore';
 import useToastStore from '../store/toastStore';
 
@@ -12,7 +12,7 @@ import useToastStore from '../store/toastStore';
  * 1. Supabase JS (with detectSessionInUrl: true) processes the URL automatically
  * 2. We listen for SIGNED_IN via onAuthStateChange
  * 3. We also do a direct getSession() check after 1.5s as fallback
- * 4. Once we have a session, we push tokens to axios and call /auth/me
+ * 4. Once we have a session, we call /auth/me
  * 5. If is_new_user → /complete-profile, else → /home
  * 6. 6 second timeout → /login
  */
@@ -31,9 +31,6 @@ export default function AuthCallbackScreen() {
             hasHandled.current = true;
 
             console.log('[Callback] Processing session. Token length:', session.access_token?.length);
-
-            // IMMEDIATELY push tokens to axios client
-            setTokens(session.access_token, session.refresh_token);
 
             try {
                 // Call backend to get/create user profile

@@ -23,7 +23,7 @@ export default function TripCard({ trip }) {
         useToastStore.getState().showToast('Opening Google Maps...', 'google');
 
         const url = buildGoogleMapsUrl(trip.stops);
-        if (url) setTimeout(() => { window.location.href = url; }, 2000);
+        if (url) setTimeout(() => { window.open(url, '_blank', 'noopener,noreferrer'); }, 2000);
     };
 
     const handleAppleMaps = (e) => {
@@ -34,7 +34,7 @@ export default function TripCard({ trip }) {
         useToastStore.getState().showToast('Opening Apple Maps...', 'apple');
 
         const url = buildAppleMapsUrl(trip.stops);
-        if (url) setTimeout(() => { window.location.href = url; }, 2000);
+        if (url) setTimeout(() => { window.open(url, '_blank', 'noopener,noreferrer'); }, 2000);
     };
 
     return (

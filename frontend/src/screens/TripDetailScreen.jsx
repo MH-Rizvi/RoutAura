@@ -30,7 +30,7 @@ export default function TripDetailScreen() {
         useToastStore.getState().showToast('Opening Google Maps...', 'google');
 
         const url = buildGoogleMapsUrl(currentTrip.stops);
-        if (url) setTimeout(() => { window.location.href = url; }, 2000);
+        if (url) setTimeout(() => { window.open(url, '_blank', 'noopener,noreferrer'); }, 2000);
     };
 
     const handleAppleMaps = () => {
@@ -40,7 +40,7 @@ export default function TripDetailScreen() {
         useToastStore.getState().showToast('Opening Apple Maps...', 'apple');
 
         const url = buildAppleMapsUrl(currentTrip.stops);
-        if (url) setTimeout(() => { window.location.href = url; }, 2000);
+        if (url) setTimeout(() => { window.open(url, '_blank', 'noopener,noreferrer'); }, 2000);
     };
 
     const handleDelete = async () => {
