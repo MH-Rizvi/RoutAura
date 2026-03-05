@@ -17,7 +17,7 @@ router = APIRouter(tags=["admin"])
 @router.get("/admin/llm-logs", response_model=schemas.LLMLogListResponse)
 async def get_llm_logs(
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
+    current_user: Any = Depends(get_current_user),
 ) -> schemas.LLMLogListResponse:
     logs: List[models.LLMLog] = (
         db.query(models.LLMLog)
@@ -30,7 +30,7 @@ async def get_llm_logs(
 
 @router.get("/admin/chroma-debug")
 async def chroma_debug(
-    current_user: models.User = Depends(get_current_user),
+    current_user: Any = Depends(get_current_user),
 ):
     """Debug: show all ChromaDB collections and their document counts."""
     from app.services.vector_service import chroma_client

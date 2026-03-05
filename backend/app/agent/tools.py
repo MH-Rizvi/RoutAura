@@ -17,7 +17,7 @@ from app.services import geocoding_service, vector_service
 from app.services import trips_service
 
 # Context variables for injecting request-scoped data into tools
-user_id_ctx: contextvars.ContextVar[int | None] = contextvars.ContextVar("user_id", default=None)
+user_id_ctx: contextvars.ContextVar[str | None] = contextvars.ContextVar("user_id", default=None)
 user_city_ctx: contextvars.ContextVar[str | None] = contextvars.ContextVar("user_city", default=None)
 
 

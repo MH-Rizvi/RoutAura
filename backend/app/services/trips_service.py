@@ -15,7 +15,7 @@ from app.services import vector_service, directions_service
 logger = logging.getLogger(__name__)
 
 
-async def create_trip(db: Session, trip_data: schemas.TripCreate, user_id: int) -> models.Trip:
+async def create_trip(db: Session, trip_data: schemas.TripCreate, user_id: str) -> models.Trip:
     """
     Create a new trip with stops.
 
@@ -79,7 +79,7 @@ async def create_trip(db: Session, trip_data: schemas.TripCreate, user_id: int) 
     return db_trip
 
 
-async def get_trip(db: Session, trip_id: int, user_id: int) -> Optional[models.Trip]:
+async def get_trip(db: Session, trip_id: int, user_id: str) -> Optional[models.Trip]:
     """Fetch a single trip with all stops."""
     trip = (
         db.query(models.Trip)
@@ -90,14 +90,14 @@ async def get_trip(db: Session, trip_id: int, user_id: int) -> Optional[models.T
     return trip
 
 
-async def list_trips(db: Session, user_id: int) -> List[models.Trip]:
+async def list_trips(db: Session, user_id: str) -> List[models.Trip]:
     """Return all saved trips."""
     trips = db.query(models.Trip).filter(models.Trip.user_id == user_id).order_by(models.Trip.created_at.desc()).all()
     return trips
 
 
 async def update_trip(
-    db: Session, trip_id: int, trip_data: schemas.TripUpdate, user_id: int
+    db: Session, trip_id: int, trip_data: schemas.TripUpdate, user_id: str
 ) -> Optional[models.Trip]:
     """
     Update a trip's name, notes, and optionally replace its stops.
@@ -196,7 +196,7 @@ async def update_trip(
     return trip
 
 
-async def delete_trip(db: Session, trip_id: int, user_id: int) -> bool:
+async def delete_trip(db: Session, trip_id: int, user_id: str) -> bool:
     """
     Delete a trip from SQLite and ChromaDB.
 
@@ -242,7 +242,7 @@ async def delete_trip(db: Session, trip_id: int, user_id: int) -> bool:
     return True
 
 
-async def launch_trip(db: Session, trip_id: int, user_id: int) -> Optional[models.TripHistory]:
+async def launch_trip(db: Session, trip_id: int, user_id: str) -> Optional[models.TripHistory]:
     """
     Record a trip launch:
 

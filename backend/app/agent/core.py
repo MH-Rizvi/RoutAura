@@ -196,7 +196,7 @@ async def run_agent(
     message: str,
     conversation_history: List[Dict[str, Any]] | None = None,
     db: Any | None = None,
-    user_id: int | None = None,
+    user_id: str | None = None,
     user_city: str | None = None,
 ) -> Dict[str, Any]:
     global _processing_messages
@@ -219,7 +219,7 @@ async def _run_agent_internal(
     message: str,
     conversation_history: List[Dict[str, Any]] | None = None,
     db: Any | None = None,
-    user_id: int | None = None,
+    user_id: str | None = None,
     user_city: str | None = None,
 ) -> Dict[str, Any]:
     """

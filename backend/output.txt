@@ -1,0 +1,32 @@
+Failed to send telemetry event ClientStartEvent: capture() takes 1 positional argument but 3 were given
+sync_chroma | User 4 no longer exists or invalid — purging all vectors
+sync_chroma | User 3 no longer exists or invalid — purging all vectors
+sync_chroma | User 2 no longer exists or invalid — purging all vectors
+sync_chroma | User 1 no longer exists or invalid — purging all vectors
+Failed to send telemetry event CollectionGetEvent: capture() takes 1 positional argument but 3 were given
+Failed to send telemetry event CollectionDeleteEvent: capture() takes 1 positional argument but 3 were given
+  Purged 3 docs from history_1
+Failed to send telemetry event CollectionGetEvent: capture() takes 1 positional argument but 3 were given
+Add of existing embedding ID: trip_1
+Add of existing embedding ID: trip_1
+Add of existing embedding ID: trip_2
+Add of existing embedding ID: trip_3
+Failed to send telemetry event CollectionDeleteEvent: capture() takes 1 positional argument but 3 were given
+  Purged 5 docs from trips_1
+Failed to send telemetry event CollectionGetEvent: capture() takes 1 positional argument but 3 were given
+Add of existing embedding ID: stop_1
+Add of existing embedding ID: stop_2
+Add of existing embedding ID: stop_1
+Add of existing embedding ID: stop_2
+Add of existing embedding ID: stop_3
+Add of existing embedding ID: stop_4
+Add of existing embedding ID: stop_5
+Add of existing embedding ID: stop_6
+Add of existing embedding ID: stop_7
+Add of existing embedding ID: stop_8
+Add of existing embedding ID: stop_9
+Add of existing embedding ID: stop_10
+Add of existing embedding ID: stop_11
+Add of existing embedding ID: stop_12
+Failed to send telemetry event CollectionDeleteEvent: capture() takes 1 positional argument but 3 were given
+  Purged 20 docs from stops_1

@@ -21,7 +21,7 @@ router = APIRouter(tags=["trips"])
 async def search_trips(
     q: str = Query(..., min_length=1, description="Semantic search query"),
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
+    current_user: Any = Depends(get_current_user),
 ) -> schemas.TripsSearchResponse:
     """Semantic search over saved trips using ChromaDB vector similarity."""
     results = vector_service.search_trips(q, current_user.id, top_k=10)
@@ -50,7 +50,7 @@ async def search_trips(
 @router.get("/trips", response_model=List[schemas.Trip])
 async def list_trips(
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
+    current_user: Any = Depends(get_current_user),
 ) -> List[schemas.Trip]:
     trips = await trips_service.list_trips(db, current_user.id)
     return trips  # pyright: ignore[reportReturnType]
@@ -60,7 +60,7 @@ async def list_trips(
 async def get_trip(
     trip_id: int, 
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
+    current_user: Any = Depends(get_current_user),
 ) -> schemas.Trip:
     trip = await trips_service.get_trip(db, trip_id, current_user.id)
     if not trip:
@@ -75,7 +75,7 @@ async def get_trip(
 async def create_trip(
     trip_data: schemas.TripCreate,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
+    current_user: Any = Depends(get_current_user),
 ) -> schemas.Trip:
     trip = await trips_service.create_trip(db, trip_data, current_user.id)
     return trip
@@ -86,7 +86,7 @@ async def update_trip(
     trip_id: int,
     trip_data: schemas.TripUpdate,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
+    current_user: Any = Depends(get_current_user),
 ) -> schemas.Trip:
     trip = await trips_service.update_trip(db, trip_id, trip_data, current_user.id)
     if not trip:
@@ -101,7 +101,7 @@ async def update_trip(
 async def delete_trip(
     trip_id: int, 
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
+    current_user: Any = Depends(get_current_user),
 ) -> Response:
     success = await trips_service.delete_trip(db, trip_id, current_user.id)
     if not success:
@@ -116,7 +116,7 @@ async def delete_trip(
 async def launch_trip(
     trip_id: int, 
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
+    current_user: Any = Depends(get_current_user),
 ) -> schemas.TripHistory:
     history = await trips_service.launch_trip(db, trip_id, current_user.id)
     if not history:

@@ -20,7 +20,7 @@ router = APIRouter(tags=["history"])
 async def list_history(
     days: int = Query(7, ge=1, le=365),
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
+    current_user: Any = Depends(get_current_user),
 ) -> schemas.HistoryListResponse:
     cutoff = datetime.utcnow() - timedelta(days=days)
 
@@ -39,7 +39,7 @@ async def list_history(
 async def delete_history_entry(
     history_id: int,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
+    current_user: Any = Depends(get_current_user),
 ):
     history_entry = (
         db.query(models.TripHistory)
@@ -57,7 +57,7 @@ async def delete_history_entry(
 @router.delete("/history")
 async def clear_all_history(
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
+    current_user: Any = Depends(get_current_user),
 ):
     db.query(models.TripHistory).filter(models.TripHistory.user_id == current_user.id).delete()
     db.commit()

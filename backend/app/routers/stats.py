@@ -16,7 +16,7 @@ router = APIRouter(tags=["stats"])
 @router.get("/stats/summary", response_model=schemas.StatsSummaryResponse)
 async def get_stats_summary(
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
+    current_user: Any = Depends(get_current_user),
 ) -> schemas.StatsSummaryResponse:
     now = datetime.utcnow()
     # today is entries where launched_at >= today 00:00
@@ -79,7 +79,7 @@ async def get_stats_summary(
 async def get_daily_stats(
     days: int = Query(30, ge=1, le=365),
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
+    current_user: Any = Depends(get_current_user),
 ) -> List[schemas.DailyStatResponse]:
     now = datetime.utcnow()
     start_date = (now - timedelta(days=days - 1)).date()

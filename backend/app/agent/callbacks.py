@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class ContextCallbackHandler(BaseCallbackHandler):
     """Sets context variables at the start of an LLM chain so tools can read them."""
     
-    def __init__(self, user_id: int | None, user_city: str | None, db: Any | None):
+    def __init__(self, user_id: str | None, user_city: str | None, db: Any | None):
         super().__init__()
         self.user_id = user_id
         self.user_city = user_city

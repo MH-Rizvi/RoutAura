@@ -14,7 +14,7 @@ router = APIRouter(tags=["rag"])
 @router.post("/rag/query", response_model=schemas.HistoryQuestionResponse)
 async def ask_history_question(
     request: schemas.HistoryQuestionRequest,
-    current_user: models.User = Depends(get_current_user),
+    current_user: Any = Depends(get_current_user),
 ) -> schemas.HistoryQuestionResponse:
     """
     Ask a natural language question about the driver's trip history using the RAG pipeline.

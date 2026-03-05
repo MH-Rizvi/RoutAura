@@ -24,7 +24,7 @@ Keep your answers conversational, friendly, and helpful. Aim for 1-3 short sente
 """.strip()
 
 
-async def answer_history_question(question: str, user_id: int) -> Dict[str, Any]:
+async def answer_history_question(question: str, user_id: str) -> Dict[str, Any]:
     """
     Full RAG pipeline:
     1. Embed the question with the same model used for trip history.

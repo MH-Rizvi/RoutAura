@@ -21,19 +21,19 @@ chroma_client = chromadb.PersistentClient(
 )
 
 
-def _get_stops_collection(user_id: int):
+def _get_stops_collection(user_id: str):
     return chroma_client.get_or_create_collection(
         name=f"stops_{user_id}",
         metadata={"hnsw:space": "cosine"},
     )
 
-def _get_trips_collection(user_id: int):
+def _get_trips_collection(user_id: str):
     return chroma_client.get_or_create_collection(
         name=f"trips_{user_id}",
         metadata={"hnsw:space": "cosine"},
     )
 
-def _get_history_collection(user_id: int):
+def _get_history_collection(user_id: str):
     return chroma_client.get_or_create_collection(
         name=f"history_{user_id}",
         metadata={"hnsw:space": "cosine"},
@@ -52,7 +52,7 @@ def add_stop(
     resolved: str,
     lat: float,
     lng: float,
-    user_id: int,
+    user_id: str,
 ) -> str:
     """
     Embed and store a stop.
@@ -81,7 +81,7 @@ def add_stop(
     return doc_id
 
 
-def add_trip(trip_id: int, name: str, stops: List[Dict[str, Any]], user_id: int) -> str:
+def add_trip(trip_id: int, name: str, stops: List[Dict[str, Any]], user_id: str) -> str:
     """
     Embed and store a trip.
 
@@ -112,7 +112,7 @@ def add_history_entry(
     trip_name: str,
     stops: List[Dict[str, Any]],
     launched_at: str,
-    user_id: int,
+    user_id: str,
 ) -> str:
     """
     Create a natural language summary of a launched trip and embed it for RAG.
@@ -137,7 +137,7 @@ def add_history_entry(
     return doc_id
 
 
-def search_stops(query: str, user_id: int, top_k: int = 3) -> List[Dict[str, Any]]:
+def search_stops(query: str, user_id: str, top_k: int = 3) -> List[Dict[str, Any]]:
     """Semantic search over saved stops."""
     results = _get_stops_collection(user_id).query(
         query_embeddings=[embed(query)],
@@ -146,7 +146,7 @@ def search_stops(query: str, user_id: int, top_k: int = 3) -> List[Dict[str, Any
     return _format_results(results)
 
 
-def search_trips(query: str, user_id: int, top_k: int = 3) -> List[Dict[str, Any]]:
+def search_trips(query: str, user_id: str, top_k: int = 3) -> List[Dict[str, Any]]:
     """Semantic search over saved trips."""
     results = _get_trips_collection(user_id).query(
         query_embeddings=[embed(query)],
@@ -155,7 +155,7 @@ def search_trips(query: str, user_id: int, top_k: int = 3) -> List[Dict[str, Any
     return _format_results(results)
 
 
-def search_history(query: str, user_id: int, top_k: int = 5) -> List[Dict[str, Any]]:
+def search_history(query: str, user_id: str, top_k: int = 5) -> List[Dict[str, Any]]:
     """Semantic search over trip history entries for the RAG pipeline."""
     results = _get_history_collection(user_id).query(
         query_embeddings=[embed(query)],
@@ -164,25 +164,25 @@ def search_history(query: str, user_id: int, top_k: int = 5) -> List[Dict[str, A
     return _format_results(results)
 
 
-def delete_stop(chroma_id: str, user_id: int) -> None:
+def delete_stop(chroma_id: str, user_id: str) -> None:
     """Delete a stop document from the saved_stops collection."""
     if chroma_id:
         _get_stops_collection(user_id).delete(ids=[chroma_id])
 
 
-def delete_trip(chroma_id: str, user_id: int) -> None:
+def delete_trip(chroma_id: str, user_id: str) -> None:
     """Delete a trip document from the saved_trips collection."""
     if chroma_id:
         _get_trips_collection(user_id).delete(ids=[chroma_id])
 
 
-def delete_history_entry(chroma_id: str, user_id: int) -> None:
+def delete_history_entry(chroma_id: str, user_id: str) -> None:
     """Delete a history document from the trip_history collection."""
     if chroma_id:
         _get_history_collection(user_id).delete(ids=[chroma_id])
 
 
-def clear_history(user_id: int) -> None:
+def clear_history(user_id: str) -> None:
     """Delete all history documents."""
     collection = _get_history_collection(user_id)
     results = collection.get()

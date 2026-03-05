@@ -28,24 +28,30 @@ def sync_chroma_with_sql() -> None:
     try:
         # Get all user_ids that have collections
         collections = chroma_client.list_collections()
-        user_ids_with_collections: set[int] = set()
+        user_ids_with_collections: set[str] = set()
         for coll in collections:
             name = coll.name
             for prefix in ("history_", "trips_", "stops_"):
                 if name.startswith(prefix):
-                    try:
-                        uid = int(name[len(prefix):])
+                    uid = name[len(prefix):]
+                    if uid:
                         user_ids_with_collections.add(uid)
-                    except ValueError:
-                        pass
 
+        import uuid
         for user_id in user_ids_with_collections:
-            # Check if user exists in SQL
-            user_exists = db.query(models.User).filter(models.User.id == user_id).first() is not None
+            # Check if user profile exists in SQL
+            user_exists = False
+            try:
+                # Only valid UUIDs should even be queried against Postgres
+                uuid_val = uuid.UUID(user_id)
+                user_exists = db.query(models.UserProfile).filter(models.UserProfile.user_id == str(uuid_val)).first() is not None
+            except ValueError:
+                # If it's an old SQLite integer ID that isn't a UUID, it inherently doesn't exist anymore
+                user_exists = False
 
             if not user_exists:
-                # User deleted — purge all their ChromaDB collections
-                logger.warning("sync_chroma | User %d no longer exists — purging all vectors", user_id)
+                # User deleted or invalid ID — purge all their ChromaDB collections
+                logger.warning("sync_chroma | User %s no longer exists or invalid — purging all vectors", user_id)
                 for prefix in ("history_", "trips_", "stops_"):
                     coll_name = f"{prefix}{user_id}"
                     try:
@@ -78,21 +84,21 @@ def sync_chroma_with_sql() -> None:
                 all_ids = hist_coll.get()["ids"]
                 if all_ids:
                     hist_coll.delete(ids=all_ids)
-                    logger.warning("sync_chroma | Purged %d stale history vectors for user %d", len(all_ids), user_id)
+                    logger.warning("sync_chroma | Purged %d stale history vectors for user %s", len(all_ids), user_id)
 
             trips_coll = _get_trips_collection(user_id)
             if sql_trips_count == 0 and trips_coll.count() > 0:
                 all_ids = trips_coll.get()["ids"]
                 if all_ids:
                     trips_coll.delete(ids=all_ids)
-                    logger.warning("sync_chroma | Purged %d stale trip vectors for user %d", len(all_ids), user_id)
+                    logger.warning("sync_chroma | Purged %d stale trip vectors for user %s", len(all_ids), user_id)
 
             stops_coll = _get_stops_collection(user_id)
             if sql_stops_count == 0 and stops_coll.count() > 0:
                 all_ids = stops_coll.get()["ids"]
                 if all_ids:
                     stops_coll.delete(ids=all_ids)
-                    logger.warning("sync_chroma | Purged %d stale stop vectors for user %d", len(all_ids), user_id)
+                    logger.warning("sync_chroma | Purged %d stale stop vectors for user %s", len(all_ids), user_id)
 
         logger.info("sync_chroma | ChromaDB ↔ SQL sync complete")
     except Exception as exc:

@@ -40,7 +40,7 @@ def _check_demo_rate(ip: str) -> bool:
 async def chat(
     request: schemas.AgentChatRequest,
     db: Session = Depends(get_db),
-    current_user: models.User = Depends(get_current_user),
+    current_user: Any = Depends(get_current_user),
 ) -> schemas.AgentChatResponse:
     is_safe = await moderation_service.is_safe(request.message)
     if not is_safe:
