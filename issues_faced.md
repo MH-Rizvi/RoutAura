@@ -219,3 +219,34 @@ The `_extract_state_from_query()` function only recognized 2-letter state abbrev
 1. **Comprehensive `_US_STATE_INFO` dict:** All 50 states + DC with full name, abbreviation, and center lat/lng.
 2. **`_STATE_LOOKUP` + `_STATE_ALIASES`:** Case-insensitive lookup supporting abbreviations, full names, and common variations (e.g. `"Calif."`, `"Fla."`, `"N.Y."`, `"Washington DC"`).
 3. **Built-in center coordinates:** Eliminated the `_get_city_coords()` Google API call for state center lookups — center lat/lng is now hardcoded per state, saving one API call per geocode request.
+
+## Issue 14: CORS OPTIONS Preflight Failing in Production
+**Phase:** Cloud Deployment / Backend Setup
+**Date Identified:** March 6, 2026
+**Severity:** CRITICAL (API Unreachable from Vercel)
+
+### Description
+The frontend hosted on Vercel was receiving `400 Bad Request` or CORS violation errors from the backend `OPTIONS` preflight requests (e.g. `/api/v1/agent/demo-chat`), blocking all cross-origin API calls.
+
+### Root Cause Analysis
+The `CORSMiddleware` in `backend/app/main.py` was correctly positioned at the top of the middleware stack, but its `allow_origins` parameter was hardcoded with a static array of local testing addresses (`http://localhost:5173`, `http://127.0.0.1:5174`, etc.). Since the actual Vercel production origin was missing from this hardcoded list, the backend aggressively rejected the preflight requests.
+
+### Resolution Implemented
+1. **Dynamic Origins via Environment:** Replaced the hardcoded list with `settings.cors_origins` in the `allow_origins` parameter of `CORSMiddleware`.
+2. **Environment Variable Injection:** Allowed the production origin (e.g. `https://your-app.vercel.app`) to be passed in seamlessly via the `CORS_ORIGINS` environment variable in Railway, solving the cross-origin block while maintaining security.
+
+## Issue 15: 401 Unauthorized Loop Due to Supabase Backend Validation
+**Phase:** Core Authentication / API
+**Date Identified:** March 6, 2026
+**Severity:** CRITICAL (Login Loop / App Unusable)
+
+### Description
+Immediately after successfully authenticating via the frontend, users would load the Home Screen for 1-2 seconds before being inexplicably booted back to the login screen. The frontend correctly possessed a valid Supabase JWT and added it to the `Authorization: Bearer <token>` header, but the backend rejected it with a `401 Unauthorized` response on endpoints like `GET /api/v1/auth/me`.
+
+### Root Cause Analysis
+The frontend correctly intercepted and hydrated the session. However, on the backend (`app/auth.py`), the `get_current_user` dependency invoked `supabase.auth.get_user(token)`. This command fundamentally triggers an outbound HTTP POST request from the FastAPI backend to the remote Supabase GoTrue Auth service server in order to validate the JWT. The Supabase server unexpectedly rejected this server-to-server proxy validation call, throwing an internal 401 to the backend. The backend then surfaced a fast `HTTP 401` back to the frontend. The frontend's Axios interceptor rightly caught this 401 and aggressively redirected the user back to `/login`, causing an infinite auth loop.
+
+### Resolution Implemented
+1. **Local JWT Verification:** Completely stripped the `supabase.auth.get_user(token)` remote network call from the fast-path authentication dependency.
+2. **Zero-Latency Decoding:** Switched to decoding the JWT entirely locally on the backend server using the `python-jose` library (`jwt.decode()`).
+3. **Injected JWT Secret:** Used `SUPABASE_JWT_SECRET` pulled from environment variables (`app/config.py`) and standard `HS256` symmetric signing to securely parse and implicitly validate the JWT payload (`sub` and `email`), converting it into a local `AuthUser` class replica without incurring network latency or remote provider rejection.
