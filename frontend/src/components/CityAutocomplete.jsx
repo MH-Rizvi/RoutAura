@@ -97,6 +97,7 @@ export default function CityAutocomplete({ value, onChange, stateAbbr, disabled,
                             key={s.place_id || i}
                             type="button"
                             onClick={() => handleSelect(s.city)}
+                            onTouchStart={() => handleSelect(s.city)}
                             className="w-full text-left px-4 py-3 text-[14px] text-white/80 hover:bg-amber-500/10 hover:text-white transition-colors flex items-center gap-2 border-b border-white/[0.04] last:border-0"
                         >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500/60 shrink-0">
