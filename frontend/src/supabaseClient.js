@@ -12,6 +12,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     auth: {
         persistSession: true,
         storage: window.localStorage,
+        storageKey: 'routigo-auth',
         autoRefreshToken: true,
         detectSessionInUrl: true,
         flowType: 'pkce'

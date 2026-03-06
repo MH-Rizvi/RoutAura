@@ -67,11 +67,16 @@ export function isIOS() {
  */
 export function openMapLink(url) {
     if (!url) return;
-    const a = document.createElement('a');
-    a.href = url;
-    a.target = '_blank';
-    a.rel = 'noopener noreferrer';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+
+    // Detect if running as a PWA (standalone mode)
+    const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+    if (isPWA) {
+        // In PWA standalone mode, opening in _blank often doesn't work correctly
+        // and can cause the app to get stuck. Direct navigation works better.
+        window.location.href = url;
+    } else {
+        // In standard browser mode, window.open is usually allowed when tied to a user gesture
+        window.open(url, '_blank');
+    }
 }
