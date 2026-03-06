@@ -355,7 +355,7 @@ export default function LandingPage() {
         <div className="min-h-screen bg-base text-white overflow-x-hidden">
 
             {/* ═══ NAVBAR ═══ */}
-            <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-base/90 backdrop-blur-xl border-b border-white/[0.06] shadow-lg' : ''}`}>
+            <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 pt-[max(env(safe-area-inset-top),0px)] ${scrolled ? 'bg-base/90 backdrop-blur-xl border-b border-white/[0.06] shadow-lg' : ''}`}>
                 <div className="max-w-6xl mx-auto px-5 sm:px-8 h-20 flex items-center justify-between">
                     <div className="flex items-center gap-3 cursor-pointer group" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                         <div className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center border border-white/[0.1] shadow-lg shadow-amber-500/20 bg-white/[0.03] group-hover:scale-105 group-hover:rotate-6 transition-transform duration-500">
@@ -376,7 +376,7 @@ export default function LandingPage() {
 
 
             {/* ═══ HERO ═══ */}
-            <section className="relative pt-28 lg:pt-40 pb-10 lg:pb-16 px-5 sm:px-8 bg-[#0a0f1a] overflow-hidden">
+            <section className="relative pt-[calc(112px+max(env(safe-area-inset-top),0px))] lg:pt-[calc(160px+max(env(safe-area-inset-top),0px))] pb-10 lg:pb-16 px-5 sm:px-8 bg-[#0a0f1a] overflow-hidden">
                 {/* Background effects */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     {/* Road SVG Background */}
