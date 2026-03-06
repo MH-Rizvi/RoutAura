@@ -48,7 +48,7 @@ export function buildAppleMapsUrl(stops) {
         .map((s) => `${s.lat},${s.lng}`)
         .join('+to:');
 
-    return `maps://?saddr=${saddr}&daddr=${daddr}&dirflg=d`;
+    return `https://maps.apple.com/?saddr=${saddr}&daddr=${daddr}&dirflg=d`;
 }
 
 /**
@@ -57,4 +57,21 @@ export function buildAppleMapsUrl(stops) {
  */
 export function isIOS() {
     return /iPad|iPhone|iPod/.test(navigator.userAgent);
+}
+
+/**
+ * Programmatically open map URLs using an anchor tag click.
+ * This bypasses mobile popup blockers that restrict window.open()
+ * when the call isn't directly tied to a user gesture.
+ * @param {string} url - The map URL to open
+ */
+export function openMapLink(url) {
+    if (!url) return;
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
 }

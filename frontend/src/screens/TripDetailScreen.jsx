@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import useTripStore from '../store/tripStore';
 import MapPreview from '../components/MapPreview';
-import { buildGoogleMapsUrl, buildAppleMapsUrl } from '../utils/mapsLinks';
+import { buildGoogleMapsUrl, buildAppleMapsUrl, openMapLink } from '../utils/mapsLinks';
 import useToastStore from '../store/toastStore';
 import Header from '../components/Header';
 
@@ -30,7 +30,7 @@ export default function TripDetailScreen() {
         useToastStore.getState().showToast('Opening Google Maps...', 'google');
 
         const url = buildGoogleMapsUrl(currentTrip.stops);
-        if (url) setTimeout(() => { window.open(url, '_blank', 'noopener,noreferrer'); }, 2000);
+        if (url) openMapLink(url);
     };
 
     const handleAppleMaps = () => {
@@ -40,7 +40,7 @@ export default function TripDetailScreen() {
         useToastStore.getState().showToast('Opening Apple Maps...', 'apple');
 
         const url = buildAppleMapsUrl(currentTrip.stops);
-        if (url) setTimeout(() => { window.open(url, '_blank', 'noopener,noreferrer'); }, 2000);
+        if (url) openMapLink(url);
     };
 
     const handleDelete = async () => {

@@ -3,7 +3,7 @@
  */
 import { useNavigate } from 'react-router-dom';
 import useTripStore from '../store/tripStore';
-import { buildGoogleMapsUrl, buildAppleMapsUrl } from '../utils/mapsLinks';
+import { buildGoogleMapsUrl, buildAppleMapsUrl, openMapLink } from '../utils/mapsLinks';
 import useToastStore from '../store/toastStore';
 
 export default function TripCard({ trip }) {
@@ -23,7 +23,7 @@ export default function TripCard({ trip }) {
         useToastStore.getState().showToast('Opening Google Maps...', 'google');
 
         const url = buildGoogleMapsUrl(trip.stops);
-        if (url) setTimeout(() => { window.open(url, '_blank', 'noopener,noreferrer'); }, 2000);
+        if (url) openMapLink(url);
     };
 
     const handleAppleMaps = (e) => {
@@ -34,7 +34,7 @@ export default function TripCard({ trip }) {
         useToastStore.getState().showToast('Opening Apple Maps...', 'apple');
 
         const url = buildAppleMapsUrl(trip.stops);
-        if (url) setTimeout(() => { window.open(url, '_blank', 'noopener,noreferrer'); }, 2000);
+        if (url) openMapLink(url);
     };
 
     return (

@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useTripStore from '../store/tripStore';
 import SemanticSearchBar from '../components/SemanticSearchBar';
-import { buildGoogleMapsUrl, buildAppleMapsUrl } from '../utils/mapsLinks';
+import { buildGoogleMapsUrl, buildAppleMapsUrl, openMapLink } from '../utils/mapsLinks';
 import useToastStore from '../store/toastStore';
 import Header from '../components/Header';
 
@@ -81,7 +81,7 @@ function TripRow({ trip, onDelete, onTap }) {
                                 useTripStore.getState().launchCurrentTrip(trip.id).catch(err => console.error(err));
                                 useToastStore.getState().showToast('Opening Apple Maps...', 'apple');
                                 const url = buildAppleMapsUrl(trip.stops);
-                                if (url) setTimeout(() => { window.open(url, '_blank', 'noopener,noreferrer'); }, 2000);
+                                if (url) openMapLink(url);
                             }}
                             title="Open in Apple Maps"
                             className="w-8 h-8 rounded-full bg-surface border border-border-hl flex items-center justify-center text-text-primary hover:bg-border-hl transition-colors"
@@ -97,7 +97,7 @@ function TripRow({ trip, onDelete, onTap }) {
                                 useTripStore.getState().launchCurrentTrip(trip.id).catch(err => console.error(err));
                                 useToastStore.getState().showToast('Opening Google Maps...', 'google');
                                 const url = buildGoogleMapsUrl(trip.stops);
-                                if (url) setTimeout(() => { window.open(url, '_blank', 'noopener,noreferrer'); }, 2000);
+                                if (url) openMapLink(url);
                             }}
                             title="Open in Google Maps"
                             className="w-8 h-8 rounded-full bg-accent border border-accent/70 flex items-center justify-center text-base hover:brightness-110 transition-colors cursor-pointer text-black"
