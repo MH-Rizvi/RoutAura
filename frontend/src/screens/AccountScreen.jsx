@@ -35,7 +35,7 @@ const Icon = {
 function InfoRow({ icon, label, value }) {
     return (
         <div className="flex items-start gap-3 py-3">
-            <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/10 flex items-center justify-center shrink-0 mt-0.5 text-amber-500">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 text-amber-500" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.1)', boxShadow: '0 0 6px rgba(245,158,11,0.1)' }}>
                 {icon}
             </div>
             <div className="flex-1 min-w-0">
@@ -51,7 +51,7 @@ function SectionCard({ children, className = '', danger = false }) {
         ? 'bg-gradient-to-br from-red-500/[0.04] via-[#111827]/90 to-[#0A0F1E]/95 border-red-500/15'
         : 'bg-gradient-to-br from-amber-500/[0.04] via-[#111827]/90 to-[#0A0F1E]/95 border-white/[0.06]';
     return (
-        <div className={`border rounded-2xl backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.25)] transition-all duration-300 hover:shadow-[0_8px_40px_rgba(0,0,0,0.35)] ${base} ${className}`}>
+        <div className={`border rounded-2xl backdrop-blur-xl transition-all duration-300 ${base} ${className}`} style={{ boxShadow: danger ? '0 4px 30px rgba(239,68,68,0.1)' : '0 4px 30px rgba(0,0,0,0.25), 0 0 15px rgba(245,158,11,0.03)' }}>
             {children}
         </div>
     );
@@ -448,7 +448,7 @@ export default function AccountScreen() {
                                 {/* Avatar */}
                                 <div className="flex justify-center -mt-12 relative z-10">
                                     <div className="relative group">
-                                        <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-[#1a1a2e] to-[#0d0d1a] border-[3px] border-[#111827] flex items-center justify-center shadow-[0_8px_30px_rgba(0,0,0,0.5)] relative z-10">
+                                        <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-[#1a1a2e] to-[#0d0d1a] border-[3px] border-[#111827] flex items-center justify-center relative z-10" style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.5), 0 0 15px rgba(245,158,11,0.15)' }}>
                                             <span className="text-amber-500 text-[28px] font-extrabold tracking-wider leading-none">{initials}</span>
                                         </div>
                                         {/* Animated ring */}

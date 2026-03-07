@@ -77,11 +77,11 @@ export default function HomeScreen() {
                 <div className="mb-8 animate-fade-up" style={{ animationDelay: '50ms' }}>
                     <button
                         onClick={() => navigate('/chat')}
-                        className="w-full relative overflow-hidden rounded-3xl bg-gradient-to-br from-accent via-orange-500 to-amber-600 p-[1px] group transition-transform active:scale-95 text-left"
-                        style={{ boxShadow: '0 8px 32px rgba(245,158,11,0.25)' }}
+                        className="w-full relative overflow-hidden rounded-3xl p-[1px] group transition-transform active:scale-95 text-left"
+                        style={{ background: 'linear-gradient(135deg, rgba(245,158,11,0.4), rgba(245,158,11,0.1), rgba(251,191,36,0.3))', boxShadow: '0 8px 32px rgba(245,158,11,0.2), 0 0 60px rgba(245,158,11,0.05)' }}
                     >
                         <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                        <div className="w-full h-full bg-[#111827]/90 backdrop-blur-xl rounded-[23px] p-6 flex items-center justify-between">
+                        <div className="w-full h-full rounded-[23px] p-6 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, rgba(13,17,23,0.95) 0%, rgba(30,41,59,0.6) 100%)', backdropFilter: 'blur(20px)' }}>
                             <div>
                                 <h2 className="text-white font-bold text-[22px] tracking-tight mb-1">Plan a Route</h2>
                                 <p className="text-text-muted text-[13px]">Powered by Routigo AI</p>
@@ -103,8 +103,8 @@ export default function HomeScreen() {
 
                 {/* Empty state */}
                 {!loading && trips.length === 0 && (
-                    <div className="flex-1 flex flex-col items-center justify-center pb-12 text-center animate-fade-up style={{ animationDelay: '100ms' }}">
-                        <div className="w-20 h-20 rounded-full bg-surface border border-border flex items-center justify-center mb-4">
+                    <div className="flex-1 flex flex-col items-center justify-center pb-12 text-center animate-fade-up" style={{ animationDelay: '100ms' }}>
+                        <div className="w-20 h-20 rounded-full flex items-center justify-center mb-4" style={{ background: 'rgba(30,41,59,0.5)', border: '1px solid rgba(245,158,11,0.15)', boxShadow: '0 0 20px rgba(245,158,11,0.08)' }}>
                             <span className="text-[32px]">🛣️</span>
                         </div>
                         <h2 className="text-[18px] font-semibold text-white mb-2">No past routes</h2>
@@ -115,7 +115,10 @@ export default function HomeScreen() {
                 {/* Section header */}
                 {topTrips.length > 0 && (
                     <div className="flex items-center justify-between mb-3 animate-fade-up" style={{ animationDelay: '100ms' }}>
-                        <h2 className="text-sm font-semibold text-text-muted uppercase tracking-wider">Recent Routes</h2>
+                        <div className="flex items-center gap-2">
+                            <div className="w-1 h-4 rounded-full bg-[#F59E0B]" />
+                            <h2 className="text-sm font-semibold text-text-muted uppercase tracking-wider">Recent Routes</h2>
+                        </div>
                         <button onClick={() => navigate('/trips')} className="text-sm text-accent font-medium min-h-touch flex items-center">
                             View All →
                         </button>

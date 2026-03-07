@@ -63,7 +63,7 @@ export default function HistoryScreen() {
                 {/* RAG Panel */}
                 <section className="mb-8 animate-fade-up">
                     <div className="flex items-center gap-2 mb-3">
-                        <div className="w-6 h-6 rounded-full bg-accent/10 border border-accent/30 flex items-center justify-center">
+                        <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)', boxShadow: '0 0 6px rgba(245,158,11,0.15)' }}>
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
                         </div>
                         <h2 className="text-base font-bold text-text-primary">Ask About Your History</h2>
@@ -75,7 +75,8 @@ export default function HistoryScreen() {
                             onChange={(e) => setRagQuestion(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleAskRAG()}
                             placeholder="Ask a question about your trips…"
-                            className="flex-1 min-h-touch rounded-xl border border-border bg-surface px-4 py-3 text-base text-text-primary placeholder:text-text-muted disabled:opacity-50"
+                            className="flex-1 min-h-touch rounded-xl px-4 py-3 text-base text-text-primary placeholder:text-text-muted disabled:opacity-50"
+                            style={{ background: 'rgba(10,15,30,0.6)', border: '1px solid rgba(245,158,11,0.1)' }}
                             disabled={ragLoading}
                         />
                         <button onClick={() => handleAskRAG()} disabled={ragLoading || !ragQuestion.trim()} className="min-w-touch min-h-touch rounded-xl btn-accent px-4 font-bold disabled:opacity-30">
@@ -89,7 +90,8 @@ export default function HistoryScreen() {
                                 key={q}
                                 onClick={() => { setRagQuestion(q); handleAskRAG(q); }}
                                 disabled={ragLoading}
-                                className="bg-[#111827] border border-[#F59E0B] rounded-[20px] px-3 py-2 text-[#F59E0B] text-[12px] text-center disabled:opacity-50 transition-colors active:bg-[#F59E0B]/10"
+                                className="rounded-[20px] px-3 py-2 text-[#F59E0B] text-[12px] text-center disabled:opacity-50 transition-all active:bg-[#F59E0B]/10"
+                                style={{ background: 'rgba(13,17,23,0.6)', border: '1px solid rgba(245,158,11,0.3)' }}
                             >
                                 {q}
                             </button>
@@ -97,7 +99,7 @@ export default function HistoryScreen() {
                     </div>
 
                     {ragAnswer && (
-                        <div className="card card-accent p-4 animate-fade-up">
+                        <div className="glow-card p-4 animate-fade-up" style={{ borderLeft: '3px solid #F59E0B' }}>
                             <div className="flex items-center gap-2 mb-2">
                                 <span className="text-accent text-sm font-bold">AI Answer</span>
                                 <span className="text-xs text-text-muted">• Based on your history</span>
@@ -152,7 +154,7 @@ export default function HistoryScreen() {
                     {/* Timeline layout */}
                     <div className="relative">
                         {history.length > 0 && (
-                            <div className="absolute left-[7px] top-3 bottom-3 w-px bg-[#1F2937]" />
+                            <div className="absolute left-[7px] top-3 bottom-3 w-px bg-gradient-to-b from-[#F59E0B]/30 via-[#1F2937] to-[#F59E0B]/30" />
                         )}
                         <div className="space-y-4">
                             {history.map((h, idx) => {
@@ -163,10 +165,10 @@ export default function HistoryScreen() {
                                 return (
                                     <div key={h.id} className="flex gap-4 animate-fade-up items-stretch" style={{ animationDelay: `${idx * 40}ms` }}>
                                         {/* Timeline dot */}
-                                        <div className="relative z-10 w-4 h-4 rounded-full bg-[#111827] border-[4px] border-[#F59E0B] shrink-0 mt-5" />
+                                        <div className="relative z-10 w-4 h-4 rounded-full shrink-0 mt-5" style={{ background: '#0A0F1E', border: '4px solid #F59E0B', boxShadow: '0 0 6px rgba(245,158,11,0.4)' }} />
 
                                         {/* Card */}
-                                        <div className="bg-[#111827] border-[1px] border-[#1F2937] border-l-[3px] border-l-[#F59E0B] rounded-xl p-4 flex-1 flex justify-between items-start gap-2 relative group">
+                                        <div className="rounded-xl p-4 flex-1 flex justify-between items-start gap-2 relative group" style={{ background: 'linear-gradient(135deg, rgba(30,41,59,0.4) 0%, rgba(13,17,23,0.7) 100%)', border: '1px solid rgba(255,255,255,0.05)', borderLeft: '3px solid #F59E0B' }}>
                                             <div className="min-w-0">
                                                 <div className="flex items-center gap-2">
                                                     <h3 className="text-[16px] font-semibold text-white truncate max-w-[200px]">{h.trip_name || 'Unnamed Trip'}</h3>
@@ -196,7 +198,8 @@ export default function HistoryScreen() {
                                                     }, 5000);
                                                 }}
                                                 disabled={deletingId === h.id}
-                                                className="w-8 h-8 rounded-full bg-surface border border-border-hl flex items-center justify-center text-text-muted hover:text-danger hover:border-danger/50 hover:bg-danger/10 transition-colors shrink-0 disabled:opacity-50"
+                                                className="w-8 h-8 rounded-full flex items-center justify-center text-text-muted hover:text-danger hover:border-danger/50 hover:bg-danger/10 transition-colors shrink-0 disabled:opacity-50"
+                                                style={{ background: 'rgba(30,41,59,0.5)', border: '1px solid rgba(255,255,255,0.06)' }}
                                                 title="Delete"
                                             >
                                                 {deletingId === h.id ? (

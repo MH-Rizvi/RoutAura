@@ -55,7 +55,9 @@ const TABS = [
 function BottomTabBar() {
     return (
         <>
-            <nav className="fixed bottom-0 left-0 right-0 z-50 glass-bar border-t border-border safe-area-bottom">
+            <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-white/[0.06] safe-area-bottom" style={{ background: 'rgba(13, 17, 23, 0.92)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
+                {/* Amber top accent line */}
+                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#F59E0B]/20 to-transparent" />
                 <div className="flex justify-start sm:justify-around items-center h-16 max-w-lg mx-auto overflow-x-auto hide-scrollbar px-2 gap-4 sm:gap-0">
                     {TABS.map((tab) => (
                         <NavLink
@@ -69,12 +71,14 @@ function BottomTabBar() {
                         >
                             {({ isActive }) => (
                                 <>
-                                    {tab.icon}
+                                    <div className={`transition-all duration-300 ${isActive ? 'drop-shadow-[0_0_6px_rgba(245,158,11,0.5)]' : ''}`}>
+                                        {tab.icon}
+                                    </div>
                                     <span className={`text-[10px] mt-1 font-medium tracking-wide ${isActive ? 'text-accent' : ''}`}>
                                         {tab.label}
                                     </span>
                                     {isActive && (
-                                        <span className="absolute -bottom-0 w-5 h-0.5 rounded-full bg-accent" />
+                                        <span className="absolute -bottom-0 w-6 h-1 rounded-full bg-[#F59E0B]" style={{ boxShadow: '0 0 10px rgba(245, 158, 11, 0.5), 0 0 20px rgba(245, 158, 11, 0.2)' }} />
                                     )}
                                 </>
                             )}

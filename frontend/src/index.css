@@ -332,6 +332,92 @@ select:focus {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
+/* ── Glow Card ────────────────────────────── */
+
+.glow-card {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.04) 0%, rgba(30, 41, 59, 0.5) 50%, rgba(13, 17, 23, 0.8) 100%);
+    border: 1px solid rgba(245, 158, 11, 0.1);
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.glow-card:hover {
+    border-color: rgba(245, 158, 11, 0.25);
+    box-shadow: 0 0 30px rgba(245, 158, 11, 0.08), 0 8px 24px rgba(0, 0, 0, 0.4);
+    transform: translateY(-2px);
+}
+
+/* ── Gradient Border (desktop only) ──────── */
+
+@media (min-width: 769px) {
+    .gradient-border {
+        position: relative;
+    }
+
+    .gradient-border::before {
+        content: '';
+        position: absolute;
+        inset: -1px;
+        border-radius: inherit;
+        padding: 1px;
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.3));
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .gradient-border:hover::before {
+        opacity: 1;
+    }
+}
+
+/* ── Pulse Glow ──────────────────────────── */
+
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 8px rgba(245, 158, 11, 0.15); }
+    50% { box-shadow: 0 0 20px rgba(245, 158, 11, 0.3); }
+}
+
+.animate-pulse-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* ── Float (desktop only) ────────────────── */
+
+@media (min-width: 769px) {
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-4px); }
+    }
+
+    .animate-float {
+        animation: float 4s ease-in-out infinite;
+    }
+}
+
+/* ── Amber top accent line ───────────────── */
+
+.amber-top-line {
+    position: relative;
+}
+
+.amber-top-line::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #F59E0B, transparent);
+    border-radius: 1px;
+}
+
 /* ── Utility ──────────────────────────────── */
 
 .font-mono {

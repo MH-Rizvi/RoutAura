@@ -39,18 +39,19 @@ export default function TripCard({ trip }) {
 
     return (
         <div
-            className="card card-accent p-4 flex items-center gap-4 cursor-pointer hover:border-accent/50 transition-all group"
+            className="glow-card gradient-border p-4 flex items-center gap-4 cursor-pointer transition-all group"
             onClick={() => navigate(`/trips/${trip.id}`)}
             role="button"
             tabIndex={0}
+            style={{ borderLeft: '3px solid #F59E0B' }}
         >
             {/* Route dots visualization */}
             <div className="flex flex-col items-center gap-1 shrink-0 py-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-accent" />
-                {stopCount > 2 && <span className="w-px h-3 bg-border-hl" />}
-                {stopCount > 2 && <span className="w-1.5 h-1.5 rounded-full bg-border-hl" />}
-                <span className="w-px h-3 bg-border-hl" />
-                <span className="w-2.5 h-2.5 rounded-full border-2 border-accent bg-transparent" />
+                <span className="w-2.5 h-2.5 rounded-full bg-[#F59E0B]" style={{ boxShadow: '0 0 6px rgba(245,158,11,0.4)' }} />
+                {stopCount > 2 && <span className="w-px h-3 bg-gradient-to-b from-[#F59E0B]/40 to-[#F59E0B]/10" />}
+                {stopCount > 2 && <span className="w-1.5 h-1.5 rounded-full bg-[#F59E0B]/30" />}
+                <span className="w-px h-3 bg-gradient-to-b from-[#F59E0B]/40 to-[#F59E0B]/10" />
+                <span className="w-2.5 h-2.5 rounded-full border-2 border-[#F59E0B] bg-transparent" />
             </div>
 
             {/* Info */}

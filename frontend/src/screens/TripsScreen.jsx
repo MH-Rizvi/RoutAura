@@ -66,7 +66,7 @@ function TripRow({ trip, onDelete, onTap }) {
                     <div className="min-w-0">
                         <h3 className="text-[17px] font-bold text-white truncate group-hover:text-accent transition-colors">{trip.name}</h3>
                         <div className="flex items-center gap-2 text-[13px] text-text-secondary mt-1">
-                            <span className="bg-surface px-2 py-0.5 rounded-md border border-border">{stopCount} stops</span>
+                            <span className="px-2 py-0.5 rounded-md text-[13px]" style={{ background: 'rgba(30,41,59,0.6)', border: '1px solid rgba(255,255,255,0.06)' }}>{stopCount} stops</span>
                             {lastUsed && <span className="text-text-muted">• {lastUsed}</span>}
                         </div>
                     </div>
@@ -84,7 +84,8 @@ function TripRow({ trip, onDelete, onTap }) {
                                 if (url) openMapLink(url);
                             }}
                             title="Open in Apple Maps"
-                            className="w-8 h-8 rounded-full bg-surface border border-border-hl flex items-center justify-center text-text-primary hover:bg-border-hl transition-colors"
+                            className="w-8 h-8 rounded-full flex items-center justify-center text-text-primary transition-all"
+                            style={{ background: 'rgba(30,41,59,0.5)', border: '1px solid rgba(255,255,255,0.08)' }}
                         >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.05 2.53.81 3.19.81.79 0 2.21-1.01 3.84-.86 1.63.13 3.13.84 4.02 2.11-3.41 1.98-2.88 6.51.35 7.84-.79 1.83-2.09 3.85-3.4 5.07zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.32 2.28-1.9 4.2-3.74 4.25z" />
@@ -100,7 +101,8 @@ function TripRow({ trip, onDelete, onTap }) {
                                 if (url) openMapLink(url);
                             }}
                             title="Open in Google Maps"
-                            className="w-8 h-8 rounded-full bg-accent border border-accent/70 flex items-center justify-center text-base hover:brightness-110 transition-colors cursor-pointer text-black"
+                            className="w-8 h-8 rounded-full flex items-center justify-center text-base transition-all cursor-pointer text-[#0D1117]"
+                            style={{ background: '#F59E0B', border: '1px solid rgba(245,158,11,0.7)', boxShadow: '0 0 10px rgba(245,158,11,0.3)' }}
                         >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z" />
@@ -157,7 +159,7 @@ export default function TripsScreen() {
 
                 {!loading && displayTrips.length === 0 && (
                     <div className="text-center py-20 animate-fade-up glass-panel rounded-3xl mt-10">
-                        <div className="w-16 h-16 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center mx-auto mb-4 relative overflow-hidden">
+                        <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 relative overflow-hidden" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', boxShadow: '0 0 20px rgba(245,158,11,0.1)' }}>
                             <div className="absolute inset-0 bg-accent/20 animate-ping rounded-full" />
                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" className="relative z-10"><circle cx="12" cy="10" r="3" /><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z" /></svg>
                         </div>
@@ -235,7 +237,7 @@ export default function TripsScreen() {
 
                 {!isSearching && trips.length > 0 && (
                     <div className="flex justify-center mt-10 mb-4 opacity-70">
-                        <p className="text-xs font-mono text-white flex items-center gap-2 bg-surface px-4 py-2 rounded-full border border-border shadow-lg">
+                        <p className="text-xs font-mono text-white flex items-center gap-2 px-4 py-2 rounded-full" style={{ background: 'rgba(30,41,59,0.5)', border: '1px solid rgba(255,255,255,0.06)', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
                             <span className="tracking-widest capitalize font-bold">Swipe left on a card to delete</span>
                         </p>
                     </div>

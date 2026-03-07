@@ -88,7 +88,7 @@ export default function PreviewScreen() {
 
                 {stops.length === 0 ? (
                     <div className="text-center py-16 animate-fade-up">
-                        <div className="w-14 h-14 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center mx-auto mb-4">
+                        <div className="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', boxShadow: '0 0 15px rgba(245,158,11,0.1)' }}>
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2"><circle cx="12" cy="10" r="3" /><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z" /></svg>
                         </div>
                         <p className="text-text-secondary">No stops to preview</p>
@@ -104,7 +104,7 @@ export default function PreviewScreen() {
                         </div>
 
                         {stops.length > 10 && (
-                            <div className="card p-3 mb-3 border-accent/30">
+                            <div className="rounded-2xl p-3 mb-3" style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)' }}>
                                 <p className="text-xs text-accent">⚠ Google Maps supports ~8 waypoints on free tier.</p>
                             </div>
                         )}
@@ -147,7 +147,7 @@ export default function PreviewScreen() {
                                 recordAdHocHistory(stops, 'chat_preview', tripId);
                                 const url = buildAppleMapsUrl(stops);
                                 if (url) openMapLink(url);
-                            }} disabled={stops.length < 2 || isSaving} className="w-full h-16 rounded-xl bg-surface border border-border-hl text-text-primary text-sm font-semibold flex flex-col items-center justify-center gap-1 hover:bg-border-hl transition-colors disabled:opacity-30">
+                            }} disabled={stops.length < 2 || isSaving} className="w-full h-16 rounded-xl text-text-primary text-sm font-semibold flex flex-col items-center justify-center gap-1 transition-all disabled:opacity-30" style={{ background: 'linear-gradient(135deg, rgba(30,41,59,0.5) 0%, rgba(13,17,23,0.8) 100%)', border: '1px solid rgba(255,255,255,0.08)' }}>
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.05 2.53.81 3.19.81.79 0 2.21-1.01 3.84-.86 1.63.13 3.13.84 4.02 2.11-3.41 1.98-2.88 6.51.35 7.84-.79 1.83-2.09 3.85-3.4 5.07zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.32 2.28-1.9 4.2-3.74 4.25z" /></svg>
                                 Apple Maps
                             </button>
@@ -184,7 +184,7 @@ export default function PreviewScreen() {
                                 recordAdHocHistory(stops, 'chat_preview', tripId);
                                 const url = buildGoogleMapsUrl(stops);
                                 if (url) openMapLink(url);
-                            }} disabled={stops.length < 2 || isSaving} className="w-full h-16 rounded-xl btn-accent text-sm font-semibold text-black flex flex-col items-center justify-center gap-1 disabled:opacity-30">
+                            }} disabled={stops.length < 2 || isSaving} className="w-full h-16 rounded-xl text-sm font-semibold text-[#0D1117] flex flex-col items-center justify-center gap-1 disabled:opacity-30 transition-all" style={{ background: '#F59E0B', boxShadow: '0 0 20px rgba(245,158,11,0.3)' }}>
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z" /></svg>
                                 Google Maps
                             </button>

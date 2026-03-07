@@ -168,7 +168,7 @@ export default function AuthScreen() {
             </button>
 
             {/* ═══ LEFT SIDE (Branding) ═══ */}
-            <div className="hidden md:flex flex-1 relative bg-surface border-r border-white/[0.06] overflow-hidden items-center justify-center p-12">
+            <div className="hidden md:flex flex-1 relative overflow-hidden items-center justify-center p-12" style={{ background: 'linear-gradient(135deg, rgba(30,41,59,0.6) 0%, rgba(13,17,23,0.95) 100%)', borderRight: '1px solid rgba(245,158,11,0.1)' }}>
                 {/* Background effects */}
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">
                     <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-amber-500/[0.05] rounded-full blur-[100px]" />
@@ -177,7 +177,7 @@ export default function AuthScreen() {
 
                 <div className="relative z-10 max-w-md">
                     <div className="flex items-center gap-4 mb-8">
-                        <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center border border-white/[0.1] shadow-lg shadow-amber-500/20 bg-white/[0.03]">
+                        <div className="w-16 h-16 rounded-full overflow-hidden flex items-center justify-center bg-white/[0.03]" style={{ border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 0 20px rgba(245,158,11,0.2)' }}>
                             <img src="/logo3_nobg.png" alt="Routigo" className="w-[140%] h-[140%] max-w-none object-cover rounded-full" />
                         </div>
                         <span className="text-accent font-extrabold text-[40px] tracking-tight">Routigo</span>
@@ -224,7 +224,7 @@ export default function AuthScreen() {
                     </div>
 
                     {/* Premium Form Card */}
-                    <div className="w-full bg-white/[0.02] border border-white/[0.06] rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-md">
+                    <div className="w-full rounded-3xl p-6 sm:p-8 backdrop-blur-md" style={{ background: 'linear-gradient(135deg, rgba(30,41,59,0.3) 0%, rgba(13,17,23,0.5) 100%)', border: '1px solid rgba(245,158,11,0.08)', boxShadow: '0 8px 30px rgba(0,0,0,0.3), 0 0 15px rgba(245,158,11,0.03)' }}>
                         {error && (
                             <div className="mb-6 p-3 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3 text-red-400 text-[13px] font-medium">
                                 <svg className="w-5 h-5 shrink-0 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>

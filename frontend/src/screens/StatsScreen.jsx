@@ -80,16 +80,16 @@ export default function StatsScreen() {
             <div className="flex-1 overflow-y-auto bg-bg-app p-4 sm:p-6 lg:p-8 animate-pulse">
                 <div className="h-8 w-48 bg-surface border border-border rounded-xl mb-6"></div>
                 <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div className="bg-surface rounded-2xl h-24 border border-border"></div>
-                    <div className="bg-surface rounded-2xl h-24 border border-border"></div>
-                    <div className="bg-surface rounded-2xl h-24 border border-border"></div>
-                    <div className="bg-surface rounded-2xl h-24 border border-border"></div>
+                    <div className="rounded-2xl h-24" style={{ background: 'rgba(30,41,59,0.3)', border: '1px solid rgba(255,255,255,0.05)' }}></div>
+                    <div className="rounded-2xl h-24" style={{ background: 'rgba(30,41,59,0.3)', border: '1px solid rgba(255,255,255,0.05)' }}></div>
+                    <div className="rounded-2xl h-24" style={{ background: 'rgba(30,41,59,0.3)', border: '1px solid rgba(255,255,255,0.05)' }}></div>
+                    <div className="rounded-2xl h-24" style={{ background: 'rgba(30,41,59,0.3)', border: '1px solid rgba(255,255,255,0.05)' }}></div>
                 </div>
                 <div className="grid grid-cols-2 gap-4 mb-6">
-                    <div className="bg-surface rounded-2xl h-20 border border-border"></div>
-                    <div className="bg-surface rounded-2xl h-20 border border-border"></div>
+                    <div className="rounded-2xl h-20" style={{ background: 'rgba(30,41,59,0.3)', border: '1px solid rgba(255,255,255,0.05)' }}></div>
+                    <div className="rounded-2xl h-20" style={{ background: 'rgba(30,41,59,0.3)', border: '1px solid rgba(255,255,255,0.05)' }}></div>
                 </div>
-                <div className="bg-surface rounded-3xl h-64 border border-border"></div>
+                <div className="rounded-3xl h-64" style={{ background: 'rgba(30,41,59,0.3)', border: '1px solid rgba(255,255,255,0.05)' }}></div>
             </div>
         );
     }
@@ -113,7 +113,7 @@ export default function StatsScreen() {
         return (
             <div className="flex-1 flex items-center justify-center p-6 bg-bg-app">
                 <div className="text-center max-w-sm">
-                    <div className="w-20 h-20 mx-auto bg-surface border border-border rounded-full flex items-center justify-center shadow-sm mb-6">
+                    <div className="w-20 h-20 mx-auto rounded-full flex items-center justify-center mb-6" style={{ background: 'rgba(30,41,59,0.5)', border: '1px solid rgba(245,158,11,0.15)', boxShadow: '0 0 20px rgba(245,158,11,0.08)' }}>
                         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-text-muted">
                             <line x1="18" y1="20" x2="18" y2="10" />
                             <line x1="12" y1="20" x2="12" y2="4" />
@@ -148,19 +148,21 @@ export default function StatsScreen() {
             </div>
 
             {/* Chart Section */}
-            <div className="bg-surface border border-border rounded-3xl p-4 sm:p-6 shadow-sm overflow-hidden animate-fade-up" style={{ animationDelay: '400ms' }}>
+            <div className="rounded-3xl p-4 sm:p-6 overflow-hidden animate-fade-up" style={{ background: 'linear-gradient(135deg, rgba(30,41,59,0.4) 0%, rgba(13,17,23,0.7) 100%)', border: '1px solid rgba(245,158,11,0.1)', boxShadow: '0 0 20px rgba(0,0,0,0.3)', animationDelay: '400ms' }}>
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-base font-semibold text-text-primary">Daily Miles Driven</h2>
-                    <div className="flex bg-bg-app rounded-xl p-1 border border-border shrink-0">
+                    <div className="flex rounded-xl p-1 shrink-0" style={{ background: 'rgba(10,15,30,0.5)', border: '1px solid rgba(255,255,255,0.05)' }}>
                         <button
                             onClick={() => setDaysRange(7)}
-                            className={`min-w-touch px-3 py-1 text-xs font-medium rounded-lg transition-colors ${daysRange === 7 ? 'bg-surface text-text-primary shadow border border-border/50' : 'text-text-muted hover:text-text-secondary'}`}
+                            className={`min-w-touch px-3 py-1 text-xs font-medium rounded-lg transition-all ${daysRange === 7 ? 'text-text-primary' : 'text-text-muted hover:text-text-secondary'}`}
+                            style={daysRange === 7 ? { background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)', boxShadow: '0 0 8px rgba(245,158,11,0.1)' } : {}}
                         >
                             7 Days
                         </button>
                         <button
                             onClick={() => setDaysRange(30)}
-                            className={`min-w-touch px-3 py-1 text-xs font-medium rounded-lg transition-colors ${daysRange === 30 ? 'bg-surface text-text-primary shadow border border-border/50' : 'text-text-muted hover:text-text-secondary'}`}
+                            className={`min-w-touch px-3 py-1 text-xs font-medium rounded-lg transition-all ${daysRange === 30 ? 'text-text-primary' : 'text-text-muted hover:text-text-secondary'}`}
+                            style={daysRange === 30 ? { background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)', boxShadow: '0 0 8px rgba(245,158,11,0.1)' } : {}}
                         >
                             30 Days
                         </button>
@@ -188,23 +190,24 @@ export default function StatsScreen() {
                             />
                             <Tooltip
                                 contentStyle={{
-                                    backgroundColor: 'var(--surface)',
-                                    borderColor: 'var(--border)',
+                                    backgroundColor: 'rgba(30,41,59,0.95)',
+                                    borderColor: 'rgba(245,158,11,0.2)',
                                     borderRadius: '12px',
                                     color: 'var(--text-primary)',
-                                    boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)'
+                                    boxShadow: '0 0 20px rgba(0,0,0,0.4), 0 0 10px rgba(245,158,11,0.05)',
+                                    backdropFilter: 'blur(8px)'
                                 }}
-                                itemStyle={{ color: '#2563EB', fontWeight: 'bold' }}
+                                itemStyle={{ color: '#F59E0B', fontWeight: 'bold' }}
                                 labelStyle={{ color: 'var(--text-muted)', marginBottom: '4px' }}
-                                cursor={{ stroke: 'var(--border)', strokeWidth: 2, strokeDasharray: '4 4' }}
+                                cursor={{ stroke: 'rgba(245,158,11,0.3)', strokeWidth: 2, strokeDasharray: '4 4' }}
                             />
                             <Line
                                 type="monotone"
                                 dataKey="miles"
-                                stroke="#2563EB"
+                                stroke="#F59E0B"
                                 strokeWidth={3}
-                                dot={{ fill: '#2563EB', strokeWidth: 2, r: 4, stroke: 'var(--surface)' }}
-                                activeDot={{ r: 6, stroke: 'var(--surface)', strokeWidth: 2 }}
+                                dot={{ fill: '#F59E0B', strokeWidth: 2, r: 4, stroke: 'rgba(13,17,23,0.9)' }}
+                                activeDot={{ r: 6, stroke: 'rgba(13,17,23,0.9)', strokeWidth: 2, fill: '#FBBF24' }}
                                 animationDuration={1000}
                             />
                         </LineChart>
@@ -220,7 +223,13 @@ export default function StatsScreen() {
 
 function StatCard({ label, value, suffix, isSecondary }) {
     return (
-        <div className={`flex flex-col p-4 rounded-2xl border ${isSecondary ? 'bg-bg-app border-border/50' : 'bg-surface border-border shadow-sm'}`}>
+        <div
+            className="flex flex-col p-4 rounded-2xl amber-top-line"
+            style={isSecondary
+                ? { background: 'rgba(10,15,30,0.4)', border: '1px solid rgba(255,255,255,0.04)' }
+                : { background: 'linear-gradient(135deg, rgba(30,41,59,0.4) 0%, rgba(13,17,23,0.7) 100%)', border: '1px solid rgba(245,158,11,0.1)' }
+            }
+        >
             <span className="text-text-muted text-xs font-medium uppercase tracking-wider mb-2 line-clamp-1">{label}</span>
             <div className="flex items-baseline gap-1 mt-auto">
                 <span className={`text-2xl sm:text-3xl tracking-tight font-semibold ${isSecondary ? 'text-text-secondary' : 'text-text-primary'}`}>{value}</span>

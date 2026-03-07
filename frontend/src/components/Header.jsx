@@ -4,7 +4,9 @@ export default function Header({ rightElement }) {
     const navigate = useNavigate();
 
     return (
-        <div className="pt-[max(env(safe-area-inset-top),0px)] shrink-0 bg-[#0A0F1E]/60 backdrop-blur-2xl sticky top-0 z-50 shadow-[0_4px_30px_rgba(0,0,0,0.1)] border-b border-white/5 flex flex-col w-full">
+        <div className="pt-[max(env(safe-area-inset-top),0px)] shrink-0 bg-[#0A0F1E]/60 backdrop-blur-2xl sticky top-0 z-50 shadow-[0_4px_30px_rgba(0,0,0,0.1)] border-b border-white/5 flex flex-col w-full" style={{ borderBottom: '1px solid rgba(245,158,11,0.15)' }}>
+            {/* Amber bottom accent line */}
+            <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#F59E0B]/20 to-transparent" />
             <div className="h-[76px] sm:h-[96px] flex items-center justify-between px-4 sm:px-5 w-full">
                 <div
                     className="flex items-center gap-0 cursor-pointer group sm:-ml-2"
