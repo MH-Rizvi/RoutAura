@@ -223,6 +223,7 @@ function AppShell() {
     const location = useLocation();
     const hideTabBar = location.pathname.startsWith('/preview') ||
         location.pathname === '/login' ||
+        location.pathname === '/signup' ||
         location.pathname === '/' ||
         location.pathname === '/complete-profile' ||
         location.pathname === '/auth/callback';
@@ -258,6 +259,7 @@ function AppShell() {
             <main className={`flex-1 flex flex-col overflow-y-auto ${hideTabBar ? '' : 'pb-safe-tabbar lg:pb-0'} ${showSidebar ? 'lg:ml-64' : ''}`}>
                 <Routes>
                     <Route path="/login" element={<AuthScreen />} />
+                    <Route path="/signup" element={<AuthScreen />} />
                     <Route path="/auth/callback" element={<AuthCallbackScreen />} />
                     <Route path="/complete-profile" element={<CompleteProfileScreen />} />
                     <Route path="/" element={

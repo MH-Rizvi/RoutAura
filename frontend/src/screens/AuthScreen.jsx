@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { login, signup, loginWithGoogle, checkEmail } from '../api/client';
 import { supabase } from '../supabaseClient';
 import useAuthStore from '../store/authStore';
@@ -19,10 +19,11 @@ const Icons = {
 
 export default function AuthScreen() {
     const navigate = useNavigate();
+    const location = useLocation();
     const setUser = useAuthStore(state => state.setUser);
     const showToast = useToastStore(state => state.showToast);
 
-    const [mode, setMode] = useState('login'); // 'login' | 'signup'
+    const [mode, setMode] = useState(location.pathname === '/signup' ? 'signup' : 'login'); // 'login' | 'signup'
     const [signupStep, setSignupStep] = useState(1); // 1: Creds, 2: Location, 3: Personal
     const [showVerification, setShowVerification] = useState(false); // email verification screen
 
