@@ -262,6 +262,275 @@ function AutoDemoChat() {
 
 
 /* ──────────────────────────────────────────────
+   STEP 1 ANIMATION — Chat input flow
+   ────────────────────────────────────────────── */
+function StepOneAnimation() {
+    const FULL_TEXT = 'Do my usual morning school run...';
+    const [phase, setPhase] = useState('waiting');   // waiting | typing | done
+    const [charIdx, setCharIdx] = useState(0);
+    const [showConfirm, setShowConfirm] = useState(false);
+    const timeouts = useRef([]);
+
+    const enqueue = useCallback((fn, ms) => {
+        const id = setTimeout(fn, ms);
+        timeouts.current.push(id);
+        return id;
+    }, []);
+
+    const reset = useCallback(() => {
+        timeouts.current.forEach(clearTimeout);
+        timeouts.current = [];
+        setPhase('waiting');
+        setCharIdx(0);
+        setShowConfirm(false);
+    }, []);
+
+    /* main loop */
+    useEffect(() => {
+        let cancelled = false;
+        function run() {
+            reset();
+            // waiting phase
+            enqueue(() => { if (!cancelled) setPhase('typing'); }, 1200);
+        }
+        run();
+        return () => { cancelled = true; reset(); };
+    }, [enqueue, reset]);
+
+    /* typing phase — advance chars */
+    useEffect(() => {
+        if (phase !== 'typing') return;
+        if (charIdx >= FULL_TEXT.length) {
+            setPhase('done');
+            return;
+        }
+        const id = setTimeout(() => setCharIdx(c => c + 1), 55);
+        return () => clearTimeout(id);
+    }, [phase, charIdx]);
+
+    /* done phase — show confirm then loop */
+    useEffect(() => {
+        if (phase !== 'done') return;
+        const ids = [];
+        ids.push(setTimeout(() => setShowConfirm(true), 400));
+        ids.push(setTimeout(() => {
+            setPhase('waiting');
+            setCharIdx(0);
+            setShowConfirm(false);
+        }, 2400));
+        return () => ids.forEach(clearTimeout);
+    }, [phase]);
+
+    return (
+        <div className="min-h-[12rem] w-full rounded-xl bg-[#0D1117] border border-white/[0.06] p-3 flex flex-col gap-2 overflow-hidden mt-3">
+            {/* Waiting text */}
+            {phase === 'waiting' && (
+                <p className="text-white/30 text-[11px]" style={{ animation: 'hiw-fade-in 0.5s ease' }}>
+                    Waiting for your route...
+                </p>
+            )}
+
+            {/* Input box */}
+            {(phase === 'typing' || phase === 'done') && (
+                <div className="rounded-lg border border-amber-500/30 bg-[#1E293B] px-3 py-2" style={{ boxShadow: '0 0 12px rgba(245,158,11,0.08)' }}>
+                    <span className="font-mono text-[12px] text-amber-300/90">
+                        {FULL_TEXT.slice(0, charIdx)}
+                    </span>
+                    {phase === 'typing' && (
+                        <span className="inline-block w-[2px] h-[14px] bg-amber-400 align-middle ml-[1px] rounded-sm" style={{ animation: 'hiw-blink 0.7s step-end infinite' }} />
+                    )}
+                </div>
+            )}
+
+            {/* Listening indicator */}
+            {phase === 'typing' && (
+                <div className="flex items-center gap-1.5 mt-1" style={{ animation: 'hiw-fade-in 0.4s ease' }}>
+                    <span className="w-[6px] h-[6px] rounded-full bg-amber-400" style={{ animation: 'hiw-dot-pulse 1.2s ease-in-out infinite' }} />
+                    <span className="text-[10px] text-amber-400/60">Routigo AI is listening...</span>
+                </div>
+            )}
+
+            {/* Confirmation */}
+            {showConfirm && (
+                <div className="flex items-center gap-1.5 mt-auto" style={{ animation: 'hiw-fade-in 0.5s ease' }}>
+                    <span className="text-emerald-400 text-[12px] font-medium">✓ Message received</span>
+                </div>
+            )}
+        </div>
+    );
+}
+
+
+/* ──────────────────────────────────────────────
+   STEP 2 ANIMATION — Agent reasoning flow
+   ────────────────────────────────────────────── */
+function StepTwoAnimation() {
+    const ADDRESSES = [
+        "St Mary's Primary School, Oak Ave, NY",
+        'Riverside Community Centre, NY',
+        'Home Depot, Syosset, NY',
+    ];
+    const [pillText, setPillText] = useState('');
+    const [visibleRows, setVisibleRows] = useState(0);
+    const [barFill, setBarFill] = useState(false);
+    const timeouts = useRef([]);
+
+    const enqueue = useCallback((fn, ms) => {
+        const id = setTimeout(fn, ms);
+        timeouts.current.push(id);
+        return id;
+    }, []);
+
+    const reset = useCallback(() => {
+        timeouts.current.forEach(clearTimeout);
+        timeouts.current = [];
+        setPillText('');
+        setVisibleRows(0);
+        setBarFill(false);
+    }, []);
+
+    useEffect(() => {
+        let cancelled = false;
+        function run() {
+            reset();
+            enqueue(() => { if (!cancelled) setPillText('🔍 Searching saved trips...'); }, 200);
+            enqueue(() => { if (!cancelled) setPillText('📍 Geocoding stops...'); }, 1000);
+            enqueue(() => { if (!cancelled) setVisibleRows(1); }, 1800);
+            enqueue(() => { if (!cancelled) setVisibleRows(2); }, 2100);
+            enqueue(() => { if (!cancelled) setVisibleRows(3); }, 2400);
+            enqueue(() => { if (!cancelled) setBarFill(true); }, 3200);
+            enqueue(() => { if (!cancelled) { run(); } }, 5000);
+        }
+        run();
+        return () => { cancelled = true; reset(); };
+    }, [enqueue, reset]);
+
+    return (
+        <div className="min-h-[12rem] w-full rounded-xl bg-[#0D1117] border border-white/[0.06] p-3 flex flex-col gap-2 overflow-hidden mt-3">
+            {/* Pill */}
+            {pillText && (
+                <div className="inline-flex self-start px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[11px] font-medium"
+                    style={{ animation: 'pulse 1.5s ease-in-out infinite' }}>
+                    {pillText}
+                </div>
+            )}
+
+            {/* Address rows */}
+            <div className="flex flex-col gap-1.5 mt-1">
+                {ADDRESSES.map((addr, i) => (
+                    i < visibleRows && (
+                        <div key={i} className="flex items-start gap-2 text-[11px]"
+                            style={{ animation: 'hiw-slide-left 0.35s ease both' }}>
+                            <span className="text-emerald-400 shrink-0">✓</span>
+                            <span className="text-white/70">{addr}</span>
+                        </div>
+                    )
+                ))}
+            </div>
+
+            {/* Progress bar */}
+            {barFill && (
+                <div className="mt-auto">
+                    <div className="w-full h-[6px] rounded-full bg-white/[0.06] overflow-hidden">
+                        <div className="h-full rounded-full bg-amber-500" style={{ animation: 'hiw-bar-fill 1.2s ease forwards' }} />
+                    </div>
+                    <p className="text-amber-400/70 text-[10px] text-right mt-1" style={{ animation: 'hiw-fade-in 0.6s ease 0.8s both' }}>100%</p>
+                </div>
+            )}
+        </div>
+    );
+}
+
+
+/* ──────────────────────────────────────────────
+   STEP 3 ANIMATION — Navigation launch flow
+   ────────────────────────────────────────────── */
+function StepThreeAnimation() {
+    const [showSummary, setShowSummary] = useState(false);
+    const [showButtons, setShowButtons] = useState(false);
+    const [showToast, setShowToast] = useState(false);
+    const [showRing, setShowRing] = useState(false);
+    const timeouts = useRef([]);
+
+    const enqueue = useCallback((fn, ms) => {
+        const id = setTimeout(fn, ms);
+        timeouts.current.push(id);
+        return id;
+    }, []);
+
+    const reset = useCallback(() => {
+        timeouts.current.forEach(clearTimeout);
+        timeouts.current = [];
+        setShowSummary(false);
+        setShowButtons(false);
+        setShowToast(false);
+        setShowRing(false);
+    }, []);
+
+    useEffect(() => {
+        let cancelled = false;
+        function run() {
+            reset();
+            enqueue(() => { if (!cancelled) setShowSummary(true); }, 200);
+            enqueue(() => { if (!cancelled) setShowButtons(true); }, 1000);
+            enqueue(() => { if (!cancelled) setShowToast(true); }, 2000);
+            enqueue(() => { if (!cancelled) setShowRing(true); }, 3000);
+            enqueue(() => { if (!cancelled) setShowRing(false); }, 3800);
+            enqueue(() => { if (!cancelled) run(); }, 4800);
+        }
+        run();
+        return () => { cancelled = true; reset(); };
+    }, [enqueue, reset]);
+
+    /* Simple SVG route line */
+    const routeSvg = (
+        <svg width="100%" height="24" viewBox="0 0 160 24" fill="none" className="mt-2 mb-1">
+            <line x1="20" y1="12" x2="140" y2="12" stroke="rgba(245,158,11,0.3)" strokeWidth="2" strokeLinecap="round" />
+            <circle cx="20" cy="12" r="5" fill="#F59E0B" />
+            <circle cx="80" cy="12" r="5" fill="#F59E0B" />
+            <circle cx="140" cy="12" r="5" fill="#F59E0B" />
+        </svg>
+    );
+
+    return (
+        <div className="min-h-[12rem] w-full rounded-xl bg-[#0D1117] border border-white/[0.06] p-3 flex flex-col gap-2 overflow-hidden mt-3 relative">
+            {/* Route summary card */}
+            {showSummary && (
+                <div className="rounded-lg border border-white/[0.08] bg-[#1E293B] p-3" style={{ animation: 'hiw-fade-in 0.4s ease' }}>
+                    <p className="text-white/80 text-[12px] font-semibold">3 stops · 12.4 miles</p>
+                    {routeSvg}
+                </div>
+            )}
+
+            {/* Buttons */}
+            {showButtons && (
+                <div className="flex gap-2 mt-1" style={{ animation: 'hiw-fade-in 0.4s ease' }}>
+                    <div className="flex-1 text-center py-2 rounded-lg text-[11px] font-bold text-white/80 border border-white/[0.1] bg-white/[0.04] backdrop-blur-sm" style={{ minWidth: 0, minHeight: 0 }}>
+                        Apple Maps
+                    </div>
+                    <div className="flex-1 text-center py-2 rounded-lg text-[11px] font-bold text-[#0D1117] bg-amber-500 relative overflow-visible" id="hiw-gmaps-btn" style={{ minWidth: 0, minHeight: 0 }}>
+                        Google Maps
+                        {showRing && (
+                            <span className="absolute inset-0 rounded-lg border-2 border-amber-400 pointer-events-none"
+                                style={{ animation: 'hiw-pulse-ring 0.8s ease-out forwards' }} />
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Success toast */}
+            {showToast && (
+                <div className="absolute top-2 left-1/2 -translate-x-1/2 px-3 py-1.5 rounded-lg bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 text-[11px] font-medium whitespace-nowrap"
+                    style={{ animation: 'hiw-slide-top 0.4s ease', minWidth: 0, minHeight: 0 }}>
+                    ✓ Navigation launched!
+                </div>
+            )}
+        </div>
+    );
+}
+
+
+/* ──────────────────────────────────────────────
    FAQ ACCORDION ITEM
    ────────────────────────────────────────────── */
 function FAQItem({ q, a, isOpen, onToggle }) {
@@ -282,23 +551,34 @@ function FAQItem({ q, a, isOpen, onToggle }) {
 
 
 /* ──────────────────────────────────────────────
-   ANIMATED ROAD BACKGROUND
+   ANIMATED ROAD BACKGROUND — Road network with vehicles
    ────────────────────────────────────────────── */
 function AnimatedRoadBackground() {
     if (typeof window !== 'undefined' && window.innerWidth < 768) return null;
 
-    // 5 organic bezier curves resembling navigation routes
-    const paths = [
-        'M -50 200 C 200 180, 400 350, 600 280 S 900 150, 1200 300 S 1600 400, 1950 250',
-        'M -30 500 C 150 450, 350 600, 550 520 S 800 380, 1050 480 S 1400 600, 1950 450',
-        'M -60 750 C 180 700, 420 850, 650 780 S 950 650, 1150 750 S 1500 850, 1950 700',
-        'M 1950 150 C 1700 200, 1400 100, 1100 180 S 700 300, 400 200 S 100 100, -50 180',
-        'M -40 950 C 250 900, 500 1050, 750 970 S 1050 850, 1300 950 S 1650 1050, 1950 900',
+    /*
+     * Layout: 4 curving highway paths across the viewport.
+     * Each road has: a subtle road surface, dashed lane-markings,
+     * and 1-2 vehicle silhouettes travelling along it.
+     */
+    const roads = [
+        { d: 'M -80 180 C 250 140, 500 320, 780 260 S 1100 120, 1400 220 S 1700 340, 2000 200', len: 2200 },
+        { d: 'M -60 480 C 180 430, 400 580, 640 510 S 900 370, 1150 470 S 1450 590, 2000 440', len: 2150 },
+        { d: 'M 2000 140 C 1680 190, 1380 80, 1060 170 S 680 310, 380 200 S 80 90, -80 160', len: 2250 },
+        { d: 'M -60 780 C 220 730, 480 870, 720 800 S 1000 670, 1280 770 S 1580 880, 2000 740', len: 2100 },
     ];
 
-    const pathLengths = [2200, 2100, 2150, 2250, 2100];
-    const delays = [0, 1.5, 3, 4.5, 6];
-    const durations = [5, 4.5, 5.5, 4, 5];
+    /* Vehicle configs: pathIndex, duration, delay, type (car|truck), direction */
+    const vehicles = [
+        { pi: 0, dur: 14, del: 0, type: 'car' },
+        { pi: 0, dur: 18, del: 5, type: 'truck' },
+        { pi: 1, dur: 16, del: 1, type: 'car' },
+        { pi: 1, dur: 20, del: 8, type: 'car' },
+        { pi: 2, dur: 15, del: 2, type: 'truck' },
+        { pi: 2, dur: 19, del: 7, type: 'car' },
+        { pi: 3, dur: 17, del: 3, type: 'car' },
+        { pi: 3, dur: 22, del: 10, type: 'truck' },
+    ];
 
     return (
         <div
@@ -318,46 +598,111 @@ function AnimatedRoadBackground() {
                 style={{ width: '100%', height: '100%' }}
                 xmlns="http://www.w3.org/2000/svg"
             >
+                <defs>
+                    {/* Headlight glow filter */}
+                    <filter id="headlight-glow" x="-50%" y="-50%" width="200%" height="200%">
+                        <feGaussianBlur stdDeviation="3" result="blur" />
+                        <feMerge>
+                            <feMergeNode in="blur" />
+                            <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                    </filter>
+                    {/* Intersection pattern */}
+                    <pattern id="road-grid" width="120" height="120" patternUnits="userSpaceOnUse">
+                        <line x1="0" y1="0" x2="0" y2="120" stroke="rgba(245,158,11,0.03)" strokeWidth="1" />
+                        <line x1="0" y1="0" x2="120" y2="0" stroke="rgba(245,158,11,0.03)" strokeWidth="1" />
+                    </pattern>
+                </defs>
+
+                {/* Faint city grid underneath */}
+                <rect width="100%" height="100%" fill="url(#road-grid)" />
+
                 <style>{`
-                    @keyframes drawPath {
-                        0%   { stroke-dashoffset: var(--path-len); opacity: 0.3; }
-                        50%  { stroke-dashoffset: 0; opacity: 1; }
-                        100% { stroke-dashoffset: calc(var(--path-len) * -1); opacity: 0.3; }
+                    @keyframes road-dash-scroll {
+                        to { stroke-dashoffset: -40; }
                     }
-                    @media (max-width: 768px) {
-                        .road-path { stroke: rgba(245, 158, 11, 0.07) !important; }
-                        .road-dot  { fill: rgba(245, 158, 11, 0.35) !important; }
+                    @keyframes vehicle-pulse {
+                        0%, 100% { opacity: 0.5; }
+                        50% { opacity: 0.9; }
                     }
                 `}</style>
 
-                {paths.map((d, i) => (
-                    <path
-                        key={i}
-                        d={d}
-                        fill="none"
-                        stroke="rgba(245, 158, 11, 0.12)"
-                        strokeWidth={i % 2 === 0 ? 1.5 : 2}
-                        strokeLinecap="round"
-                        className="road-path"
-                        style={{
-                            '--path-len': pathLengths[i],
-                            strokeDasharray: pathLengths[i],
-                            strokeDashoffset: pathLengths[i],
-                            animation: `drawPath ${durations[i]}s ease-in-out ${delays[i]}s infinite alternate`,
-                        }}
-                    />
+                {/* Roads */}
+                {roads.map((road, i) => (
+                    <g key={`road-${i}`}>
+                        {/* Road surface (wide, very faint) */}
+                        <path
+                            d={road.d}
+                            fill="none"
+                            stroke="rgba(245, 158, 11, 0.04)"
+                            strokeWidth="18"
+                            strokeLinecap="round"
+                        />
+                        {/* Lane-marking dashes — animated scroll */}
+                        <path
+                            d={road.d}
+                            fill="none"
+                            stroke="rgba(245, 158, 11, 0.12)"
+                            strokeWidth="1.2"
+                            strokeLinecap="round"
+                            strokeDasharray="12 28"
+                            style={{
+                                animation: `road-dash-scroll ${3 + i * 0.5}s linear infinite`,
+                            }}
+                        />
+                    </g>
                 ))}
 
-                {/* GPS dots travelling along paths */}
-                {[0, 1, 2, 4].map((pathIdx, dotIdx) => (
-                    <circle key={`dot-${dotIdx}`} r="3" fill="rgba(245, 158, 11, 0.5)" className="road-dot">
-                        <animateMotion
-                            dur={`${durations[pathIdx] + 3}s`}
-                            repeatCount="indefinite"
-                            begin={`${delays[pathIdx] + 1}s`}
-                            path={paths[pathIdx]}
-                        />
-                    </circle>
+                {/* Vehicles */}
+                {vehicles.map((v, i) => {
+                    const isTruck = v.type === 'truck';
+                    return (
+                        <g key={`v-${i}`} style={{ animation: 'vehicle-pulse 3s ease-in-out infinite', animationDelay: `${v.del}s` }}>
+                            {/* Vehicle body */}
+                            <rect
+                                x={isTruck ? -10 : -6}
+                                y="-3"
+                                width={isTruck ? 20 : 12}
+                                height="6"
+                                rx="2"
+                                fill={isTruck ? 'rgba(245, 158, 11, 0.35)' : 'rgba(255, 255, 255, 0.25)'}
+                            >
+                                <animateMotion
+                                    dur={`${v.dur}s`}
+                                    repeatCount="indefinite"
+                                    begin={`${v.del}s`}
+                                    rotate="auto"
+                                    path={roads[v.pi].d}
+                                />
+                            </rect>
+                            {/* Headlight glow */}
+                            <circle
+                                r="4"
+                                fill="rgba(245, 158, 11, 0.25)"
+                                filter="url(#headlight-glow)"
+                            >
+                                <animateMotion
+                                    dur={`${v.dur}s`}
+                                    repeatCount="indefinite"
+                                    begin={`${v.del}s`}
+                                    rotate="auto"
+                                    path={roads[v.pi].d}
+                                />
+                            </circle>
+                        </g>
+                    );
+                })}
+
+                {/* Subtle intersection crosshairs */}
+                {[
+                    { x: 640, y: 380 }, { x: 1150, y: 280 },
+                    { x: 380, y: 680 }, { x: 900, y: 520 },
+                ].map((pt, i) => (
+                    <g key={`int-${i}`} opacity="0.08">
+                        <line x1={pt.x - 20} y1={pt.y} x2={pt.x + 20} y2={pt.y} stroke="#F59E0B" strokeWidth="1" />
+                        <line x1={pt.x} y1={pt.y - 20} x2={pt.x} y2={pt.y + 20} stroke="#F59E0B" strokeWidth="1" />
+                        <circle cx={pt.x} cy={pt.y} r="3" fill="none" stroke="#F59E0B" strokeWidth="0.8" />
+                    </g>
                 ))}
             </svg>
         </div>
@@ -450,8 +795,116 @@ export default function LandingPage() {
                 SECTION 2: HERO
                ═══════════════════════════════════════ */}
             <section className="relative z-[1] pt-28 sm:pt-36 lg:pt-40 pb-16 lg:pb-24 px-5 sm:px-8 overflow-hidden">
-                {/* Background effects */}
-                <div className="absolute inset-0 pointer-events-none">
+                {/* Background effects — road scene + gradient blobs */}
+                <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                    {/* === Hero road scene SVG === */}
+                    <svg
+                        viewBox="0 0 1200 700"
+                        preserveAspectRatio="xMidYMid slice"
+                        className="absolute inset-0 w-full h-full"
+                        xmlns="http://www.w3.org/2000/svg"
+                        style={{ opacity: 0.55 }}
+                    >
+                        <defs>
+                            <filter id="hero-glow" x="-50%" y="-50%" width="200%" height="200%">
+                                <feGaussianBlur stdDeviation="4" result="b" />
+                                <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+                            </filter>
+                            <linearGradient id="road-fade-l" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0%" stopColor="#0D1117" stopOpacity="1" />
+                                <stop offset="15%" stopColor="#0D1117" stopOpacity="0" />
+                                <stop offset="85%" stopColor="#0D1117" stopOpacity="0" />
+                                <stop offset="100%" stopColor="#0D1117" stopOpacity="1" />
+                            </linearGradient>
+                        </defs>
+
+                        <style>{`
+                            @keyframes hero-dash { to { stroke-dashoffset: -60; } }
+                            @keyframes hero-pin-bounce {
+                                0%, 100% { transform: translateY(0); }
+                                50% { transform: translateY(-6px); }
+                            }
+                            @keyframes hero-ring-pulse {
+                                0% { r: 6; opacity: 0.6; }
+                                100% { r: 22; opacity: 0; }
+                            }
+                        `}</style>
+
+                        {/* Main diagonal highway — wide road surface */}
+                        <path d="M -50 520 C 200 480, 400 400, 600 350 S 900 250, 1250 180"
+                            fill="none" stroke="rgba(245,158,11,0.06)" strokeWidth="60" strokeLinecap="round" />
+                        {/* Road edge lines */}
+                        <path d="M -50 490 C 200 450, 400 370, 600 320 S 900 220, 1250 150"
+                            fill="none" stroke="rgba(245,158,11,0.08)" strokeWidth="1" strokeLinecap="round" />
+                        <path d="M -50 550 C 200 510, 400 430, 600 380 S 900 280, 1250 210"
+                            fill="none" stroke="rgba(245,158,11,0.08)" strokeWidth="1" strokeLinecap="round" />
+                        {/* Center lane dashes — animated */}
+                        <path d="M -50 520 C 200 480, 400 400, 600 350 S 900 250, 1250 180"
+                            fill="none" stroke="rgba(245,158,11,0.15)" strokeWidth="1.5" strokeLinecap="round"
+                            strokeDasharray="16 32"
+                            style={{ animation: 'hero-dash 2.5s linear infinite' }} />
+
+                        {/* Secondary road crossing diagonally */}
+                        <path d="M 350 -20 C 380 150, 500 350, 650 550 S 780 650, 850 750"
+                            fill="none" stroke="rgba(245,158,11,0.035)" strokeWidth="40" strokeLinecap="round" />
+                        <path d="M 350 -20 C 380 150, 500 350, 650 550 S 780 650, 850 750"
+                            fill="none" stroke="rgba(245,158,11,0.1)" strokeWidth="1" strokeLinecap="round"
+                            strokeDasharray="12 28"
+                            style={{ animation: 'hero-dash 3s linear infinite' }} />
+
+                        {/* Vehicles on main highway */}
+                        {[
+                            { dur: 10, del: 0, w: 14, h: 7, color: 'rgba(255,255,255,0.3)' },
+                            { dur: 13, del: 3, w: 22, h: 8, color: 'rgba(245,158,11,0.4)' },
+                            { dur: 11, del: 6, w: 14, h: 7, color: 'rgba(255,255,255,0.25)' },
+                            { dur: 15, del: 1, w: 14, h: 7, color: 'rgba(255,255,255,0.2)' },
+                            { dur: 12, del: 8, w: 14, h: 7, color: 'rgba(245,158,11,0.3)' },
+                        ].map((v, i) => (
+                            <g key={`hv-${i}`}>
+                                <rect x={-v.w / 2} y={-v.h / 2} width={v.w} height={v.h} rx="3" fill={v.color}>
+                                    <animateMotion dur={`${v.dur}s`} repeatCount="indefinite" begin={`${v.del}s`} rotate="auto"
+                                        path="M -50 520 C 200 480, 400 400, 600 350 S 900 250, 1250 180" />
+                                </rect>
+                                <circle r="5" fill="rgba(245,158,11,0.2)" filter="url(#hero-glow)">
+                                    <animateMotion dur={`${v.dur}s`} repeatCount="indefinite" begin={`${v.del}s`} rotate="auto"
+                                        path="M -50 520 C 200 480, 400 400, 600 350 S 900 250, 1250 180" />
+                                </circle>
+                            </g>
+                        ))}
+
+                        {/* Vehicle on secondary road */}
+                        <g>
+                            <rect x="-6" y="-3" width="12" height="6" rx="2" fill="rgba(255,255,255,0.18)">
+                                <animateMotion dur="14s" repeatCount="indefinite" begin="2s" rotate="auto"
+                                    path="M 350 -20 C 380 150, 500 350, 650 550 S 780 650, 850 750" />
+                            </rect>
+                        </g>
+
+                        {/* Map pin markers at destinations */}
+                        {[
+                            { cx: 250, cy: 470 },
+                            { cx: 620, cy: 340 },
+                            { cx: 1000, cy: 230 },
+                        ].map((pin, i) => (
+                            <g key={`pin-${i}`} style={{ animation: `hero-pin-bounce 3s ease-in-out ${i * 0.8}s infinite` }}>
+                                {/* Pin body */}
+                                <path d={`M ${pin.cx} ${pin.cy - 18} 
+                                          a 8 8 0 1 1 0 0.01 Z 
+                                          M ${pin.cx} ${pin.cy - 4} l -4 -8 h 8 Z`}
+                                    fill="rgba(245,158,11,0.4)" stroke="rgba(245,158,11,0.6)" strokeWidth="0.8" />
+                                {/* Pulse ring */}
+                                <circle cx={pin.cx} cy={pin.cy} fill="none" stroke="rgba(245,158,11,0.3)" strokeWidth="1">
+                                    <animate attributeName="r" values="6;22" dur="2.5s" begin={`${i * 0.8}s`} repeatCount="indefinite" />
+                                    <animate attributeName="opacity" values="0.5;0" dur="2.5s" begin={`${i * 0.8}s`} repeatCount="indefinite" />
+                                </circle>
+                            </g>
+                        ))}
+
+                        {/* Fade edges so it blends into page */}
+                        <rect width="100%" height="100%" fill="url(#road-fade-l)" />
+                    </svg>
+
+                    {/* Original gradient ambient blobs (on top for depth) */}
                     <div className="absolute top-20 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-amber-500/[0.06] rounded-full blur-[120px]" />
                     <div className="absolute top-40 left-1/4 w-[400px] h-[400px] bg-amber-600/[0.04] rounded-full blur-[100px]" />
                     <div className="absolute top-60 right-1/4 w-[300px] h-[300px] bg-amber-400/[0.03] rounded-full blur-[80px]" />
@@ -577,9 +1030,9 @@ export default function LandingPage() {
                         </div>
 
                         {[
-                            { step: '01', icon: <MessageSquare className="w-6 h-6" />, title: 'Describe your route', desc: 'Type or speak where you need to go. No exact addresses, no postcodes. Just plain English.' },
-                            { step: '02', icon: <Brain className="w-6 h-6" />, title: 'Agent resolves stops', desc: 'The LangChain ReAct agent geocodes each stop, checks your semantic memory for saved locations, and confirms the route.' },
-                            { step: '03', icon: <Navigation className="w-6 h-6" />, title: 'Launch navigation', desc: 'One tap opens Google Maps or Apple Maps with every stop pre-loaded in the correct order.' },
+                            { step: '01', icon: <MessageSquare className="w-6 h-6" />, title: 'Describe your route', anim: <StepOneAnimation /> },
+                            { step: '02', icon: <Brain className="w-6 h-6" />, title: 'Agent resolves stops', anim: <StepTwoAnimation /> },
+                            { step: '03', icon: <Navigation className="w-6 h-6" />, title: 'Launch navigation', anim: <StepThreeAnimation /> },
                         ].map((item, i) => (
                             <RevealOnScroll key={item.step} delay={i * 180}>
                                 <div className="relative text-center">
@@ -588,7 +1041,7 @@ export default function LandingPage() {
                                         <div className="text-amber-400">{item.icon}</div>
                                     </div>
                                     <h3 className="text-white font-bold text-[18px] mb-3">{item.title}</h3>
-                                    <p className="text-[#94A3B8] text-[14px] leading-relaxed max-w-[280px] mx-auto">{item.desc}</p>
+                                    {item.anim}
                                 </div>
                             </RevealOnScroll>
                         ))}
@@ -598,9 +1051,9 @@ export default function LandingPage() {
                     <div className="md:hidden space-y-8 relative">
                         <div className="absolute top-0 bottom-0 left-[39px] w-[2px] border-l-2 border-dashed border-amber-500/20" />
                         {[
-                            { step: '01', icon: <MessageSquare className="w-5 h-5" />, title: 'Describe your route', desc: 'Type or speak where you need to go. No exact addresses, no postcodes. Just plain English.' },
-                            { step: '02', icon: <Brain className="w-5 h-5" />, title: 'Agent resolves stops', desc: 'The LangChain ReAct agent geocodes each stop, checks your semantic memory for saved locations, and confirms the route.' },
-                            { step: '03', icon: <Navigation className="w-5 h-5" />, title: 'Launch navigation', desc: 'One tap opens Google Maps or Apple Maps with every stop pre-loaded in the correct order.' },
+                            { step: '01', icon: <MessageSquare className="w-5 h-5" />, title: 'Describe your route', anim: <StepOneAnimation /> },
+                            { step: '02', icon: <Brain className="w-5 h-5" />, title: 'Agent resolves stops', anim: <StepTwoAnimation /> },
+                            { step: '03', icon: <Navigation className="w-5 h-5" />, title: 'Launch navigation', anim: <StepThreeAnimation /> },
                         ].map((item, i) => (
                             <RevealOnScroll key={item.step} delay={i * 120}>
                                 <div className="flex gap-5 items-start">
@@ -608,9 +1061,9 @@ export default function LandingPage() {
                                         <span className="text-[#F59E0B] text-lg font-extrabold">{item.step}</span>
                                         <div className="text-amber-400">{item.icon}</div>
                                     </div>
-                                    <div className="pt-2">
+                                    <div className="pt-2 flex-1">
                                         <h3 className="text-white font-bold text-[16px] mb-2">{item.title}</h3>
-                                        <p className="text-[#94A3B8] text-[14px] leading-relaxed">{item.desc}</p>
+                                        {item.anim}
                                     </div>
                                 </div>
                             </RevealOnScroll>
