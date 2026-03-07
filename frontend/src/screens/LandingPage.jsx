@@ -749,23 +749,27 @@ export default function LandingPage() {
             {/* ═══════════════════════════════════════
                 SECTION 1: NAVBAR
                ═══════════════════════════════════════ */}
-            <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-[#0D1117]/85 backdrop-blur-xl shadow-lg' : 'bg-transparent'}`} style={{ borderBottom: '1px solid rgba(245,158,11,0.2)', paddingTop: 'env(safe-area-inset-top)' }}>
-                <div className="max-w-6xl mx-auto px-5 sm:px-8 h-16 sm:h-20 flex items-center justify-between">
+            <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'bg-[#0D1117]/80 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.3)]' : 'bg-transparent'}`} style={{ borderBottom: scrolled ? '1px solid rgba(245,158,11,0.12)' : '1px solid transparent', paddingTop: 'env(safe-area-inset-top)' }}>
+                <div className="max-w-6xl mx-auto px-5 sm:px-8 h-16 sm:h-[72px] flex items-center justify-between">
                     {/* Logo */}
-                    <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="flex items-center gap-2.5 group">
-                        <div className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center border border-white/[0.1] shadow-lg shadow-amber-500/20 bg-white/[0.03] group-hover:scale-105 transition-transform duration-300">
+                    <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="flex items-center gap-2.5 group shrink-0">
+                        <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center border border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.15)] bg-[#1E293B]/80 group-hover:scale-105 group-hover:border-amber-500/40 transition-all duration-300">
                             <img src="/logo3_nobg.png" alt="Routigo" className="w-[140%] h-[140%] max-w-none object-cover rounded-full" />
                         </div>
-                        <span className="text-[#F59E0B] font-bold text-xl tracking-tight">Routigo</span>
+                        <span className="text-[#F59E0B] font-bold text-lg tracking-tight">Routigo</span>
                     </a>
 
-                    {/* Desktop nav links */}
-                    <div className="hidden md:flex items-center gap-6">
+                    {/* Desktop — Centered glass pill nav */}
+                    <div className="hidden md:flex items-center gap-1 px-2 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.07] backdrop-blur-md shadow-[0_2px_20px_rgba(0,0,0,0.15)]">
                         {NAV_LINKS.map(link => (
-                            <a key={link.href} href={link.href} className="text-white/50 hover:text-white text-[13px] font-medium transition-colors">{link.label}</a>
+                            <a key={link.href} href={link.href} className="relative px-4 py-2 text-white/55 hover:text-white text-[13px] font-medium transition-all duration-200 rounded-full hover:bg-white/[0.06] group" style={{ minWidth: 0, minHeight: 0 }}>
+                                {link.label}
+                                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-0 h-[2px] bg-amber-400 rounded-full group-hover:w-4 transition-all duration-300" />
+                            </a>
                         ))}
-                        <a href="/login" className="text-white/60 hover:text-white text-[13px] font-medium transition-colors px-3 py-2">Sign In</a>
-                        <a href="/signup" className="px-5 py-2.5 rounded-xl bg-[#F59E0B] text-[#0D1117] text-[13px] font-bold hover:brightness-110 transition-all active:scale-95 shadow-lg shadow-amber-500/20">Get Started Free</a>
+                        <div className="w-px h-5 bg-white/[0.1] mx-1" />
+                        <a href="/login" className="px-4 py-2 text-white/55 hover:text-white text-[13px] font-medium transition-all duration-200 rounded-full hover:bg-white/[0.06]" style={{ minWidth: 0, minHeight: 0 }}>Sign In</a>
+                        <a href="/signup" className="ml-1 px-5 py-2 rounded-full bg-[#F59E0B] text-[#0D1117] text-[13px] font-bold hover:bg-amber-400 transition-all duration-200 active:scale-95 shadow-[0_0_20px_rgba(245,158,11,0.25)]" style={{ minWidth: 0, minHeight: 0 }}>Get Started</a>
                     </div>
 
                     {/* Mobile hamburger */}
@@ -969,8 +973,16 @@ export default function LandingPage() {
             {/* ═══════════════════════════════════════
                 SECTION 3: SOCIAL PROOF BAR
                ═══════════════════════════════════════ */}
-            <section className="relative z-[1] py-8 px-5 sm:px-8 border-y border-white/[0.04] bg-white/[0.01]">
-                <div className="max-w-6xl mx-auto">
+            <section className="relative z-[1] py-8 px-5 sm:px-8 border-y border-white/[0.04] bg-white/[0.01] overflow-hidden">
+                {/* Road lane divider animation */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="none" viewBox="0 0 1200 60" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.4 }}>
+                    <line x1="0" y1="30" x2="1200" y2="30" stroke="rgba(245,158,11,0.08)" strokeWidth="40" />
+                    <line x1="0" y1="30" x2="1200" y2="30" stroke="rgba(245,158,11,0.15)" strokeWidth="1" strokeDasharray="20 30" style={{ animation: 'hero-dash 2s linear infinite' }} />
+                    <rect x="-8" y="26" width="16" height="8" rx="3" fill="rgba(245,158,11,0.3)">
+                        <animateMotion dur="6s" repeatCount="indefinite" path="M 0 30 L 1200 30" />
+                    </rect>
+                </svg>
+                <div className="max-w-6xl mx-auto relative">
                     <div className="flex items-center gap-6 overflow-x-auto hide-scrollbar">
                         <span className="text-white/30 text-[12px] font-medium tracking-wider uppercase whitespace-nowrap shrink-0">Built with</span>
                         <div className="w-px h-4 bg-white/10 shrink-0" />
@@ -987,8 +999,28 @@ export default function LandingPage() {
             {/* ═══════════════════════════════════════
                 SECTION 4: METRICS
                ═══════════════════════════════════════ */}
-            <section className="py-20 lg:py-28 px-5 sm:px-8 relative z-[1]">
+            <section className="py-20 lg:py-28 px-5 sm:px-8 relative z-[1] overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-amber-500/[0.02] to-transparent pointer-events-none" />
+                {/* Speedometer arcs + highway */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="xMidYMid slice" viewBox="0 0 1200 500" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.3 }}>
+                    <path d="M -50 400 C 200 370, 450 300, 650 320 S 950 250, 1250 280" fill="none" stroke="rgba(245,158,11,0.06)" strokeWidth="50" strokeLinecap="round" />
+                    <path d="M -50 400 C 200 370, 450 300, 650 320 S 950 250, 1250 280" fill="none" stroke="rgba(245,158,11,0.12)" strokeWidth="1.2" strokeDasharray="14 28" style={{ animation: 'hero-dash 3s linear infinite' }} />
+                    <rect x="-7" y="-4" width="14" height="8" rx="3" fill="rgba(255,255,255,0.2)">
+                        <animateMotion dur="12s" repeatCount="indefinite" rotate="auto" path="M -50 400 C 200 370, 450 300, 650 320 S 950 250, 1250 280" />
+                    </rect>
+                    <circle r="4" fill="rgba(245,158,11,0.2)">
+                        <animateMotion dur="12s" repeatCount="indefinite" rotate="auto" path="M -50 400 C 200 370, 450 300, 650 320 S 950 250, 1250 280" />
+                    </circle>
+                    {/* Speedometer arcs behind each card */}
+                    {[200, 600, 1000].map((x, i) => (
+                        <g key={`arc-${i}`} opacity="0.15">
+                            <path d={`M ${x - 60} 180 A 60 60 0 0 1 ${x + 60} 180`} fill="none" stroke="#F59E0B" strokeWidth="1.5" strokeLinecap="round" />
+                            <line x1={x} y1={180} x2={x} y2={130} stroke="#F59E0B" strokeWidth="1" strokeLinecap="round">
+                                <animateTransform attributeName="transform" type="rotate" from={`-60 ${x} 180`} to={`60 ${x} 180`} dur={`${3 + i}s`} repeatCount="indefinite" />
+                            </line>
+                        </g>
+                    ))}
+                </svg>
                 <div className="max-w-5xl mx-auto relative">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
                         {[
@@ -1015,7 +1047,26 @@ export default function LandingPage() {
             {/* ═══════════════════════════════════════
                 SECTION 5: HOW IT WORKS
                ═══════════════════════════════════════ */}
-            <section id="how-it-works" className="py-20 lg:py-28 px-5 sm:px-8 relative z-[1] bg-[#0F172A]/50">
+            <section id="how-it-works" className="py-20 lg:py-28 px-5 sm:px-8 relative z-[1] bg-[#0F172A]/50 overflow-hidden">
+                {/* Winding road with 3 stop pins */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="xMidYMid slice" viewBox="0 0 1200 500" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.25 }}>
+                    <path d="M -30 450 C 150 350, 300 200, 500 250 S 700 400, 900 300 S 1100 150, 1250 200" fill="none" stroke="rgba(245,158,11,0.05)" strokeWidth="44" strokeLinecap="round" />
+                    <path d="M -30 450 C 150 350, 300 200, 500 250 S 700 400, 900 300 S 1100 150, 1250 200" fill="none" stroke="rgba(245,158,11,0.12)" strokeWidth="1.2" strokeDasharray="16 30" style={{ animation: 'hero-dash 3s linear infinite' }} />
+                    {/* 3 map pins along the road */}
+                    {[{ x: 250, y: 240 }, { x: 600, y: 340 }, { x: 950, y: 220 }].map((p, i) => (
+                        <g key={`hiw-pin-${i}`}>
+                            <circle cx={p.x} cy={p.y} r="8" fill="rgba(245,158,11,0.15)" stroke="rgba(245,158,11,0.3)" strokeWidth="1" />
+                            <text x={p.x} y={p.y + 4} textAnchor="middle" fill="rgba(245,158,11,0.5)" fontSize="10" fontWeight="bold">{i + 1}</text>
+                            <circle cx={p.x} cy={p.y} fill="none" stroke="rgba(245,158,11,0.2)" strokeWidth="0.8">
+                                <animate attributeName="r" values="8;20" dur="3s" begin={`${i * 1}s`} repeatCount="indefinite" />
+                                <animate attributeName="opacity" values="0.4;0" dur="3s" begin={`${i * 1}s`} repeatCount="indefinite" />
+                            </circle>
+                        </g>
+                    ))}
+                    <rect x="-6" y="-3" width="12" height="6" rx="2" fill="rgba(245,158,11,0.3)">
+                        <animateMotion dur="14s" repeatCount="indefinite" rotate="auto" path="M -30 450 C 150 350, 300 200, 500 250 S 700 400, 900 300 S 1100 150, 1250 200" />
+                    </rect>
+                </svg>
                 <div className="max-w-5xl mx-auto relative">
                     <RevealOnScroll className="text-center mb-16 lg:mb-20">
                         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 tracking-tight">How it works</h2>
@@ -1076,8 +1127,36 @@ export default function LandingPage() {
             {/* ═══════════════════════════════════════
                 SECTION 6: FEATURES (Bento Grid)
                ═══════════════════════════════════════ */}
-            <section id="features" className="py-20 lg:py-28 px-5 sm:px-8 relative z-[1]">
+            <section id="features" className="py-20 lg:py-28 px-5 sm:px-8 relative z-[1] overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-b from-[#0F172A]/50 to-transparent pointer-events-none" />
+                {/* GPS signal ripples + compass */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="xMidYMid slice" viewBox="0 0 1200 600" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.2 }}>
+                    {/* GPS ripples from two points */}
+                    {[{ x: 150, y: 120 }, { x: 1050, y: 480 }].map((p, i) => (
+                        <g key={`gps-${i}`}>
+                            {[0, 1, 2].map(r => (
+                                <circle key={r} cx={p.x} cy={p.y} fill="none" stroke="rgba(245,158,11,0.15)" strokeWidth="0.8">
+                                    <animate attributeName="r" values="10;80" dur="4s" begin={`${r * 1.3 + i * 2}s`} repeatCount="indefinite" />
+                                    <animate attributeName="opacity" values="0.4;0" dur="4s" begin={`${r * 1.3 + i * 2}s`} repeatCount="indefinite" />
+                                </circle>
+                            ))}
+                            <circle cx={p.x} cy={p.y} r="3" fill="rgba(245,158,11,0.4)" />
+                        </g>
+                    ))}
+                    {/* Compass rose */}
+                    <g opacity="0.12" transform="translate(600,300)">
+                        <circle r="45" fill="none" stroke="#F59E0B" strokeWidth="1" />
+                        <circle r="35" fill="none" stroke="#F59E0B" strokeWidth="0.5" strokeDasharray="4 8" />
+                        <line x1="0" y1="-50" x2="0" y2="50" stroke="#F59E0B" strokeWidth="0.8" />
+                        <line x1="-50" y1="0" x2="50" y2="0" stroke="#F59E0B" strokeWidth="0.8" />
+                        <polygon points="0,-48 -4,-38 4,-38" fill="#F59E0B" />
+                        <text x="0" y="-54" textAnchor="middle" fill="#F59E0B" fontSize="8" fontWeight="bold">N</text>
+                        <animateTransform attributeName="transform" type="rotate" from="0 600 300" to="360 600 300" dur="60s" repeatCount="indefinite" />
+                    </g>
+                    {/* Connecting road from How It Works */}
+                    <path d="M -30 80 C 200 120, 400 50, 600 100 S 900 160, 1250 80" fill="none" stroke="rgba(245,158,11,0.05)" strokeWidth="30" strokeLinecap="round" />
+                    <path d="M -30 80 C 200 120, 400 50, 600 100 S 900 160, 1250 80" fill="none" stroke="rgba(245,158,11,0.1)" strokeWidth="1" strokeDasharray="12 24" style={{ animation: 'hero-dash 3.5s linear infinite' }} />
+                </svg>
                 <div className="max-w-6xl mx-auto relative">
                     <RevealOnScroll className="text-center mb-16 lg:mb-20">
                         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 tracking-tight">Built for real-world drivers</h2>
@@ -1155,8 +1234,29 @@ export default function LandingPage() {
             {/* ═══════════════════════════════════════
                 SECTION 7: WHY WE BUILT ROUTIGO
                ═══════════════════════════════════════ */}
-            <section className="py-20 lg:py-28 px-5 sm:px-8 relative z-[1] bg-[#0F172A]/30 border-y border-white/[0.04]">
-                <div className="max-w-5xl mx-auto">
+            <section className="py-20 lg:py-28 px-5 sm:px-8 relative z-[1] bg-[#0F172A]/30 border-y border-white/[0.04] overflow-hidden">
+                {/* Fork-in-the-road — old way vs new way */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="xMidYMid slice" viewBox="0 0 1200 500" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.2 }}>
+                    {/* Main road leading to fork */}
+                    <path d="M -30 350 C 150 340, 300 320, 450 300" fill="none" stroke="rgba(245,158,11,0.06)" strokeWidth="40" strokeLinecap="round" />
+                    <path d="M -30 350 C 150 340, 300 320, 450 300" fill="none" stroke="rgba(245,158,11,0.12)" strokeWidth="1" strokeDasharray="14 26" style={{ animation: 'hero-dash 2.5s linear infinite' }} />
+                    {/* Old way (fades out — red tint) */}
+                    <path d="M 450 300 C 600 250, 750 200, 900 220 S 1100 280, 1250 250" fill="none" stroke="rgba(239,68,68,0.06)" strokeWidth="30" strokeLinecap="round" />
+                    <path d="M 450 300 C 600 250, 750 200, 900 220 S 1100 280, 1250 250" fill="none" stroke="rgba(239,68,68,0.1)" strokeWidth="0.8" strokeDasharray="10 20" />
+                    {/* New way (glowing amber) */}
+                    <path d="M 450 300 C 600 350, 750 420, 900 380 S 1100 320, 1250 340" fill="none" stroke="rgba(245,158,11,0.06)" strokeWidth="35" strokeLinecap="round" />
+                    <path d="M 450 300 C 600 350, 750 420, 900 380 S 1100 320, 1250 340" fill="none" stroke="rgba(245,158,11,0.15)" strokeWidth="1.2" strokeDasharray="14 26" style={{ animation: 'hero-dash 2.5s linear infinite' }} />
+                    {/* Vehicle on new way */}
+                    <rect x="-7" y="-3" width="14" height="6" rx="2" fill="rgba(245,158,11,0.35)">
+                        <animateMotion dur="10s" repeatCount="indefinite" rotate="auto" path="M -30 350 C 150 340, 300 320, 450 300 C 600 350, 750 420, 900 380 S 1100 320, 1250 340" />
+                    </rect>
+                    <circle r="4" fill="rgba(245,158,11,0.2)">
+                        <animateMotion dur="10s" repeatCount="indefinite" rotate="auto" path="M -30 350 C 150 340, 300 320, 450 300 C 600 350, 750 420, 900 380 S 1100 320, 1250 340" />
+                    </circle>
+                    {/* Fork label dots */}
+                    <circle cx="450" cy="300" r="5" fill="rgba(245,158,11,0.3)" />
+                </svg>
+                <div className="max-w-5xl mx-auto relative">
                     <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
                         {/* Left — Story text */}
                         <RevealOnScroll className="flex-1">
@@ -1212,8 +1312,22 @@ export default function LandingPage() {
             {/* ═══════════════════════════════════════
                 SECTION 8: FAQ
                ═══════════════════════════════════════ */}
-            <section id="faq" className="py-20 lg:py-28 px-5 sm:px-8 relative z-[1]">
-                <div className="max-w-3xl mx-auto">
+            <section id="faq" className="py-20 lg:py-28 px-5 sm:px-8 relative z-[1] overflow-hidden">
+                {/* Road sign posts */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="xMidYMid slice" viewBox="0 0 1200 600" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.12 }}>
+                    {/* Vertical road behind FAQ cards */}
+                    <path d="M 600 -20 C 580 150, 620 300, 600 450 S 580 550, 600 650" fill="none" stroke="rgba(245,158,11,0.06)" strokeWidth="40" />
+                    <path d="M 600 -20 C 580 150, 620 300, 600 450 S 580 550, 600 650" fill="none" stroke="rgba(245,158,11,0.15)" strokeWidth="1" strokeDasharray="14 28" style={{ animation: 'hero-dash 3s linear infinite' }} />
+                    {/* Road sign posts on the sides */}
+                    {[{ x: 100, y: 120, label: '?' }, { x: 1100, y: 280, label: '?' }, { x: 120, y: 440, label: '!' }].map((s, i) => (
+                        <g key={`sign-${i}`}>
+                            <line x1={s.x} y1={s.y} x2={s.x} y2={s.y + 40} stroke="rgba(245,158,11,0.3)" strokeWidth="2" />
+                            <rect x={s.x - 15} y={s.y - 15} width="30" height="25" rx="4" fill="rgba(245,158,11,0.08)" stroke="rgba(245,158,11,0.2)" strokeWidth="1" />
+                            <text x={s.x} y={s.y + 4} textAnchor="middle" fill="rgba(245,158,11,0.5)" fontSize="14" fontWeight="bold">{s.label}</text>
+                        </g>
+                    ))}
+                </svg>
+                <div className="max-w-3xl mx-auto relative">
                     <RevealOnScroll className="text-center mb-14">
                         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 tracking-tight">Questions?</h2>
                         <p className="text-base sm:text-lg" style={{ color: '#94A3B8' }}>Everything you need to know.</p>
@@ -1238,8 +1352,24 @@ export default function LandingPage() {
             {/* ═══════════════════════════════════════
                 SECTION 9: ROADMAP
                ═══════════════════════════════════════ */}
-            <section className="py-20 lg:py-28 px-5 sm:px-8 relative z-[1] bg-[#0F172A]/30">
-                <div className="max-w-5xl mx-auto">
+            <section className="py-20 lg:py-28 px-5 sm:px-8 relative z-[1] bg-[#0F172A]/30 overflow-hidden">
+                {/* Road with milestone markers */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="xMidYMid slice" viewBox="0 0 1200 500" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.2 }}>
+                    <path d="M -30 400 C 200 380, 400 350, 600 360 S 900 330, 1250 350" fill="none" stroke="rgba(245,158,11,0.05)" strokeWidth="44" strokeLinecap="round" />
+                    <path d="M -30 400 C 200 380, 400 350, 600 360 S 900 330, 1250 350" fill="none" stroke="rgba(245,158,11,0.12)" strokeWidth="1.2" strokeDasharray="16 30" style={{ animation: 'hero-dash 3s linear infinite' }} />
+                    {/* Milestone flags */}
+                    {[{ x: 200, y: 385 }, { x: 600, y: 358 }, { x: 1000, y: 342 }].map((m, i) => (
+                        <g key={`ms-${i}`}>
+                            <line x1={m.x} y1={m.y} x2={m.x} y2={m.y - 35} stroke="rgba(245,158,11,0.4)" strokeWidth="1.5" />
+                            <rect x={m.x} y={m.y - 35} width="18" height="12" rx="2" fill={i === 0 ? 'rgba(245,158,11,0.3)' : 'rgba(245,158,11,0.1)'} stroke="rgba(245,158,11,0.25)" strokeWidth="0.8" />
+                            <circle cx={m.x} cy={m.y} r="4" fill="rgba(245,158,11,0.2)" stroke="rgba(245,158,11,0.3)" strokeWidth="1" />
+                        </g>
+                    ))}
+                    <rect x="-6" y="-3" width="12" height="6" rx="2" fill="rgba(245,158,11,0.3)">
+                        <animateMotion dur="16s" repeatCount="indefinite" rotate="auto" path="M -30 400 C 200 380, 400 350, 600 360 S 900 330, 1250 350" />
+                    </rect>
+                </svg>
+                <div className="max-w-5xl mx-auto relative">
                     <RevealOnScroll className="text-center mb-14 lg:mb-20">
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[12px] font-medium mb-6">
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
@@ -1300,6 +1430,29 @@ export default function LandingPage() {
                 <div className="absolute inset-0 pointer-events-none">
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-amber-500/[0.08] rounded-full blur-[120px]" />
                 </div>
+                {/* Converging roads to destination */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="xMidYMid slice" viewBox="0 0 1200 400" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.2 }}>
+                    {/* Road from left */}
+                    <path d="M -30 300 C 150 280, 350 220, 600 200" fill="none" stroke="rgba(245,158,11,0.05)" strokeWidth="36" strokeLinecap="round" />
+                    <path d="M -30 300 C 150 280, 350 220, 600 200" fill="none" stroke="rgba(245,158,11,0.12)" strokeWidth="1" strokeDasharray="14 26" style={{ animation: 'hero-dash 2.5s linear infinite' }} />
+                    {/* Road from right */}
+                    <path d="M 1230 300 C 1050 280, 850 220, 600 200" fill="none" stroke="rgba(245,158,11,0.05)" strokeWidth="36" strokeLinecap="round" />
+                    <path d="M 1230 300 C 1050 280, 850 220, 600 200" fill="none" stroke="rgba(245,158,11,0.12)" strokeWidth="1" strokeDasharray="14 26" style={{ animation: 'hero-dash 2.5s linear infinite' }} />
+                    {/* Destination pin at convergence */}
+                    <circle cx="600" cy="200" r="10" fill="rgba(245,158,11,0.15)" stroke="rgba(245,158,11,0.4)" strokeWidth="1.5" />
+                    <circle cx="600" cy="200" r="4" fill="rgba(245,158,11,0.5)" />
+                    <circle cx="600" cy="200" fill="none" stroke="rgba(245,158,11,0.25)" strokeWidth="1">
+                        <animate attributeName="r" values="10;30" dur="3s" repeatCount="indefinite" />
+                        <animate attributeName="opacity" values="0.5;0" dur="3s" repeatCount="indefinite" />
+                    </circle>
+                    {/* Vehicles approaching from both sides */}
+                    <rect x="-6" y="-3" width="12" height="6" rx="2" fill="rgba(245,158,11,0.3)">
+                        <animateMotion dur="8s" repeatCount="indefinite" rotate="auto" path="M -30 300 C 150 280, 350 220, 600 200" />
+                    </rect>
+                    <rect x="-6" y="-3" width="12" height="6" rx="2" fill="rgba(255,255,255,0.2)">
+                        <animateMotion dur="9s" repeatCount="indefinite" begin="2s" rotate="auto" path="M 1230 300 C 1050 280, 850 220, 600 200" />
+                    </rect>
+                </svg>
 
                 <div className="max-w-2xl mx-auto text-center relative z-10">
                     <RevealOnScroll>
