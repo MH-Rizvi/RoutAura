@@ -404,7 +404,7 @@ export default function LandingPage() {
             {/* ═══════════════════════════════════════
                 SECTION 1: NAVBAR
                ═══════════════════════════════════════ */}
-            <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-[#0D1117]/85 backdrop-blur-xl shadow-lg' : 'bg-transparent'}`} style={{ borderBottom: '1px solid rgba(245,158,11,0.2)' }}>
+            <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-[#0D1117]/85 backdrop-blur-xl shadow-lg' : 'bg-transparent'}`} style={{ borderBottom: '1px solid rgba(245,158,11,0.2)', paddingTop: 'env(safe-area-inset-top)' }}>
                 <div className="max-w-6xl mx-auto px-5 sm:px-8 h-16 sm:h-20 flex items-center justify-between">
                     {/* Logo */}
                     <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="flex items-center gap-2.5 group">
