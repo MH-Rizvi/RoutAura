@@ -40,16 +40,24 @@ function TripRow({ trip, onDelete, onTap }) {
         : null;
 
     return (
-        <div className="relative overflow-hidden rounded-2xl w-full">
+        <div className="relative overflow-hidden rounded-2xl w-full group/card transition-all duration-300 hover:shadow-[0_8px_30px_rgba(245,158,11,0.15)] hover:-translate-y-1">
+            <div className="absolute inset-0 bg-accent/0 group-hover/card:bg-accent/5 transition-colors duration-500 rounded-2xl pointer-events-none z-0" />
+
             <div
                 className="absolute inset-0 bg-danger flex items-center justify-end pr-6 rounded-2xl transition-opacity duration-200"
                 style={{ opacity: offset > 0 ? 1 : 0 }}
             >
                 <span className="text-white font-bold text-sm">Delete</span>
             </div>
+
             <div
-                className="relative glass-card rounded-xl p-4 cursor-pointer flex items-center justify-between group"
-                style={{ transform: `translateX(-${offset}px)` }}
+                className="relative rounded-2xl p-5 cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-4 z-10 transition-colors border border-transparent group-hover/card:border-accent/40"
+                style={{
+                    transform: `translateX(-${offset}px)`,
+                    background: 'linear-gradient(135deg, rgba(20,26,45,0.6) 0%, rgba(13,17,23,0.8) 100%)',
+                    backdropFilter: 'blur(12px)',
+                    WebkitBackdropFilter: 'blur(12px)',
+                }}
                 onTouchStart={handleDragStart}
                 onTouchMove={handleDragMove}
                 onTouchEnd={handleDragEnd}
@@ -61,54 +69,50 @@ function TripRow({ trip, onDelete, onTap }) {
                 role="button"
                 tabIndex={0}
             >
-                <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-amber-400 to-amber-600 rounded-l-xl opacity-80" />
-                <div className="flex items-center gap-3 min-w-0 flex-1 pl-2">
-                    <div className="min-w-0">
-                        <h3 className="text-[17px] font-bold text-white truncate group-hover:text-accent transition-colors">{trip.name}</h3>
-                        <div className="flex items-center gap-2 text-[13px] text-text-secondary mt-1">
-                            <span className="px-2 py-0.5 rounded-md text-[13px]" style={{ background: 'rgba(30,41,59,0.6)', border: '1px solid rgba(255,255,255,0.06)' }}>{stopCount} stops</span>
-                            {lastUsed && <span className="text-text-muted">• {lastUsed}</span>}
-                        </div>
+                <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-amber-400 to-amber-600 rounded-l-2xl opacity-80 group-hover/card:opacity-100 transition-opacity" />
+
+                <div className="flex-1 min-w-0 pl-3">
+                    <h3 className="text-[20px] sm:text-[22px] font-bold text-white truncate drop-shadow-sm group-hover/card:text-accent transition-colors">
+                        {trip.name}
+                    </h3>
+                    <div className="flex items-center gap-3 text-[14px] text-white/50 mt-1.5 font-medium">
+                        <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/5 border border-white/10 text-white/80">
+                            {stopCount} stops
+                        </span>
+                        {lastUsed && <span>• {lastUsed}</span>}
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3 shrink-0">
-                    <div className="flex items-center gap-1.5 shrink-0">
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                if (!trip.stops || trip.stops.length < 2) return;
-                                useTripStore.getState().launchCurrentTrip(trip.id).catch(err => console.error(err));
-                                useToastStore.getState().showToast('Opening Apple Maps...', 'apple');
-                                const url = buildAppleMapsUrl(trip.stops);
-                                if (url) openMapLink(url);
-                            }}
-                            title="Open in Apple Maps"
-                            className="w-8 h-8 rounded-full flex items-center justify-center text-text-primary transition-all"
-                            style={{ background: 'rgba(30,41,59,0.5)', border: '1px solid rgba(255,255,255,0.08)' }}
-                        >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.05 2.53.81 3.19.81.79 0 2.21-1.01 3.84-.86 1.63.13 3.13.84 4.02 2.11-3.41 1.98-2.88 6.51.35 7.84-.79 1.83-2.09 3.85-3.4 5.07zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.32 2.28-1.9 4.2-3.74 4.25z" />
-                            </svg>
-                        </button>
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                if (!trip.stops || trip.stops.length < 2) return;
-                                useTripStore.getState().launchCurrentTrip(trip.id).catch(err => console.error(err));
-                                useToastStore.getState().showToast('Opening Google Maps...', 'google');
-                                const url = buildGoogleMapsUrl(trip.stops);
-                                if (url) openMapLink(url);
-                            }}
-                            title="Open in Google Maps"
-                            className="w-8 h-8 rounded-full flex items-center justify-center text-base transition-all cursor-pointer text-[#0D1117]"
-                            style={{ background: '#F59E0B', border: '1px solid rgba(245,158,11,0.7)', boxShadow: '0 0 10px rgba(245,158,11,0.3)' }}
-                        >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                                <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.748L12.545,10.239z" />
-                            </svg>
-                        </button>
+                {/* Visual Route Representation */}
+                {trip.stops && trip.stops.length >= 2 && (
+                    <div className="hidden md:flex items-center justify-center flex-1 px-6 opacity-50 group-hover/card:opacity-100 transition-opacity">
+                        <div className="w-2.5 h-2.5 rounded-full bg-accent relative z-10 shadow-[0_0_8px_rgba(245,158,11,0.8)] shrink-0" />
+                        <div className="h-[2px] w-12 bg-gradient-to-r from-accent to-white/20" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-white/40 shrink-0" />
+                        <div className="h-[2px] w-4 border-t border-dashed border-white/20" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-white/40 shrink-0" />
+                        <div className="h-[2px] w-12 bg-gradient-to-r from-white/20 to-emerald-400" />
+                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 relative z-10 shadow-[0_0_8px_rgba(52,211,153,0.8)] shrink-0" />
                     </div>
+                )}
+
+                <div className="flex items-center justify-end shrink-0 sm:pl-4 mt-2 sm:mt-0">
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (!trip.stops || trip.stops.length < 2) return;
+                            useTripStore.getState().launchCurrentTrip(trip.id).catch(err => console.error(err));
+                            useToastStore.getState().showToast('Launching Route...', 'google');
+                            const url = buildGoogleMapsUrl(trip.stops);
+                            if (url) openMapLink(url);
+                        }}
+                        title="Launch Route"
+                        className="px-6 py-3 rounded-xl flex items-center justify-center text-[14px] font-bold text-[#0D1117] transition-all hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:shadow-[0_0_25px_rgba(245,158,11,0.6)]"
+                        style={{ background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)', border: '1px solid rgba(255,255,255,0.2)' }}
+                    >
+                        Launch
+                        <svg className="ml-2 w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                    </button>
                 </div>
             </div>
         </div>
@@ -141,62 +145,76 @@ export default function TripsScreen() {
 
     return (
         <div className="min-h-full pb-6 flex flex-col animate-page-enter lg:px-8 lg:pt-6">
-            <Header
-                rightElement={
-                    <div className="flex flex-col items-end">
-                        <span className="text-text-primary text-[14px] font-bold tracking-tight">My Trips</span>
-                        <span className="text-accent text-[11px] font-mono tracking-widest">{trips.length} Total</span>
-                    </div>
-                }
-            />
+            <Header rightElement={null} />
 
-            <div className="px-4 sm:px-5 lg:px-8 mt-4 sm:mt-6 flex-1 pb-24 lg:max-w-4xl lg:mx-auto w-full">
-                <div className="mb-6 lg:max-w-xl"><SemanticSearchBar /></div>
+            <div className="px-4 sm:px-5 lg:px-8 mt-4 sm:mt-6 flex-1 pb-24 lg:max-w-6xl lg:mx-auto w-full">
+
+                {/* ── Page Header ── */}
+                <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-5 mb-8 animate-fade-up">
+                    <div>
+                        <h1 className="text-3xl sm:text-4xl font-extrabold text-white flex items-center gap-4 drop-shadow-md tracking-tight">
+                            <span className="p-3 rounded-2xl bg-accent/10 border border-accent/20 shadow-[0_0_20px_rgba(245,158,11,0.15)] flex items-center justify-center">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 3v18h18" /><path d="m19 9-5 5-4-4-3 3" /></svg>
+                            </span>
+                            My Trips
+                        </h1>
+                        <p className="text-text-muted text-[15px] mt-2 font-medium">Manage and access your saved routes.</p>
+                    </div>
+
+                    <button
+                        onClick={() => navigate('/chat')}
+                        className="px-6 py-3.5 rounded-2xl flex items-center justify-center text-[15px] font-bold text-[#0D1117] transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:shadow-[0_0_30px_rgba(245,158,11,0.6)] group shrink-0"
+                        style={{ background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)', border: '1px solid rgba(255,255,255,0.2)' }}
+                    >
+                        <span className="mr-2 text-xl font-black group-hover:rotate-90 transition-transform duration-300">+</span> New Route
+                    </button>
+                </div>
+
+                <div className="mb-8 lg:max-w-3xl animate-fade-up" style={{ animationDelay: '50ms' }}><SemanticSearchBar /></div>
 
                 {loading && displayTrips.length === 0 && (
-                    <div className="space-y-4">{[1, 2, 3].map(i => <div key={i} className="skeleton rounded-2xl h-24" />)}</div>
+                    <div className="space-y-5 lg:grid lg:grid-cols-2 lg:gap-5 lg:space-y-0">
+                        {[1, 2, 3, 4].map(i => (
+                            <div key={i} className="rounded-2xl h-[120px] bg-white/5 animate-pulse border border-white/10" style={{ backdropFilter: 'blur(12px)' }} />
+                        ))}
+                    </div>
                 )}
 
                 {!loading && displayTrips.length === 0 && (
-                    <div className="text-center py-20 animate-fade-up glass-panel rounded-3xl mt-10">
-                        <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 relative overflow-hidden" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', boxShadow: '0 0 20px rgba(245,158,11,0.1)' }}>
+                    <div className="text-center py-20 animate-fade-up rounded-3xl mt-10 transition-all border border-accent/20 shadow-[0_10px_40px_rgba(0,0,0,0.4)]" style={{ background: 'linear-gradient(180deg, rgba(20,26,45,0.4) 0%, rgba(13,17,23,0.8) 100%)', backdropFilter: 'blur(16px)' }}>
+                        <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 relative overflow-hidden" style={{ background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.2)', boxShadow: '0 0 30px rgba(245,158,11,0.15)' }}>
                             <div className="absolute inset-0 bg-accent/20 animate-ping rounded-full" />
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" className="relative z-10"><circle cx="12" cy="10" r="3" /><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 7 8 11.7z" /></svg>
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2.5" className="relative z-10"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
                         </div>
-                        <h3 className="text-lg font-bold text-white mb-1">{isSearching ? 'No routes found' : 'No saved routes'}</h3>
-                        <p className="text-text-muted text-sm px-8">{isSearching ? 'Try a different search term or ask naturally' : 'Your saved routes will appear here for easy access'}</p>
+                        <h3 className="text-2xl font-black text-white mb-2 drop-shadow-md">{isSearching ? 'No routes found' : 'No saved routes yet'}</h3>
+                        <p className="text-text-muted text-[15px] max-w-sm mx-auto">{isSearching ? 'Try adjusting your search terms.' : 'Your completed routes will appear here for easy access. Chat with the AI to map something new!'}</p>
                     </div>
                 )}
 
                 {isSearching && displayTrips.length > 0 && (
-                    <div className="mb-4 flex items-center justify-between">
-                        <h2 className="text-sm font-bold text-white">Search Results</h2>
-                        <span className="text-xs text-accent bg-accent/10 px-2 py-1 rounded-md font-mono">{displayTrips.length} Found</span>
+                    <div className="mb-6 flex items-center justify-between animate-fade-up">
+                        <h2 className="text-[14px] font-bold text-white tracking-wide">Search Results</h2>
+                        <span className="text-xs text-accent bg-accent/10 border border-accent/20 px-3 py-1.5 rounded-lg font-mono font-bold">{displayTrips.length} Found</span>
                     </div>
                 )}
 
                 {!isSearching && displayTrips.length > 0 && tripsThisWeek.length > 0 && (
-                    <div className="mb-6 animate-fade-up">
-                        <h2 className="text-xs font-bold text-text-muted uppercase tracking-widest mb-3 flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-success animate-pulse" />
+                    <div className="mb-10 animate-fade-up">
+                        <h2 className="text-[13px] font-black text-white/50 uppercase tracking-[0.2em] mb-4 flex items-center gap-3">
+                            <span className="flex w-2.5 h-2.5 relative">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full w-2.5 h-2.5 bg-success shadow-[0_0_8px_rgba(52,211,153,0.8)]"></span>
+                            </span>
                             Active This Week
                         </h2>
-                        <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
+                        <div className="space-y-4 xl:grid xl:grid-cols-2 xl:gap-5 xl:space-y-0">
                             {tripsThisWeek.map((trip, i) => (
-                                <div key={trip.id} className="animate-fade-up" style={{ animationDelay: `${i * 40}ms` }}>
+                                <div key={trip.id} className="animate-fade-up" style={{ animationDelay: `${i * 50}ms` }}>
                                     <TripRow trip={trip} onDelete={async (id) => {
                                         const deletedData = removeTripOptimistic(id);
                                         let isUndoing = false;
-                                        useToastStore.getState().showToast('Trip deleted', 'success', {
-                                            label: 'Undo',
-                                            onClick: () => {
-                                                isUndoing = true;
-                                                undoRemoveTrip(deletedData);
-                                            }
-                                        }, 5000);
-                                        setTimeout(() => {
-                                            if (!isUndoing) commitRemoveTrip(id);
-                                        }, 5000);
+                                        useToastStore.getState().showToast('Trip deleted', 'success', { label: 'Undo', onClick: () => { isUndoing = true; undoRemoveTrip(deletedData); } }, 5000);
+                                        setTimeout(() => { if (!isUndoing) commitRemoveTrip(id); }, 5000);
                                     }} onTap={(id) => navigate(`/trips/${id}`)} />
                                 </div>
                             ))}
@@ -207,27 +225,22 @@ export default function TripsScreen() {
                 {(isSearching || olderTrips.length > 0) && displayTrips.length > 0 && (
                     <div className="animate-fade-up" style={{ animationDelay: '100ms' }}>
                         {!isSearching && tripsThisWeek.length > 0 && (
-                            <h2 className="text-xs font-bold text-text-muted uppercase tracking-widest mb-3 mt-8 flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-border-hl" />
-                                Older Routes
+                            <div className="w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent my-8" />
+                        )}
+                        {!isSearching && (
+                            <h2 className="text-[13px] font-black text-white/50 uppercase tracking-[0.2em] mb-4 flex items-center gap-3">
+                                <span className="w-2.5 h-2.5 rounded-full bg-border-hl border border-white/20" />
+                                All Saved Routes
                             </h2>
                         )}
-                        <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
+                        <div className="space-y-4 xl:grid xl:grid-cols-2 xl:gap-5 xl:space-y-0">
                             {(isSearching ? displayTrips : olderTrips).map((trip, i) => (
-                                <div key={trip.id} className="animate-fade-up" style={{ animationDelay: `${(tripsThisWeek.length + i) * 40}ms` }}>
+                                <div key={trip.id} className="animate-fade-up" style={{ animationDelay: `${(tripsThisWeek.length + i) * 30}ms` }}>
                                     <TripRow trip={trip} onDelete={async (id) => {
                                         const deletedData = removeTripOptimistic(id);
                                         let isUndoing = false;
-                                        useToastStore.getState().showToast('Trip deleted', 'success', {
-                                            label: 'Undo',
-                                            onClick: () => {
-                                                isUndoing = true;
-                                                undoRemoveTrip(deletedData);
-                                            }
-                                        }, 5000);
-                                        setTimeout(() => {
-                                            if (!isUndoing) commitRemoveTrip(id);
-                                        }, 5000);
+                                        useToastStore.getState().showToast('Trip deleted', 'success', { label: 'Undo', onClick: () => { isUndoing = true; undoRemoveTrip(deletedData); } }, 5000);
+                                        setTimeout(() => { if (!isUndoing) commitRemoveTrip(id); }, 5000);
                                     }} onTap={(id) => navigate(`/trips/${id}`)} />
                                 </div>
                             ))}
@@ -236,9 +249,9 @@ export default function TripsScreen() {
                 )}
 
                 {!isSearching && trips.length > 0 && (
-                    <div className="flex justify-center mt-10 mb-4 opacity-70 lg:hidden">
-                        <p className="text-xs font-mono text-white flex items-center gap-2 px-4 py-2 rounded-full" style={{ background: 'rgba(30,41,59,0.5)', border: '1px solid rgba(255,255,255,0.06)', boxShadow: '0 4px 15px rgba(0,0,0,0.3)' }}>
-                            <span className="tracking-widest capitalize font-bold">Swipe left on a card to delete</span>
+                    <div className="flex justify-center mt-12 mb-4 opacity-60 lg:hidden pointer-events-none">
+                        <p className="text-[11px] font-mono text-white flex items-center gap-2 px-5 py-2.5 rounded-full" style={{ background: 'rgba(30,41,59,0.5)', border: '1px solid rgba(255,255,255,0.06)', backdropFilter: 'blur(8px)' }}>
+                            <span className="tracking-[0.1em] font-medium uppercase">Swipe left on a card to delete</span>
                         </p>
                     </div>
                 )}
