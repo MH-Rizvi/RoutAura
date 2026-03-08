@@ -47,6 +47,10 @@ export default function TripDetailScreen() {
         if (!currentTrip) return;
         setDeleting(true);
         await removeTrip(currentTrip.id);
+        // Force-refresh all stores so Home/History don't show stale data
+        useTripStore.getState().clearCurrentTrip();
+        useTripStore.getState().fetchTrips();
+        useTripStore.getState().fetchHistory();
         setDeleting(false);
         useToastStore.getState().showToast('Trip deleted', 'success');
         navigate('/trips');

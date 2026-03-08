@@ -300,3 +300,63 @@ Thus, logging in actively overwrote the frontend's Zustand state with a `User` o
 1. **Endpoint Parity:** Updated the `/login` route in `backend/app/routers/auth.py` to faithfully extract and include `first_name`, `last_name`, and `birthday` from the `UserProfile` database row into the returned `user` dictionary.
 2. **Signup Parity:** Also added the missing `birthday` field to the payload returned by the `/signup` route.
 Now, the `User` object passed to the frontend is perfectly identical whether it comes from a fresh Login, a Signup, or a background Hydration (`auth/me`), ensuring the Account screen always has the complete data immediately.
+
+## Issue 19: "Cannot Validate Credentials" on All API Calls (Production)
+**Phase:** Core Authentication / Production
+**Date Identified:** March 7, 2026
+**Severity:** CRITICAL (App Completely Unusable)
+
+### Description
+After deploying to production (Railway), every authenticated API call — including chat, trips, and history — returned "Could not validate credentials." The frontend's Axios interceptor correctly attached the `Bearer` token, but the backend rejected it.
+
+### Root Cause Analysis
+`backend/app/auth.py` was using `supabase.auth.get_user(token)`, which makes a remote HTTP POST to Supabase's GoTrue server to validate the JWT. This remote call was intermittently rejected by the Supabase server, especially under latency or rate limits on the Railway deployment. The Issue 15 fix (local JWT decode) was planned but `auth.py` still contained the remote call.
+
+### Resolution Implemented
+1. **Full Local JWT Verification:** Rewrote `auth.py` entirely. Replaced `supabase.auth.get_user(token)` with `jose.jwt.decode()` using the `JWT_SECRET` environment variable and `HS256` algorithm.
+2. **Config Binding:** Updated `config.py` to bind `jwt_secret` to the `JWT_SECRET` env var via `Field(env="JWT_SECRET")`.
+3. **Lightweight AuthUser Class:** Created a minimal `AuthUser` dataclass with `id` and `email` fields, replacing the heavy Supabase User object. Zero network calls for auth validation.
+
+## Issue 20: Missing Send Button and Mystery Square in Chat Input
+**Phase:** Frontend UI / Chat Interface
+**Date Identified:** March 7, 2026
+**Severity:** MEDIUM (Core Feature Inoperable Without Keyboard)
+
+### Description
+The send button in the chat input was invisible on both desktop and mobile. A tiny amber square appeared in its place. Users could only send messages by pressing Enter.
+
+### Root Cause Analysis
+The send button used `min-w-touch min-h-touch` sizing classes combined with `btn-accent` but had no explicit `width` or `height`. The `btn-accent` CSS class doesn't set dimensions, so the button collapsed to its minimum content size — just the tiny SVG icon with no padding, rendering as an indistinguishable amber dot.
+
+### Resolution Implemented
+1. **Embedded Send Button:** Redesigned `ChatInput.jsx` with the send button embedded *inside* the input field container (right-aligned, `absolute right-1.5`), with explicit `w-9 h-9` sizing.
+2. **Visual Feedback:** The button dynamically changes from dim amber to full amber with a glow shadow when text is present. Uses a paper-plane SVG icon.
+3. **Input Polish:** Added amber focus ring glow, blur backdrop on the input bar, and cleaner spacing.
+
+## Issue 21: Double Scrollbar on Chat Page (Desktop)
+**Phase:** Frontend Layout / Chat Interface
+**Date Identified:** March 7, 2026
+**Severity:** LOW (Visual Glitch)
+
+### Description
+On desktop, the chat page displayed two scrollbars: one on the messages area and one on the overall page frame.
+
+### Root Cause Analysis
+`ChatScreen.jsx` used `lg:h-screen` on the outer container, while `App.jsx`'s `<main>` wrapper already had `flex-1 overflow-y-auto`. Both containers independently allowed scrolling, creating competing scrollbars.
+
+### Resolution Implemented
+1. **Single Scroll Zone:** Changed the outer chat container from `lg:h-screen` to `h-full overflow-hidden`, and the left panel from `h-screen` to `h-full`. Now only the messages `<div>` scrolls.
+
+## Issue 22: Trip Deletion Not Reflected Across Screens
+**Phase:** Frontend State Management
+**Date Identified:** March 7, 2026
+**Severity:** MEDIUM (Confusing UX)
+
+### Description
+When a trip was deleted from `TripDetailScreen`, it still appeared on the Home screen and History screen. Navigating back to the Trips page showed it briefly before a "Trip not found" toast appeared with the trip then vanishing.
+
+### Root Cause Analysis
+`TripDetailScreen.handleDelete()` called `removeTrip()`, which deleted from the API and removed the trip from `tripStore.trips[]`. However, `HomeScreen` and `HistoryScreen` only re-fetched their data on component mount (`useEffect(() => { fetchTrips(); }, [fetchTrips])`). Since React Router preserves mounted components when navigating between tabs, these screens kept their stale cached data. Additionally, `currentTrip` wasn't cleared after deletion, causing the "trip not found" flash when returning to TripsScreen.
+
+### Resolution Implemented
+1. **Force-Refresh All Stores:** After `removeTrip()` completes, `handleDelete()` now calls `clearCurrentTrip()`, `fetchTrips()`, and `fetchHistory()` to ensure all Zustand stores are synchronized before navigating away.

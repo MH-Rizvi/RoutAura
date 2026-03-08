@@ -37,9 +37,9 @@ export default function ChatScreen() {
     };
 
     return (
-        <div className="flex flex-col flex-1 w-full relative animate-page-enter lg:flex-row lg:h-screen">
+        <div className="flex flex-col flex-1 w-full relative animate-page-enter lg:flex-row h-full overflow-hidden">
             {/* ── Desktop Left Panel: Prompts ── */}
-            <div className="hidden lg:flex flex-col w-80 shrink-0 h-screen overflow-y-auto" style={{ background: '#0D1117', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
+            <div className="hidden lg:flex flex-col w-80 shrink-0 h-full overflow-y-auto" style={{ background: '#0D1117', borderRight: '1px solid rgba(255,255,255,0.06)' }}>
                 {/* Panel header */}
                 <div className="p-5 flex items-center justify-between" style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
                     <h2 className="text-[15px] font-bold text-white/90">Route Assistant</h2>
