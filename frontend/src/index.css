@@ -207,6 +207,37 @@ a,
     }
 }
 
+/* ── Chat Input — cockpit controls ─────── */
+
+@keyframes borderPulse {
+
+    0%,
+    100% {
+        opacity: 0.6;
+    }
+
+    50% {
+        opacity: 1;
+    }
+}
+
+.chat-input-field::placeholder {
+    color: rgba(255, 255, 255, 0.25);
+    animation: placeholderShimmer 3s ease-in-out infinite;
+}
+
+@keyframes placeholderShimmer {
+
+    0%,
+    100% {
+        opacity: 0.25;
+    }
+
+    50% {
+        opacity: 0.45;
+    }
+}
+
 /* Skeleton shimmer (dark) */
 .skeleton {
     background: linear-gradient(90deg, var(--bg-surface) 25%, var(--bg-elevated) 50%, var(--bg-surface) 75%);
