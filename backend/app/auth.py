@@ -33,6 +33,23 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         logger.error("JWT_SECRET is not configured — cannot validate tokens")
         raise credentials_exception
 
+    # Add this debug function
+    import base64
+    import json
+    
+    def decode_token_header(token_str: str):
+        try:
+            header_b64 = token_str.split('.')[0]
+            # Add padding
+            header_b64 += '=' * (4 - len(header_b64) % 4)
+            header = json.loads(base64.b64decode(header_b64))
+            print(f"TOKEN HEADER: {header}")
+        except Exception as e:
+            print(f"Header decode error: {e}")
+
+    # Call it here
+    decode_token_header(token)
+
     try:
         payload = jwt.decode(
             token,
