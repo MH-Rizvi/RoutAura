@@ -40,12 +40,12 @@ def _check_demo_rate(ip: str) -> bool:
 @router.post("/agent/chat", response_model=schemas.AgentChatResponse)
 @limiter.limit("100/hour")
 async def chat(
-    request: schemas.AgentChatRequest,
-    http_request: Request,
+    request: Request,
+    payload: schemas.AgentChatRequest,
     db: Session = Depends(get_db),
     current_user: Any = Depends(get_current_user),
 ) -> schemas.AgentChatResponse:
-    is_safe = await moderation_service.is_safe(request.message)
+    is_safe = await moderation_service.is_safe(payload.message)
     if not is_safe:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -58,8 +58,8 @@ async def chat(
         user_city = profile.full_location if profile else ""
         
         result: dict[str, Any] = await agent_service.run_agent(
-            request.message,
-            request.conversation_history,  # pyright: ignore[reportArgumentType]
+            payload.message,
+            payload.conversation_history,  # pyright: ignore[reportArgumentType]
             db,
             user_id=current_user.id,
             user_city=user_city,
@@ -80,19 +80,19 @@ async def chat(
 
 @router.post("/agent/demo-chat", response_model=schemas.AgentChatResponse)
 async def demo_chat(
-    request: schemas.DemoChatRequest,
-    http_request: Request,
+    request: Request,
+    payload: schemas.DemoChatRequest,
     db: Session = Depends(get_db),
 ) -> schemas.AgentChatResponse:
     """Public demo endpoint — no auth required, rate-limited."""
-    client_ip = http_request.client.host if http_request.client else "unknown"
+    client_ip = request.client.host if request.client else "unknown"
     if not _check_demo_rate(client_ip):
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Demo rate limit reached. Sign up for unlimited access!",
         )
 
-    is_safe = await moderation_service.is_safe(request.message)
+    is_safe = await moderation_service.is_safe(payload.message)
     if not is_safe:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -101,8 +101,8 @@ async def demo_chat(
 
     try:
         result: dict[str, Any] = await agent_service.run_agent(
-            request.message,
-            request.conversation_history,  # pyright: ignore[reportArgumentType]
+            payload.message,
+            payload.conversation_history,  # pyright: ignore[reportArgumentType]
             db,
             user_id=0,
             user_city="Hicksville, NY",
