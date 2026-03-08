@@ -20,7 +20,7 @@ from app.rate_limit import limiter
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title="Routigo API",
+    title="RouteAura API",
     version="1.0.0",
 )
 

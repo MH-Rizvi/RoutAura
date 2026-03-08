@@ -1,4 +1,4 @@
-const CACHE_NAME = 'routigo-v1';
+const CACHE_NAME = 'routeaura-v1';
 const ASSETS_TO_CACHE = [
     '/',
     '/index.html',

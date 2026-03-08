@@ -1,10 +1,10 @@
-# Routigo
+# RouteAura
 
 **An Agentic AI route planner for professional drivers using LangChain, Fastembed, and Supabase.**
 
-![Routigo Interface UI](./frontend/public/icon.png)
+![RouteAura Interface UI](./frontend/public/icon.png)
 
-Routigo is a full-stack Progressive Web App (PWA) designed to solve the daily friction of manual route entry for professional drivers. Instead of typing addresses into Maps, drivers can simply chat with an AI Agent ("Do my usual morning school run"). The agent dynamically geocodes, parses intent, searches its local vector memory for past patterns, and generates deep links to automatically launch external navigation platforms.
+RouteAura is a full-stack Progressive Web App (PWA) designed to solve the daily friction of manual route entry for professional drivers. Instead of typing addresses into Maps, drivers can simply chat with an AI Agent ("Do my usual morning school run"). The agent dynamically geocodes, parses intent, searches its local vector memory for past patterns, and generates deep links to automatically launch external navigation platforms.
 
 Beyond utility, this repository is built to serve as a comprehensive portfolio showcase of modern **Agentic AI Engineering, LLMOps, and Full-Stack Development.**
 
