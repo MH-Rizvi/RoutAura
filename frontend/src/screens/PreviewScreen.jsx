@@ -84,7 +84,12 @@ export default function PreviewScreen() {
                 }
             />
 
-            <div className="px-4 sm:px-5 mt-4 sm:mt-5 pb-24">
+            <div className="px-4 sm:px-5 mt-4 sm:mt-5 pb-24 lg:max-w-5xl lg:mx-auto lg:w-full">
+                {/* Desktop back button */}
+                <button onClick={() => navigate(-1)} className="hidden lg:flex items-center gap-1.5 text-accent font-bold text-sm mb-4 hover:opacity-80 transition-opacity">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5" /><path d="M12 19l-7-7 7-7" /></svg>
+                    Back
+                </button>
 
                 {stops.length === 0 ? (
                     <div className="text-center py-16 animate-fade-up">
