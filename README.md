@@ -1,69 +1,73 @@
 # RoutAura
 
-**An Agentic AI route planner for professional drivers using LangChain, Fastembed, and Supabase.**
+**An Agentic AI route planner for professional drivers using LangChain, Fastembed, ChromaDB, and Supabase.**
 
 ![RoutAura Interface UI](./frontend/public/icon.png)
 
-RoutAura is a full-stack Progressive Web App (PWA) designed to solve the daily friction of manual route entry for professional drivers. Instead of typing addresses into Maps, drivers can simply chat with an AI Agent ("Do my usual morning school run"). The agent dynamically geocodes, parses intent, searches its local vector memory for past patterns, and generates deep links to automatically launch external navigation platforms.
+RoutAura is a full-stack Progressive Web App (PWA) built specifically to solve the daily friction of manual route generation for delivery contractors and professional drivers. Instead of typing dozens of addresses repetitively into navigation platforms, drivers can chat conversationally with an advanced AI Agent ("Route me to the Co-Op, then the primary school, and finish at the depot"). The agent autonomously geocodes locations, parses driver intent, retrieves localized context using vector memory, and generates deep link structures to launch external navigation apps.
 
-Beyond utility, this repository is built to serve as a comprehensive portfolio showcase of modern **Agentic AI Engineering, LLMOps, and Full-Stack Development.**
+This implementation acts fundamentally as a robust portfolio benchmark reflecting modern **Agentic AI Engineering, LLMOps Observability, and Full-Stack Cloud Deployment Protocols.**
 
 ---
 
-## 🛠️ Technology Stack
+## 🛠️ Technology Stack (v2.0 Architecture)
 
 **Frontend Layer:**
-- **React 18 + Vite** (PWA configured)
-- **Tailwind CSS v3** (Mobile-first dynamic styling)
-- **Zustand** (Global state management)
-- **Leaflet.js + OpenStreetMap** (Embedded previews)
+- **React 18 + Vite** (Configured tightly as an installable PWA)
+- **Tailwind CSS v3** (Mobile-first dynamic Glassmorphism styling)
+- **Zustand** (Rapid synchronous global state persistence)
+- **Leaflet.js** (Dynamic embedded routing sequence mapping)
 
 **AI Orchestration & Infrastructure:**
-- **LangChain** (ReAct Agent Core)
-- **Groq API** (`llama-3.3-70b-versatile` for extremely fast inference) 
-- **Fastembed** ONNX framework (`BAAI/bge-small-en-v1.5` for local, cost-free vector embeddings without bulky PyTorch dependencies)
-- **ChromaDB** (Local semantic vector storage)
+- **LangChain** (Intelligent single-parameter ReAct Agent Core)
+- **Groq API** (`llama-3.3-70b-versatile` operating at high token-per-second constraints) 
+- **Google Gemini API** (`gemini-2.5-flash` natively integrated fallback pipeline for zero-downtime routing processing)
+- **Fastembed** ONNX framework (`BAAI/bge-small-en-v1.5` for local, cost-free vector execution devoid of heavy PyTorch instances)
+- **ChromaDB** (Granular semantic vector database orchestration)
 
 **Backend & Data Layer:**
-- **FastAPI** (Python 3.12 async backend)
-- **Supabase PostgreSQL** (Relational state & identity)
-- **Supabase Auth** (Tokens & IAM)
+- **FastAPI** (Python 3.12+ concurrent asyncio API handling)
+- **Supabase Auth** (Natively handling PKCE OAuth flows, verification pipelines, and identity issuance)
+- **Supabase PostgreSQL** (Cloud-scalable persistent structural mapping tables and metrics)
+- **python-jose** (Secure zero-latency inner-network JSON Web Token decryption)
 
 **Cloud Deployment Architecture:**
-- **Vercel** (Frontend static hosting & CD)
-- **Railway** (Backend scalable containerized logic)
+- **Vercel** (Frontend static caching logic)
+- **Railway** (Containerized backend processing clusters)
 
 ---
 
-## 🏗️ System Architecture & Logic Flow
+## 🏗️ System Architecture & Logic Capabilities
 
-1. **ReAct Agent Core**: User inputs ("Go to the Co-Op then the hospital") are not blindly forwarded to an LLM. A true LangChain ReAct agent orchestrates multiple tools (semantic stops search, SQL database trip matching, and live Google Maps geocoding).
-2. **True Semantic Memory**: Every driver's saved stop is embedded locally and stored in ChromaDB. "The Co-Op" instantly matches the specific lat/lng they usually go to, rather than generic web results.
-3. **Retrieval-Augmented Generation (RAG)**: Drivers can ask historical questions ("What route did I do last Friday?"). The application seamlessly isolates the question, queries ChromaDB's history logs, and answers safely grounded purely on facts.
-4. **Responsible AI Governance**: System input moderation blocks out-of-bounds agent queries immediately, reducing unauthorized LLM usage.
-5. **LLMOps**: Granular telemetry on LangChain traces. Every invocation is tracked by token counts and execution latencies directly in the Postgres database layer.
+1. **ReAct Agent Autonomy**: User inputs are mathematically structured via ReAct heuristics rather than blindly passed to static generation frameworks. The Agent sequences `Thought` → `Action` → `Observation` loops internally, picking from 5 distinct tool clusters (Database indexing, vector indexing, Google Maps Live APIs, etc.) until it constructs a confident mapping package.
+2. **True Semantic Fuzzy Memory**: Every saved stop is embedded directly through Fastembed against isolated user ChromaDB namespaces. Typing "The high school" avoids random Google results in favor of finding the specific semantic coordinate mapping historically referenced by the identical User UID.
+3. **Retrieval-Augmented Generation (RAG)**: Drivers inquiring "When did I last perform a Sunday run?" invoke an isolated pipeline that strictly answers natural language questions using fact-grounded `trip_history` databases indexed by cosine-similarity.
+4. **Resilient Rate Rotation Engines**: Heavy LangChain workloads easily trip commercial API limits. RoutAura leverages a `groq_rotator` hook to intercept HTTP 503 Overloads or 429 Statuses, transferring inference seamlessly to Google Gemini clusters on the fly so the end user never visualizes a failure state.
+5. **Contextual LLMOps Tracking**: A specialized LangChain callback layer captures payload latencies, API prompt variations, success metrics, and token consumption statistics routing them directly into PostgreSQL arrays.
 
 ---
 
-## 📚 Technical Documentation (The Spokes)
+## 📚 Technical Reference Sheets
 
-Instead of overloading this README, the deep-dive technical reasoning and product specifications can be explored in the engineering documents below:
+Explore deep-dive technical reasoning and architectural workflows within the dedicated engineering specifications:
 
-- **[Technical Specification & DB Schema](./TECHNICAL_SPEC.md)**: Full architecture definitions, Supabase schema diagrams, LangChain configurations, and HTTP API endpoint contracts.
-- **[Product Requirements Document (PRD)](./PRD.md)**: Target user personas, User Stories, edge cases, feature prioritization, and engineering showcase mapping.
-- **[Project Plan & Roadmap](./PROJECT_PLAN.md)**: The iterative phased approach of how this complex monolith was systematically deployed correctly.
-- **[Agent Control & Workflow Definitions](./CLAUDE.md)**: Context document built explicitly to corral and standardize instructions for AI collaborative engineering tools.
+- **[Technical Specification & DB Schema](./TECHNICAL_SPEC.md)**: Master schema modeling definitions, LangChain structural deployments, state fallback diagrams, and explicit API endpoint contract payloads.
+- **[Product Requirements Document (PRD)](./PRD.md)**: Targeted personas, exhaustive user impact variables, product featuresets, and hiring-showcase alignment.
+- **[Project Plan & Roadmap](./PROJECT_PLAN.md)**: The iterative phased mapping of the complete software lifecycle tracking the monolith across all exactly completed 23 phases.
+- **[Agent Control & Workflow Definitions](./CLAUDE.md)**: Standardized developer heuristics aligning collaborative toolings logic variables.
 
 ---
 
 ## 🚀 Running Locally
 
+*Requires active API payloads across Supabase, Groq, and Google.*
+
 ### 1. Backend (FastAPI + ChromaDB)
 ```bash
 cd backend
-uv sync # Ensure uv is installed to handle fast dependency constraints
+uv install
 source .venv/scripts/activate
-# Make sure .env has your GROQ_API_KEY, SUPABASE parameters, and GOOGLE_MAPS keys
+# Required .env config overrides: GROQ_API_KEY, SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, GOOGLE_MAPS_API_KEY, DATABASE_URL, JWT_SECRET, GEMINI_API_KEY
 uvicorn app.main:app --reload --host 0.0.0.0
 ```
 
@@ -74,8 +78,8 @@ npm install
 npm run dev -- --host
 ```
 
-Both local environments will sync up instantly with the external Supabase and Groq pipelines.
+Both environments bind seamlessly onto authenticated localports. Traffic is mediated securely through CORS pipelines against upstream Vercel/Railway instances matching your exact `CORS_ORIGINS` definitions.
 
 ---
 
-*Open Source & Showcase Built.*
+*Mission complete. Ready for production usage.*
