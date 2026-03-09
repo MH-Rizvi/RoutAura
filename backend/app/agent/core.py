@@ -105,15 +105,28 @@ def _extract_stops_from_steps(intermediate_steps: list) -> List[Dict[str, Any]]:
     """
     Extract geocoded stops from the agent's intermediate tool calls.
 
-    Uses an ordered dict keyed by normalised label so that re-geocoded stops
-    (e.g. after out-of-state confirmation) overwrite stale first-attempt coords.
-    This is fully generic — works for any home-state / target-state combination.
+    CRITICAL FIX: The agent may retry geocoding with a refined query
+    (e.g., "Westbury, NY" → "Westbury, Long Island, NY"). 
+    
+    We track stops by their POSITION in the geocoding sequence, not by label.
+    The agent geocodes in order: first call = position 0, second = position 1, etc.
+    When retrying, we overwrite the previous result for that position.
+    
+    To detect retries without explicit signals, we use label similarity:
+    if a new geocode's label is similar to a recent one, it's a retry.
     """
     import json as _json
 
-    stops_by_label: Dict[str, Dict[str, Any]] = {}
-    # Track insertion order separately for get_trip_by_id stops
+    # Track geocoded stops by position (0, 1, 2...)
+    # Each position holds the LATEST result for that stop
+    stops_by_position: Dict[int, Dict[str, Any]] = {}
+    current_position = 0
+    
+    # Track trip stops loaded from get_trip_by_id
     trip_stops: List[Dict[str, Any]] = []
+    
+    # Track recent geocode labels to detect retries
+    recent_labels: List[str] = []  # [(position, label_lower), ...]
 
     for action, observation in intermediate_steps:
         if action.tool == "get_trip_by_id" and isinstance(observation, dict) and "stops" in observation:
@@ -127,7 +140,7 @@ def _extract_stops_from_steps(intermediate_steps: list) -> List[Dict[str, Any]]:
                 })
         elif action.tool == "geocode_stop" and isinstance(observation, dict):
             if observation.get("success"):
-                # Extract clean label — LangChain ReAct may pass a JSON dict string
+                # Extract clean label
                 raw_input = action.tool_input if isinstance(action.tool_input, str) else str(action.tool_input)
                 label = raw_input
                 if raw_input.strip().startswith("{"):
@@ -135,19 +148,56 @@ def _extract_stops_from_steps(intermediate_steps: list) -> List[Dict[str, Any]]:
                         label = _json.loads(raw_input).get("query", raw_input)
                     except (ValueError, _json.JSONDecodeError):
                         pass
+                
+                label_clean = label.strip()
+                label_lower = label_clean.lower()
 
-                # Key by lowercase label so "Times Square" and "times square" dedup
-                label_key = label.strip().lower()
-                stops_by_label[label_key] = {
-                    "label": label.strip(),
-                    "resolved": observation.get("formatted_address", ""),
-                    "lat": observation.get("lat"),
-                    "lng": observation.get("lng"),
-                    "note": None,
-                }
+                # Check if this looks like a retry for a recent position
+                # Heuristic: if label shares significant words with a recent label
+                is_retry = False
+                retry_position = -1
+                
+                label_words = set(label_lower.replace(",", "").split())
+                
+                # Check recent labels (last 3) for similarity
+                for pos, recent_label in reversed(recent_labels[-3:]):
+                    recent_words = set(recent_label.replace(",", "").split())
+                    common = label_words & recent_words
+                    # Retry if: 2+ words match, or one label contains the other
+                    if len(common) >= 2 or label_lower in recent_label or recent_label in label_lower:
+                        is_retry = True
+                        retry_position = pos
+                        break
+
+                if is_retry and retry_position >= 0:
+                    # Overwrite the previous result for this position
+                    stops_by_position[retry_position] = {
+                        "label": label_clean,
+                        "resolved": observation.get("formatted_address", ""),
+                        "lat": observation.get("lat"),
+                        "lng": observation.get("lng"),
+                        "note": None,
+                    }
+                    # Update the label for this position
+                    recent_labels = [(p, l) for p, l in recent_labels if p != retry_position]
+                    recent_labels.append((retry_position, label_lower))
+                else:
+                    # New stop position
+                    stops_by_position[current_position] = {
+                        "label": label_clean,
+                        "resolved": observation.get("formatted_address", ""),
+                        "lat": observation.get("lat"),
+                        "lng": observation.get("lng"),
+                        "note": None,
+                    }
+                    recent_labels.append((current_position, label_lower))
+                    current_position += 1
+
+    # Build final list in position order
+    geocoded_stops = [stops_by_position[pos] for pos in sorted(stops_by_position.keys())]
 
     # Merge: trip stops first, then geocoded stops, with correct positions
-    merged = trip_stops + list(stops_by_label.values())
+    merged = trip_stops + geocoded_stops
     return [{**stop, "position": i} for i, stop in enumerate(merged)]
 
 
