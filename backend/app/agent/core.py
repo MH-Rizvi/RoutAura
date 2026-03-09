@@ -156,15 +156,15 @@ def _extract_stops_from_steps(intermediate_steps: list) -> List[Dict[str, Any]]:
                 # Heuristic: if label shares significant words with a recent label
                 is_retry = False
                 retry_position = -1
-                
-                label_words = set(label_lower.replace(",", "").split())
-                
-                # Check recent labels (last 3) for similarity
+
+                # A geocode call is a retry ONLY if one label is a pure substring of the other.
+                # This means the agent is refining the same location query with more detail.
+                # Example retry: "Trader Joe's Westbury NY" → "Trader Joe's Westbury Long Island NY"
+                # Example NOT retry: "Home Depot Jericho NY" vs "Home Depot Syosset NY"
+                # Word-overlap counting is intentionally avoided — it breaks on chain stores
+                # and would require hardcoding stopwords that don't generalise internationally.
                 for pos, recent_label in reversed(recent_labels[-3:]):
-                    recent_words = set(recent_label.replace(",", "").split())
-                    common = label_words & recent_words
-                    # Retry if: 2+ words match, or one label contains the other
-                    if len(common) >= 2 or label_lower in recent_label or recent_label in label_lower:
+                    if label_lower in recent_label or recent_label in label_lower:
                         is_retry = True
                         retry_position = pos
                         break
