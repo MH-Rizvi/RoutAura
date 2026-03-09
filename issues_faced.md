@@ -360,3 +360,20 @@ When a trip was deleted from `TripDetailScreen`, it still appeared on the Home s
 
 ### Resolution Implemented
 1. **Force-Refresh All Stores:** After `removeTrip()` completes, `handleDelete()` now calls `clearCurrentTrip()`, `fetchTrips()`, and `fetchHistory()` to ensure all Zustand stores are synchronized before navigating away.
+
+## Issue 23: Inability to Set Billing Quota on Google Cloud Console
+**Phase:** Core Infrastructure / Billing Protection
+**Date Identified:** March 9, 2026
+**Severity:** HIGH (Risk of Unexpected Billing)
+
+### Description
+The developer intended to set a daily quota limit on the Google Maps Geocoding API directly through the Google Cloud Console to ensure the application remained in the 100% free tier (under 40,000 requests/month) for a public showcase. However, Google Cloud Console restrictions prevented modifying the quota limits arbitrarily.
+
+### Root Cause Analysis
+Without a hard quota limit on the GCP side, the RouteEasy backend was completely exposed to infinite API calls. A malicious user or script could spam the backend chat/routing endpoints, driving the Geocoding API usage far past the $200 monthly free tier credit and generating unwanted billing charges.
+
+### Resolution Implemented
+1. **Application-Layer Quota Implementation:** Instead of relying on the Google Cloud Dashboard, a robust daily request quota was implemented directly within the RouteEasy backend code.
+2. **`ApiUsage` Database Model:** Created a new `ApiUsage` model in `models.py` (`id`, `api_name`, `date`, `request_count`) that persists API call counts iteratively in the SQLite database.
+3. **Geocoding Service Enforcer:** Added a `_check_and_increment_quota()` function in `geocoding_service.py` that intercepts every geocoding query. It checks the database for today's requests specifically for the `google_geocoding` API. If requests are perfectly under 1,300, it increments the database and proceeds.
+4. **Instant Fast-Fail Barrier:** If the database `request_count` hits 1,300 for the day, the function returns False instantly returning an error block: `{"success": False, "error": "Daily map routing quota exceeded..."}`. This keeps monthly requests safely near ~39,000, ensuring 100% free usage entirely at the application layer.
