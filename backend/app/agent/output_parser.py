@@ -61,6 +61,10 @@ class RouteEasyOutputParser(AgentOutputParser):
 
     def _extract_thought(self, text: str) -> str:
         """Extract the last Thought content from the LLM output."""
+        # Clean the entire text of common ReAct leaks before extracting
+        text = re.sub(r'Observation:', '', text)
+        text = re.sub(r'Action Input:', '', text)
+        
         # Find all Thought: lines and take the last one
         thoughts = re.findall(
             r"Thought\s*:\s*(.+?)(?=\n(?:Action|Thought|Final Answer|Observation)|$)",
@@ -79,9 +83,21 @@ class RouteEasyOutputParser(AgentOutputParser):
                 if thought.lower().startswith(prefix.lower()):
                     # The thought is reasoning, not a response — build a response
                     return ""
+            
+            # Final safety strip to guarantee no "Action: None" leaks
+            thought = re.sub(r'(?i)Action\s*:\s*(?:None|N/?A|none|n/?a).*', '', thought).strip()
             return thought
 
-        return ""
+        # If no explicit "Thought:" tag is found, strip all tags from the raw text completely
+        # so we don't accidentally return reasoning.
+        clean_text = text
+        clean_text = re.sub(r'(?i)Thought:', '', clean_text)
+        clean_text = re.sub(r'(?i)Action:', '', clean_text)
+        clean_text = re.sub(r'(?i)Action Input:', '', clean_text)
+        clean_text = re.sub(r'(?i)Observation:', '', clean_text)
+        clean_text = re.sub(r'(?i)Final Answer:', '', clean_text)
+        clean_text = re.sub(r'(?i)(?:None|N/?A|none|n/?a)', '', clean_text)
+        return clean_text.strip()
 
     @property
     def _type(self) -> str:

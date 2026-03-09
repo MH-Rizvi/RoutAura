@@ -40,7 +40,7 @@ _tools = [
 
 _prompt = PromptTemplate(
     template=SYSTEM_PROMPT_v1,
-    input_variables=["input", "chat_history", "agent_scratchpad", "tools", "tool_names"],
+    input_variables=["input", "chat_history", "agent_scratchpad", "tools", "tool_names", "user_context"],
 )
 
 # Ordered by reliability/capacity — less popular models first to reduce rate-limit hits.
@@ -216,6 +216,46 @@ async def run_agent(
         _processing_messages.discard(msg_hash)
 
 
+def _build_user_context_string(db: Any, user_id: str, user_city: str) -> str:
+    """Fetches real-time user profile, saved trips, and stats to inject into LLM prompt."""
+    if not db or not user_id:
+        return "You are talking to a guest driver. Their default city is Hicksville, NY."
+
+    from app.models import UserProfile, Trip, TripHistory
+    import json
+    
+    # 1. Profile
+    profile = db.query(UserProfile).filter(UserProfile.user_id == user_id).first()
+    first_name = profile.first_name if profile and profile.first_name else "Driver"
+    
+    # 2. Saved Trips
+    trips = db.query(Trip).filter(Trip.user_id == user_id).all()
+    trip_count = len(trips)
+    trip_names = ", ".join([f"'{t.name}'" for t in trips]) if trips else "none"
+
+    # 3. Recent History & Stats
+    histories = db.query(TripHistory).filter(TripHistory.user_id == user_id).order_by(TripHistory.launched_at.desc()).all()
+    
+    total_trips = len(histories)
+    total_miles = round(sum(h.total_miles or 0.0 for h in histories), 1)
+    
+    recent_3 = histories[:3]
+    if recent_3:
+        recent_str = "\n".join([f"- {h.launched_at.strftime('%Y-%m-%d')}: {h.trip_name or 'Unsaved Route'} ({int(len(json.loads(h.stops_json)))} stops, {h.total_miles or 0} mi)" for h in recent_3])
+    else:
+        recent_str = "No recent trips."
+
+    return f"""
+You are talking to {first_name}. 
+Their default city is {user_city}.
+They have {trip_count} saved trips including: {trip_names}.
+Their recent history:
+{recent_str}
+Their stats: {total_miles} total miles, {total_trips} total trips completed.
+Always address them by their first name naturally in conversation — not every message, just when it feels natural like a real assistant would.
+""".strip()
+
+
 async def _run_agent_internal(
     message: str,
     conversation_history: List[Dict[str, Any]] | None = None,
@@ -229,12 +269,16 @@ async def _run_agent_internal(
     """
     global _agent_executor, _current_model_idx
 
+    # Build real-time context
+    user_context = _build_user_context_string(db, user_id, user_city)
+
     # Send only the last 4 messages to save tokens
     recent_history = (conversation_history or [])[-4:]
     chat_history_str = _format_history(recent_history)
     invoke_input = {
         "input": message,
         "chat_history": chat_history_str,
+        "user_context": user_context,
     }
 
     last_exc: Exception | None = None
