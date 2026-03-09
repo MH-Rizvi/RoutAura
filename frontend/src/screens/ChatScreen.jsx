@@ -184,6 +184,8 @@ export default function ChatScreen() {
                                     content={msg.content}
                                     timestamp={msg.timestamp}
                                     routeStops={msg.routeStops}
+                                    distanceText={msg.distanceText}
+                                    durationText={msg.durationText}
                                     onPreviewRoute={() => handlePreviewRoute(msg.routeStops)}
                                 />
                             ))}
@@ -214,6 +216,7 @@ export default function ChatScreen() {
                         </div>
                     )}
 
+                    <div className="hidden lg:block h-6 shrink-0" />
                     <div ref={scrollRef} />
                 </div>
 

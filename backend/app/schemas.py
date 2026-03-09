@@ -216,6 +216,8 @@ class AgentChatResponse(BaseModel):
     needs_confirmation: bool = False
     agent_steps: Optional[int] = None
     requires_auth: bool = False
+    total_duration_text: Optional[str] = None
+    total_distance_text: Optional[str] = None
 
 
 class DemoChatRequest(BaseModel):

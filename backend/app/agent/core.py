@@ -22,6 +22,7 @@ from app.agent.tools import (
     get_recent_history_tool,
     save_trip_tool,
 )
+from app.services import directions_service
 from app.services.groq_client import groq_rotator, _is_rate_limit_error
 
 
@@ -279,6 +280,11 @@ async def _run_agent_internal(
 
             response: Dict[str, Any] = {"reply": reply}
             if stops:
+                # Calculate accurate distance & duration
+                stats = await directions_service.calculate_route_stats(stops)
+                response["total_distance_text"] = stats["distance"]
+                response["total_duration_text"] = stats["duration"]
+                
                 response["stops"] = stops
                 response["needs_confirmation"] = True
 

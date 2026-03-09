@@ -26,13 +26,15 @@ const useChatStore = create((set, get) => ({
     error: null,
 
     // ── Helpers ────────────────────────────────
-    _addMessage: (role, content, routeStops = null) => {
+    _addMessage: (role, content, routeStops = null, distanceText = null, durationText = null) => {
         const msg = {
             id: Date.now().toString(36) + Math.random().toString(36).slice(2),
             role,
             content,
             timestamp: new Date().toISOString(),
             routeStops,
+            distanceText,
+            durationText,
         };
         set((state) => ({
             messages: [...state.messages, msg],
@@ -136,7 +138,7 @@ const useChatStore = create((set, get) => ({
                 messageStops = response.stops;
             }
 
-            const asstMsg = _addMessage('assistant', finalReply, messageStops);
+            const asstMsg = _addMessage('assistant', finalReply, messageStops, response.total_distance_text, response.total_duration_text);
 
             // Track stops for confirmation flow
             set({
