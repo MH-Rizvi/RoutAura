@@ -34,33 +34,29 @@ async def calculate_route_stats(stops: List[Dict[str, float]]) -> Dict[str, str]
         }
         if waypoint_str:
             params["waypoints"] = waypoint_str
+        print('STOPS RECEIVED:', stops)
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(
                 "https://maps.googleapis.com/maps/api/directions/json", params=params
             )
         response.raise_for_status()
         data = response.json()
-        
+
         print("DIRECTIONS API RESPONSE:", data)
-        
-        if data.get("status") != "OK":
-            logger.error("Google Directions API error: %s", data.get("status"))
-            return {"distance": "N/A", "duration": "N/A"}
-        
-        total_meters = 0
-        total_seconds = 0
-        
-        for route in data.get("routes", []):
-            for leg in route.get("legs", []):
-                total_meters += leg.get("distance", {}).get("value", 0)
-                total_seconds += leg.get("duration", {}).get("value", 0)
-                
-        total_duration_text = f"{round(total_seconds / 60)} min"
-        total_distance_text = f"{round(total_meters / 1609.34, 1)} mi"
-        
+
+        if data.get('status') == 'OK':
+            legs = data['routes'][0]['legs']
+            total_seconds = sum(leg['duration']['value'] for leg in legs)
+            total_meters = sum(leg['distance']['value'] for leg in legs)
+            total_duration = f"{round(total_seconds / 60)} min"
+            total_distance = f"{round(total_meters / 1609.34, 1)} mi"
+        else:
+            total_duration = 'N/A'
+            total_distance = 'N/A'
+
         return {
-            "distance": total_distance_text,
-            "duration": total_duration_text
+            "distance": total_distance,
+            "duration": total_duration
         }
     except Exception as e:
         logger.error("Failed to calculate route stats: %s", e)
@@ -93,21 +89,20 @@ async def calculate_route_miles(stops: List[Dict[str, float]]) -> float:
         }
         if waypoint_str:
             params["waypoints"] = waypoint_str
+        print('STOPS RECEIVED:', stops)
         async with httpx.AsyncClient(timeout=10.0) as client:
             response = await client.get(
                 "https://maps.googleapis.com/maps/api/directions/json", params=params
             )
         response.raise_for_status()
         data = response.json()
-        if data.get("status") != "OK":
-            logger.error("Google Directions API error: %s", data.get("status"))
+        if data.get('status') == 'OK':
+            legs = data['routes'][0]['legs']
+            total_meters = sum(leg['distance']['value'] for leg in legs)
+            total_miles = total_meters * 0.000621371
+            return round(total_miles, 2)
+        else:
             return 0.0
-        total_meters = 0
-        for route in data.get("routes", []):
-            for leg in route.get("legs", []):
-                total_meters += leg.get("distance", {}).get("value", 0)
-        total_miles = total_meters * 0.000621371
-        return round(total_miles, 2)
     except Exception as e:
         logger.error("Failed to calculate route miles: %s", e)
         return 0.0
