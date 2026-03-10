@@ -389,24 +389,43 @@ async def _run_agent_internal(
             intermediate = result.get("intermediate_steps", [])
 
             # HYBRID STOP EXTRACTION:
-            # 1. Check if modify_route was used (amendments) — active_route_ctx has the updated array
-            # 2. If empty, fall back to _extract_stops_from_steps() for fresh route builds via geocode_stop
-            from app.agent.tools import get_current_route
-            stops = get_current_route()
-            logger.info("=== STOP EXTRACTION DEBUG ===")
-            logger.info("Stage 1 — get_current_route(): %d stops", len(stops))
+            # Priority order:
+            # 1. Check if get_trip_by_id was called — its stops take highest priority
+            #    (this is crucial for loading saved trips back-to-back)
+            # 2. Check if modify_route was used (amendments) — active_route_ctx has the updated array
+            # 3. Fall back to _extract_stops_from_steps() for fresh route builds via geocode_stop
             
-            if not stops or len(stops) < 2:
-                # No modify_route was used — try extracting from geocode_stop tool calls
-                extracted = _extract_stops_from_steps(intermediate)
-                logger.info("Stage 2 — _extract_stops_from_steps(): %d stops extracted", len(extracted) if extracted else 0)
-                if extracted and len(extracted) >= 2:
-                    stops = extracted
+            # Always check intermediate steps first for get_trip_by_id results
+            extracted = _extract_stops_from_steps(intermediate)
+            logger.info("=== STOP EXTRACTION DEBUG ===")
+            logger.info("_extract_stops_from_steps(): %d stops extracted", len(extracted) if extracted else 0)
+            
+            # Check if get_trip_by_id was used (loaded a saved trip)
+            trip_loaded = any(
+                step[0].tool == "get_trip_by_id" 
+                for step in intermediate
+            ) if intermediate else False
+            
+            if trip_loaded and extracted and len(extracted) >= 2:
+                # Saved trip load — these stops take absolute priority
+                stops = extracted
+                logger.info("Stage 1 — Loaded saved trip: %d stops", len(stops))
+            else:
+                # Check active_route_ctx (modify_route amendments)
+                from app.agent.tools import get_current_route
+                stops = get_current_route()
+                logger.info("Stage 2 — get_current_route(): %d stops", len(stops))
+                
+                if not stops or len(stops) < 2:
+                    # Fall back to extracted geocode_stop results
+                    if extracted and len(extracted) >= 2:
+                        stops = extracted
+                        logger.info("Stage 3 — Using extracted stops: %d", len(stops))
 
             # If still empty, try parsing from the reply text as a last resort
             if not stops or len(stops) < 2:
                 extracted_reply = _extract_stops_from_reply(reply)
-                logger.info("Stage 3 — _extract_stops_from_reply(): %d stops extracted", len(extracted_reply) if extracted_reply else 0)
+                logger.info("Stage 4 — _extract_stops_from_reply(): %d stops extracted", len(extracted_reply) if extracted_reply else 0)
                 if extracted_reply and len(extracted_reply) >= 2:
                     stops = extracted_reply
 
