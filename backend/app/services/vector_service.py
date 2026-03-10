@@ -181,9 +181,10 @@ def search_trips(query: str, user_id: str, top_k: int = 3) -> List[Dict[str, Any
     Queries more results under the hood to deduplicate hybrid matching (name + stops doc) per trip.
     """
     # Query extra records in case both docs for the same trip match highly
+    # Query deep enough so short, low-confidence semantic keyword matches ("IKEA") aren't truncated before deduplication.
     results = _get_trips_collection(user_id).query(
         query_embeddings=[embed(query)],
-        n_results=top_k * 2,
+        n_results=top_k * 10,
     )
     
     formatted = _format_results(results)
@@ -193,6 +194,11 @@ def search_trips(query: str, user_id: str, top_k: int = 3) -> List[Dict[str, Any
     seen_trip_ids = set()
     
     for item in formatted:
+        # Require a minimum similarity threshold
+        sim = item.get("similarity", 0.0)
+        if sim is None or sim < 0.3:
+            continue
+            
         trip_id = item.get("metadata", {}).get("trip_id")
         if trip_id is not None and trip_id not in seen_trip_ids:
             seen_trip_ids.add(trip_id)
