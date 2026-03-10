@@ -116,6 +116,9 @@ def search_trips_by_stop(query: str) -> str:
         query_words = query.strip().split()
         short_query = query_words[0] if len(query_words) > 1 else query
         
+        # Auto-handle simple plurals ("hospitals" -> "hospital")
+        singular_query = query[:-1] if query.endswith('s') and len(query) > 4 else query
+        
         sql = text("""
             SELECT DISTINCT trips.id, trips.name, stops.label, stops.resolved
             FROM trips 
@@ -123,13 +126,16 @@ def search_trips_by_stop(query: str) -> str:
             WHERE (stops.label ILIKE :query 
                    OR stops.resolved ILIKE :query
                    OR stops.label ILIKE :short_query 
-                   OR stops.resolved ILIKE :short_query)
+                   OR stops.resolved ILIKE :short_query
+                   OR stops.label ILIKE :singular_query
+                   OR stops.resolved ILIKE :singular_query)
             AND trips.user_id = :user_id
         """)
         
         results = db.execute(sql, {
             "query": f"%{query}%", 
             "short_query": f"%{short_query}%", 
+            "singular_query": f"%{singular_query}%",
             "user_id": user_id
         }).fetchall()
         
