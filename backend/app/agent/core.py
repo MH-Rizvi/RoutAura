@@ -389,18 +389,30 @@ async def _run_agent_internal(
             # 2. If empty, fall back to _extract_stops_from_steps() for fresh route builds via geocode_stop
             from app.agent.tools import get_current_route
             stops = get_current_route()
+            logger.info("=== STOP EXTRACTION DEBUG ===")
+            logger.info("Stage 1 — get_current_route(): %d stops", len(stops))
             
             if not stops or len(stops) < 2:
                 # No modify_route was used — try extracting from geocode_stop tool calls
                 extracted = _extract_stops_from_steps(intermediate)
+                logger.info("Stage 2 — _extract_stops_from_steps(): %d stops extracted", len(extracted) if extracted else 0)
                 if extracted and len(extracted) >= 2:
                     stops = extracted
 
             # If still empty, try parsing from the reply text as a last resort
             if not stops or len(stops) < 2:
                 extracted_reply = _extract_stops_from_reply(reply)
+                logger.info("Stage 3 — _extract_stops_from_reply(): %d stops extracted", len(extracted_reply) if extracted_reply else 0)
                 if extracted_reply and len(extracted_reply) >= 2:
                     stops = extracted_reply
+
+            # Log intermediate steps tool names for debugging
+            tool_names_used = [step[0].tool for step in intermediate] if intermediate else []
+            logger.info("Tools used in this turn: %s", tool_names_used)
+            logger.info("Final stops count: %d", len(stops))
+            if stops:
+                for i, s in enumerate(stops):
+                    logger.info("  Stop %d: label=%s, resolved=%s, lat=%s, lng=%s", i, s.get('label'), s.get('resolved'), s.get('lat'), s.get('lng'))
 
             # We no longer strip coordinates from the reply text here!
             # If we strip them here, the frontend won't save them in conversation history,
@@ -412,6 +424,7 @@ async def _run_agent_internal(
             # Determine if the route actually changed mechanically
             route_changed = False
             prev_route = current_route or []
+            logger.info("prev_route count: %d, stops count: %d", len(prev_route), len(stops))
             if len(stops) != len(prev_route):
                 route_changed = True
             else:
@@ -419,6 +432,7 @@ async def _run_agent_internal(
                     if s.get("label") != p.get("label") or s.get("resolved") != p.get("resolved"):
                         route_changed = True
                         break
+            logger.info("route_changed: %s", route_changed)
 
             if stops and len(stops) >= 2 and route_changed:
                 # Calculate accurate distance & duration
@@ -427,6 +441,9 @@ async def _run_agent_internal(
                 response["total_duration_text"] = stats["duration"]
                 
                 response["stops"] = stops
+                logger.info("✅ Returning %d stops in response with distance=%s, duration=%s", len(stops), stats["distance"], stats["duration"])
+            else:
+                logger.info("❌ NOT returning stops. stops=%d, route_changed=%s", len(stops), route_changed)
 
             return response
 
