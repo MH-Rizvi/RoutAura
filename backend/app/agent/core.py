@@ -161,29 +161,28 @@ def _extract_stops_from_steps(intermediate_steps: list) -> List[Dict[str, Any]]:
                 label_clean = label.strip()
                 label_lower = label_clean.lower()
 
-                # Check if this looks like a retry for a recent position
-                # Heuristic: if label shares significant words with a recent label
+                # Check if this looks like a retry of the IMMEDIATELY PREVIOUS stop.
+                # A genuine retry is always consecutive: the agent geocodes, gets a bad
+                # result, and immediately re-geocodes with a refined query.
+                # We ONLY check against the last stop (current_position - 1), NOT earlier
+                # stops, to avoid false positives on loop routes where the final stop
+                # returns to the same place as stop 1.
                 is_retry = False
                 retry_position = -1
 
-                # A geocode call is a retry ONLY if one label is a pure substring of the other.
-                # This means the agent is refining the same location query with more detail.
                 norm_current = _normalize_label(label_lower)
 
-                for pos, recent_label in reversed(recent_labels[-3:]):
-                    norm_recent = _normalize_label(recent_label)
-                    if norm_current in norm_recent or norm_recent in norm_current:
-                        # Guard against false positives on loop routes where the final stop
-                        # shares a city name with an earlier stop. A genuine retry is a
-                        # refinement of the same query, so the two labels should be close in
-                        # length. If the shorter label is less than 60% the length of the
-                        # longer one, treat them as different stops, not a retry.
-                        shorter = min(len(norm_current), len(norm_recent))
-                        longer = max(len(norm_current), len(norm_recent))
+                if recent_labels:
+                    prev_pos, prev_label = recent_labels[-1]
+                    norm_prev = _normalize_label(prev_label)
+                    if norm_current in norm_prev or norm_prev in norm_current:
+                        # Additional guard: the two labels should be close in length
+                        # (a refinement, not a completely different stop)
+                        shorter = min(len(norm_current), len(norm_prev))
+                        longer = max(len(norm_current), len(norm_prev))
                         if longer > 0 and (shorter / longer) >= 0.6:
                             is_retry = True
-                            retry_position = pos
-                            break
+                            retry_position = prev_pos
 
                 if is_retry and retry_position >= 0:
                     # Overwrite the previous result for this position
