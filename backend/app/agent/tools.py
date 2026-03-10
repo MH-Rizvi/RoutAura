@@ -287,6 +287,28 @@ async def modify_route_tool(input_str: str) -> str:
                     actual_city = parts[i-1]
                 break
 
+        # City mismatch detection: if user said "Walmart Jericho" but it resolved
+        # to Westbury, warn the agent so it can ask the user for confirmation.
+        query_words = query.strip().split()
+        # Extract potential city from query (last word before any state abbreviation)
+        query_lower = query.lower()
+        # Strip state abbreviations from query for clean comparison
+        clean_query_words = [w for w in query_words if not re.match(r'^[A-Z]{2}$', w.upper()) and w.upper() not in ('USA', 'US')]
+        if actual_city and len(clean_query_words) >= 2:
+            # Check if any word in the query looks like a city name that doesn't match actual_city
+            potential_city = clean_query_words[-1]  # Last word is often the city
+            if (potential_city.lower() != actual_city.lower() 
+                and not re.search(r'\d', potential_city)  # Not a street number
+                and potential_city.lower() not in actual_city.lower()
+                and actual_city.lower() not in potential_city.lower()):
+                return (
+                    f"CITY MISMATCH: The user requested '{query}' but the closest match is at "
+                    f"'{resolved_address}' which is in {actual_city}, not {potential_city}. "
+                    f"ASK the user: 'There's no {place_name or query_words[0]} in {potential_city}, "
+                    f"but I found one at {resolved_address}. Want me to use that instead?' "
+                    f"Do NOT modify the route until the user confirms."
+                )
+
         # Dynamic cross-country labeling natively without hardcoding
         if place_name and actual_city:
             final_label = f"{place_name.strip()} {actual_city}"
@@ -310,7 +332,7 @@ async def modify_route_tool(input_str: str) -> str:
             # Re-index just in case
             for i, stop in enumerate(route):
                 stop["position"] = i
-            return f"Successfully replaced '{old_stop.get('label')}' at position {position} with '{new_stop['resolved']}'."
+            return f"Successfully replaced '{old_stop.get('label')}' at position {position} with '{new_stop['label']}' ({new_stop['resolved']})."
             
         elif action == "add":
             # For add, we insert before the requested position.

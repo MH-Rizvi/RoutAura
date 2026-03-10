@@ -374,7 +374,12 @@ async def _run_agent_internal(
             # the shared async event loop. This is a data isolation safeguard.
             user_id_ctx.set(user_id)
             user_city_ctx.set(user_city)
-            active_route_ctx.set(current_route or [])
+            # MUST deep copy! modify_route mutates the list in place. If we pass
+            # the same reference, the route_changed diff later compares the
+            # modified list against itself and always returns False.
+            import copy
+            prev_route_snapshot = copy.deepcopy(current_route or [])
+            active_route_ctx.set(copy.deepcopy(current_route or []))
 
             # Inject user context into the callbacks so tools can access them
             context_callbacks = [ContextCallbackHandler(user_id=user_id, user_city=user_city, db=db)]
@@ -422,13 +427,14 @@ async def _run_agent_internal(
             response: Dict[str, Any] = {"reply": reply}
             
             # Determine if the route actually changed mechanically
+            # Uses prev_route_snapshot taken BEFORE the agent ran, so
+            # in-place mutations by modify_route don't corrupt the comparison.
             route_changed = False
-            prev_route = current_route or []
-            logger.info("prev_route count: %d, stops count: %d", len(prev_route), len(stops))
-            if len(stops) != len(prev_route):
+            logger.info("prev_route count: %d, stops count: %d", len(prev_route_snapshot), len(stops))
+            if len(stops) != len(prev_route_snapshot):
                 route_changed = True
             else:
-                for s, p in zip(stops, prev_route):
+                for s, p in zip(stops, prev_route_snapshot):
                     if s.get("label") != p.get("label") or s.get("resolved") != p.get("resolved"):
                         route_changed = True
                         break
