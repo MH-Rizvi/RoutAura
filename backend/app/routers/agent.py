@@ -64,6 +64,7 @@ async def chat(
             db,
             user_id=current_user.id,
             user_city=user_city,
+            session_id=payload.session_id,
         )
         return schemas.AgentChatResponse(**result)
     except Exception as exc:

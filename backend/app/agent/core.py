@@ -256,7 +256,7 @@ def _hide_coordinates_from_reply(reply: str) -> str:
     return re.sub(r'\s*\(-?\d+\.?\d*,\s*-?\d+\.?\d*\)\s*', ' ', reply).strip()
 
 
-_processing_messages = set()
+_processing_messages: Dict[str, float] = {}
 
 async def run_agent(
     message: str,
@@ -265,9 +265,20 @@ async def run_agent(
     db: Any | None = None,
     user_id: str | None = None,
     user_city: str | None = None,
+    session_id: str | None = None,
 ) -> Dict[str, Any]:
     global _processing_messages
-    msg_hash = hashlib.md5(message.encode("utf-8")).hexdigest()
+    import time
+    
+    # Include session_id in the hash so identical messages from different sessions
+    # are never treated as duplicates (e.g., user refreshes and retypes same message).
+    hash_input = f"{session_id or ''}:{message}"
+    msg_hash = hashlib.md5(hash_input.encode("utf-8")).hexdigest()
+    
+    now = time.time()
+    # Clean up stale entries older than 5 seconds
+    _processing_messages = {k: v for k, v in _processing_messages.items() if now - v < 5}
+    
     if msg_hash in _processing_messages:
         logger.warning("Duplicate request detected for hash %s. Skipping.", msg_hash)
         return {
@@ -275,11 +286,11 @@ async def run_agent(
             "stops": []
         }
         
-    _processing_messages.add(msg_hash)
+    _processing_messages[msg_hash] = now
     try:
         return await _run_agent_internal(message, conversation_history, current_route, db, user_id, user_city)
     finally:
-        _processing_messages.discard(msg_hash)
+        _processing_messages.pop(msg_hash, None)
 
 
 def _build_user_context_string(db: Any, user_id: str, user_city: str) -> str:
