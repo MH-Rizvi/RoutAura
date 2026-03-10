@@ -424,6 +424,13 @@ select:focus {
     border-color: var(--accent) !important;
 }
 
+/* Chat input has its own premium gradient border + ambient glow in ChatInput.jsx,
+   so we suppress the global yellow ring and use a subtle inner glow instead. */
+.chat-input-field:focus {
+    box-shadow: none !important;
+    border-color: transparent !important;
+}
+
 /* ── Glass bar ────────────────────────────── */
 
 .glass-bar {
