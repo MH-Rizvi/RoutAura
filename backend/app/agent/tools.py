@@ -218,36 +218,40 @@ def get_current_route() -> List[Dict[str, Any]]:
     return active_route_ctx.get()
 
 @tool("modify_route")
-async def modify_route_tool(action: str, position: int, query: str = "", place_name: str = "") -> str:
+async def modify_route_tool(input_str: str) -> str:
     """
     Modifies the current route by adding, removing, or replacing a stop.
     IMPORTANT: This tool mechanically updates the array in the backend. 
     You do NOT need to output the full route list in your text reply after using this.
 
-    Inputs:
-    - action: Must be exactly "add", "remove", or "replace".
-    - position: The 1-based index where the action should happen (1 is the first stop).
-    - query: For "add" or "replace", describe the new place to search for. For "remove", leave empty.
-    - place_name: The raw brand name of the place (e.g. "Walmart", "Home Depot"). Leave empty for "remove" or for a direct residential street address.
+    Input MUST be a valid JSON string with these fields:
+    {
+      "action": "add" | "remove" | "replace",
+      "position": 1-based index (1 = first stop),
+      "query": "place to search for" (required for add/replace, empty for remove),
+      "place_name": "brand name like Walmart or Home Depot" (optional, helps labeling)
+    }
+    
+    Example: {"action": "replace", "position": 2, "query": "Walmart Jericho", "place_name": "Walmart"}
     
     Returns: Success message with the new place details, or error.
     """
-    # Safety net: LangChain ReAct agents sometimes pass the entire input as a single
-    # JSON string instead of separate parameters. Detect and extract fields if so.
-    if isinstance(action, str) and action.strip().startswith("{"):
-        import json
-        try:
-            payload = json.loads(action)
-            action = payload.get("action", action)
-            position = int(payload.get("position", position))
-            query = payload.get("query", query)
-            place_name = payload.get("place_name", place_name)
-        except (json.JSONDecodeError, ValueError):
-            pass
+    import json as _json
+    import re
+
+    # Parse the single string input as JSON
+    try:
+        payload = _json.loads(input_str) if isinstance(input_str, str) else input_str
+    except (_json.JSONDecodeError, ValueError):
+        return "Error: Input must be a valid JSON string with action, position, query fields."
+
+    action = str(payload.get("action", "")).lower()
+    position = int(payload.get("position", 0))
+    query = str(payload.get("query", ""))
+    place_name = str(payload.get("place_name", ""))
 
     route = active_route_ctx.get()
     
-    action = action.lower()
     if action not in ["add", "remove", "replace"]:
         return "Error: action must be 'add', 'remove', or 'replace'."
         
@@ -277,7 +281,6 @@ async def modify_route_tool(action: str, position: int, query: str = "", place_n
         resolved_address = geocoded.get("formatted_address", "")
         parts = [p.strip() for p in resolved_address.split(",")]
         actual_city = ""
-        import re
         for i, p in enumerate(parts):
             if re.match(r'^[A-Z]{2}(\s+\d{5})?$', p.upper()):
                 if i > 0:
@@ -318,6 +321,3 @@ async def modify_route_tool(action: str, position: int, query: str = "", place_n
             for i, stop in enumerate(route):
                 stop["position"] = i
             return f"Successfully added '{new_stop['resolved']}' at position {position}."
-
-
-
