@@ -52,7 +52,7 @@ _prompt = PromptTemplate(
 
 def _build_executor() -> AgentExecutor:
     """Build a fresh AgentExecutor using the current rotator key."""
-    llm = groq_rotator.get_chat_groq(temperature=0)
+    llm = groq_rotator.get_chat_llm(temperature=0)
     agent = create_react_agent(llm, _tools, _prompt, output_parser=RouteEasyOutputParser())
     return AgentExecutor(
         agent=agent,
