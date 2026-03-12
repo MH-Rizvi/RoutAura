@@ -549,16 +549,12 @@ function AnimatedRoadBackground() {
         { d: 'M -60 780 C 220 730, 480 870, 720 800 S 1000 670, 1280 770 S 1580 880, 2000 740', len: 2100 },
     ];
 
-    /* Vehicle configs: pathIndex, duration, delay, type (car|truck), direction */
+    /* Vehicle configs: pathIndex, duration, delay, type (car|truck), direction — reduced for perf */
     const vehicles = [
         { pi: 0, dur: 14, del: 0, type: 'car' },
-        { pi: 0, dur: 18, del: 5, type: 'truck' },
         { pi: 1, dur: 16, del: 1, type: 'car' },
-        { pi: 1, dur: 20, del: 8, type: 'car' },
         { pi: 2, dur: 15, del: 2, type: 'truck' },
-        { pi: 2, dur: 19, del: 7, type: 'car' },
         { pi: 3, dur: 17, del: 3, type: 'car' },
-        { pi: 3, dur: 22, del: 10, type: 'truck' },
     ];
 
     return (
@@ -571,6 +567,7 @@ function AnimatedRoadBackground() {
                 height: '100%',
                 zIndex: 0,
                 pointerEvents: 'none',
+                willChange: 'transform',
             }}
         >
             <svg
@@ -580,14 +577,6 @@ function AnimatedRoadBackground() {
                 xmlns="http://www.w3.org/2000/svg"
             >
                 <defs>
-                    {/* Headlight glow filter */}
-                    <filter id="headlight-glow" x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur stdDeviation="3" result="blur" />
-                        <feMerge>
-                            <feMergeNode in="blur" />
-                            <feMergeNode in="SourceGraphic" />
-                        </feMerge>
-                    </filter>
                     {/* Intersection pattern */}
                     <pattern id="road-grid" width="120" height="120" patternUnits="userSpaceOnUse">
                         <line x1="0" y1="0" x2="0" y2="120" stroke="rgba(245,158,11,0.03)" strokeWidth="1" />
@@ -638,7 +627,7 @@ function AnimatedRoadBackground() {
                 {vehicles.map((v, i) => {
                     const isTruck = v.type === 'truck';
                     return (
-                        <g key={`v-${i}`} style={{ animation: 'vehicle-pulse 3s ease-in-out infinite', animationDelay: `${v.del}s` }}>
+                        <g key={`v-${i}`} style={{ opacity: 0.7 }}>
                             {/* Vehicle body */}
                             <rect
                                 x={isTruck ? -10 : -6}
@@ -656,20 +645,6 @@ function AnimatedRoadBackground() {
                                     path={roads[v.pi].d}
                                 />
                             </rect>
-                            {/* Headlight glow */}
-                            <circle
-                                r="4"
-                                fill="rgba(245, 158, 11, 0.25)"
-                                filter="url(#headlight-glow)"
-                            >
-                                <animateMotion
-                                    dur={`${v.dur}s`}
-                                    repeatCount="indefinite"
-                                    begin={`${v.del}s`}
-                                    rotate="auto"
-                                    path={roads[v.pi].d}
-                                />
-                            </circle>
                         </g>
                     );
                 })}
@@ -714,7 +689,7 @@ export default function LandingPage() {
 
     const FAQ_DATA = [
         { q: 'Is RoutAura free to use?', a: 'Yes, completely free. No credit card required. Sign up and start planning routes in under 2 minutes.' },
-        { q: 'Does it work on my phone?', a: 'Yes. RoutAura is a Progressive Web App (PWA) optimised for iOS Safari and Android Chrome. Add it to your home screen for a native app experience.' },
+        { q: 'Does it work on my phone?', a: 'It works great on your phone — just add it to your home screen like a normal app (no App Store needed).' },
         { q: 'Do I need to type exact addresses?', a: 'No. That\'s the whole point. Say "the co-op", "main school", or "morning run" and the AI figures out the rest using your saved location history.' },
         { q: 'What if I drive the same route every day?', a: 'Save it once, re-launch it with one tap. The agent recognises "do my usual run" and retrieves the right route automatically from your saved trips.' },
         { q: 'How is this different from just using Google Maps?', a: 'Google Maps has no memory of your routes, no natural language input, and forces you to re-enter every stop manually every single day. RoutAura remembers everything.' },
@@ -839,21 +814,14 @@ export default function LandingPage() {
 
                         {/* Vehicles on main highway — desktop only */}
                         {!isMobile && [
-                            { dur: 10, del: 0, w: 14, h: 7, color: 'rgba(255,255,255,0.3)' },
-                            { dur: 13, del: 3, w: 22, h: 8, color: 'rgba(245,158,11,0.4)' },
-                            { dur: 11, del: 6, w: 14, h: 7, color: 'rgba(255,255,255,0.25)' },
-                            { dur: 15, del: 1, w: 14, h: 7, color: 'rgba(255,255,255,0.2)' },
-                            { dur: 12, del: 8, w: 14, h: 7, color: 'rgba(245,158,11,0.3)' },
+                            { dur: 12, del: 0, w: 14, h: 7, color: 'rgba(255,255,255,0.3)' },
+                            { dur: 15, del: 4, w: 22, h: 8, color: 'rgba(245,158,11,0.4)' },
                         ].map((v, i) => (
                             <g key={`hv-${i}`}>
                                 <rect x={-v.w / 2} y={-v.h / 2} width={v.w} height={v.h} rx="3" fill={v.color}>
                                     <animateMotion dur={`${v.dur}s`} repeatCount="indefinite" begin={`${v.del}s`} rotate="auto"
                                         path="M -50 520 C 200 480, 400 400, 600 350 S 900 250, 1250 180" />
                                 </rect>
-                                <circle r="5" fill="rgba(245,158,11,0.2)" filter="url(#hero-glow)">
-                                    <animateMotion dur={`${v.dur}s`} repeatCount="indefinite" begin={`${v.del}s`} rotate="auto"
-                                        path="M -50 520 C 200 480, 400 400, 600 350 S 900 250, 1250 180" />
-                                </circle>
                             </g>
                         ))}
 
@@ -930,6 +898,12 @@ export default function LandingPage() {
                                     </a>
                                 </div>
                             </RevealOnScroll>
+                            {/* JARGON SIMPLIFIED – user-friendly version */}
+                            <RevealOnScroll delay={400}>
+                                <p className="text-white/60 text-sm mt-3">
+                                    You don’t need to understand AI — just tell it where you usually go, like talking to a helpful co-driver.
+                                </p>
+                            </RevealOnScroll>
 
                             <RevealOnScroll delay={400}>
                                 <div className="flex flex-wrap items-center gap-x-5 gap-y-2 justify-center lg:justify-start text-[13px] text-white/40">
@@ -952,26 +926,33 @@ export default function LandingPage() {
 
 
             {/* ═══════════════════════════════════════
-                SECTION 3: SOCIAL PROOF BAR
+                SECTION 3: TECH STACK BAR
                ═══════════════════════════════════════ */}
-            <section className="relative z-[1] py-8 px-5 sm:px-8 border-y border-white/[0.04] bg-white/[0.01] overflow-hidden">
-                {/* Road lane divider animation */}
-                <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="none" viewBox="0 0 1200 60" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.4 }}>
-                    <line x1="0" y1="30" x2="1200" y2="30" stroke="rgba(245,158,11,0.08)" strokeWidth="40" />
-                    <line x1="0" y1="30" x2="1200" y2="30" stroke="rgba(245,158,11,0.15)" strokeWidth="1" strokeDasharray="20 30" style={{ animation: 'hero-dash 2s linear infinite' }} />
-                    {!isMobile && <rect x="-8" y="26" width="16" height="8" rx="3" fill="rgba(245,158,11,0.3)">
-                        <animateMotion dur="6s" repeatCount="indefinite" path="M 0 30 L 1200 30" />
-                    </rect>}
-                </svg>
+            <section className="relative z-[1] py-5 px-5 sm:px-8 border-y border-white/[0.04] bg-white/[0.01] overflow-hidden">
+                <style>{`
+                    @keyframes stack-scroll {
+                        0% { transform: translateX(0); }
+                        100% { transform: translateX(-50%); }
+                    }
+                    .stack-marquee { animation: stack-scroll 25s linear infinite; }
+                    .stack-marquee:hover { animation-play-state: paused; }
+                `}</style>
                 <div className="max-w-6xl mx-auto relative">
-                    <div className="flex items-center gap-6 overflow-x-auto hide-scrollbar">
-                        <span className="text-white/30 text-[12px] font-medium tracking-wider uppercase whitespace-nowrap shrink-0">Built with</span>
+                    <div className="flex items-center gap-5 overflow-hidden mask-fade-x">
+                        <span className="text-white/25 text-[11px] font-semibold tracking-[0.15em] uppercase whitespace-nowrap shrink-0">Built with</span>
                         <div className="w-px h-4 bg-white/10 shrink-0" />
-                        {['LangChain', 'pgvector', 'Groq AI', 'Supabase', 'FastAPI', 'Fastembed'].map(tech => (
-                            <span key={tech} className="px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.06] text-white/40 text-[12px] font-medium whitespace-nowrap shrink-0 hover:text-white/60 hover:border-white/[0.1] transition-colors">
-                                {tech}
-                            </span>
-                        ))}
+                        <div className="overflow-hidden flex-1" style={{ maskImage: 'linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)' }}>
+                            <div className="flex gap-4 stack-marquee" style={{ width: 'max-content' }}>
+                                {[...Array(2)].map((_, setIdx) =>
+                                    ['LangChain', 'pgvector', 'Groq AI', 'Supabase', 'FastAPI', 'Fastembed', 'React', 'Vite'].map((tech, i) => (
+                                        <span key={`${setIdx}-${i}`} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.03] border border-white/[0.06] text-white/45 text-[12px] font-medium whitespace-nowrap shrink-0 hover:text-amber-400 hover:border-amber-500/25 hover:bg-amber-500/[0.06] transition-all duration-300 cursor-default">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500/40" />
+                                            {tech}
+                                        </span>
+                                    ))
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -1003,14 +984,14 @@ export default function LandingPage() {
                     ))}
                 </svg>
                 <div className="max-w-5xl mx-auto relative">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8" style={{ alignItems: 'stretch' }}>
                         {[
                             { number: 8, suffix: '', label: 'AI Tools', desc: 'Geocoding, trip search, stop search, route building, history Q&A, compliance RAG, and more' },
                             { number: 8, suffix: 's', label: 'Avg Response Time', desc: 'Average agent reasoning chain completion', prefix: '< ' },
                             { number: 2, suffix: ' min', label: 'To First Route', desc: 'From sign-up to navigating your first route' },
                         ].map((stat, i) => (
                             <RevealOnScroll key={stat.label} delay={i * 120}>
-                                <div className="group relative text-center p-10 lg:p-12 rounded-2xl bg-[#1E293B]/50 border border-white/[0.06] hover:border-amber-500/25 hover:shadow-[0_0_40px_rgba(245,158,11,0.08)] hover:-translate-y-1 transition-all duration-300 overflow-hidden">
+                                <div className="group relative text-center p-10 lg:p-12 rounded-2xl bg-[#1E293B]/50 border border-white/[0.06] hover:border-amber-500/25 hover:shadow-[0_0_40px_rgba(245,158,11,0.08)] hover:-translate-y-1 transition-all duration-300 overflow-hidden h-full flex flex-col justify-center">
                                     <div className="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-[2px] bg-gradient-to-r from-transparent via-[#F59E0B] to-transparent" />
                                     <p className="text-[clamp(42px,5vw,64px)] font-extrabold bg-gradient-to-b from-[#FBBF24] via-[#F59E0B] to-amber-600/60 bg-clip-text text-transparent leading-none mb-3">
                                         {stat.prefix || ''}<CountUpNumber target={stat.number} suffix={stat.suffix} />
@@ -1146,22 +1127,40 @@ export default function LandingPage() {
 
                     {/* Bento grid */}
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-6">
-                        {/* Large card (2/3 width) — LangChain AI Agent */}
+                        {/* Large card (2/3 width) — Smart AI Assistant */}
                         <RevealOnScroll className="lg:col-span-2">
                             <div className="group h-full p-7 lg:p-9 rounded-2xl bg-[#1E293B]/50 border border-white/[0.06] hover:border-amber-500/25 transition-all duration-300">
                                 <div className="flex items-center gap-3 mb-5">
                                     <div className="w-11 h-11 rounded-xl bg-amber-500/10 flex items-center justify-center">
                                         <Brain className="w-5 h-5 text-amber-400" />
                                     </div>
-                                    <h3 className="text-white font-bold text-[18px]">LangChain AI Agent</h3>
+                                    <h3 className="text-white font-bold text-[18px]">Smart AI Assistant</h3>
                                 </div>
-                                <p className="text-[#94A3B8] text-[14px] leading-relaxed mb-5">Reasons through your request step by step using the ReAct architecture with 8 specialised tools.</p>
-                                {/* Code snippet */}
-                                <div className="rounded-xl bg-[#0D1117] border border-white/[0.06] p-4 font-mono text-[12px] leading-[1.8] overflow-x-auto">
-                                    <p><span className="text-amber-400">THOUGHT:</span> <span className="text-white/60">Sounds like a saved trip recall</span></p>
-                                    <p><span className="text-emerald-400">ACTION:</span> <span className="text-white/60">search_saved_trips(</span><span className="text-amber-300">"morning school run"</span><span className="text-white/60">)</span></p>
-                                    <p><span className="text-blue-400">OBSERVATION:</span> <span className="text-white/60">Found </span><span className="text-amber-300">"Morning School Run"</span><span className="text-white/60"> — 4 stops</span></p>
-                                    <p><span className="text-emerald-400">ACTION:</span> <span className="text-white/60">get_trip_by_id(3) → loading route</span></p>
+                                <p className="text-[#94A3B8] text-[14px] leading-relaxed mb-5">Understands natural language, remembers your routes, and plans everything step by step — no complicated instructions needed.</p>
+                                {/* Agent reasoning chain mock */}
+                                <div className="rounded-xl bg-[#0D1117] border border-white/[0.06] p-4 space-y-2.5">
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-6 h-6 rounded-full bg-amber-600 flex items-center justify-center shrink-0 mt-0.5"><span className="text-[10px] text-white font-bold">D</span></div>
+                                        <div className="rounded-xl bg-amber-600/90 px-3 py-2 text-white text-[12px]">Do my usual morning school run</div>
+                                    </div>
+                                    <div className="flex items-center gap-2 pl-9">
+                                        <span className="px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[11px] font-medium animate-pulse">🔍 Searching saved trips...</span>
+                                    </div>
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-6 h-6 rounded-full bg-white/[0.08] border border-white/[0.1] flex items-center justify-center shrink-0 mt-0.5 overflow-hidden">
+                                            <img src="/logo3_nobg.png" alt="AI" className="w-[140%] h-[140%] max-w-none object-cover rounded-full" />
+                                        </div>
+                                        <div className="rounded-xl bg-white/[0.05] border border-white/[0.06] px-3 py-2 text-[12px] text-white/80 leading-relaxed">
+                                            Found your <span className="text-amber-400 font-medium">Morning School Run</span>! Here are your 4 stops:<br />
+                                            <span className="text-emerald-400">✓</span> St Mary's Primary School<br />
+                                            <span className="text-emerald-400">✓</span> Riverside Community Centre<br />
+                                            <span className="text-emerald-400">✓</span> Depot Yard, Industrial Estate<br />
+                                            <span className="text-emerald-400">✓</span> Elmwood Park & Ride
+                                        </div>
+                                    </div>
+                                    <div className="pl-9">
+                                        <button className="flex items-center gap-2 px-3.5 py-2 rounded-lg bg-gradient-to-r from-amber-600 to-amber-500 text-white text-[11px] font-bold shadow-lg shadow-amber-500/20">🗺 Open in Google Maps →</button>
+                                    </div>
                                 </div>
                             </div>
                         </RevealOnScroll>
@@ -1191,22 +1190,85 @@ export default function LandingPage() {
                             </div>
                         </RevealOnScroll>
 
-                        {/* Bottom three equal cards */}
-                        {[
-                            { icon: <Clock className="w-5 h-5 text-amber-400" />, title: 'Trip History Q&A', desc: 'Ask "have I been to Oak Ave before?" and get a real answer from your driving history.' },
-                            { icon: <Navigation className="w-5 h-5 text-amber-400" />, title: 'One-Tap Navigation', desc: 'Google Maps and Apple Maps deep-link with all stops pre-loaded.' },
-                            { icon: <BarChart3 className="w-5 h-5 text-amber-400" />, title: 'Stats Dashboard', desc: 'Track your daily and weekly trips, stops visited, and total miles driven.' },
-                        ].map((f, i) => (
-                            <RevealOnScroll key={f.title} delay={180 + i * 100}>
-                                <div className="group h-full p-7 rounded-2xl bg-[#1E293B]/50 border border-white/[0.06] hover:border-amber-500/25 hover:-translate-y-1 transition-all duration-300">
-                                    <div className="w-11 h-11 rounded-xl bg-amber-500/10 flex items-center justify-center mb-5">
-                                        {f.icon}
-                                    </div>
-                                    <h3 className="text-white font-bold text-[17px] mb-2">{f.title}</h3>
-                                    <p className="text-[#94A3B8] text-[14px] leading-relaxed">{f.desc}</p>
+                        {/* Bottom three equal cards — each with a mini demo */}
+                        {/* Trip History Q&A */}
+                        <RevealOnScroll delay={180}>
+                            <div className="group h-full p-7 rounded-2xl bg-[#1E293B]/50 border border-white/[0.06] hover:border-amber-500/25 hover:-translate-y-1 transition-all duration-300 flex flex-col">
+                                <div className="w-11 h-11 rounded-xl bg-amber-500/10 flex items-center justify-center mb-4">
+                                    <Clock className="w-5 h-5 text-amber-400" />
                                 </div>
-                            </RevealOnScroll>
-                        ))}
+                                <h3 className="text-white font-bold text-[17px] mb-2">Trip History Q&A</h3>
+                                <p className="text-[#94A3B8] text-[14px] leading-relaxed mb-4">Ask about your past trips and get grounded answers.</p>
+                                <div className="mt-auto space-y-2">
+                                    <div className="rounded-lg bg-[#0D1117] border border-white/[0.06] px-3 py-2">
+                                        <p className="text-amber-400 text-[11px] font-mono">"Have I been to Oak Ave before?"</p>
+                                    </div>
+                                    <div className="rounded-lg bg-white/[0.03] border border-white/[0.06] px-3 py-2">
+                                        <p className="text-white/70 text-[11px]">Yes — you visited <span className="text-amber-400">Oak Ave</span> on your <span className="text-white/90">East Side Route</span>, last driven Feb 28.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </RevealOnScroll>
+
+                        {/* One-Tap Navigation */}
+                        <RevealOnScroll delay={280}>
+                            <div className="group h-full p-7 rounded-2xl bg-[#1E293B]/50 border border-white/[0.06] hover:border-amber-500/25 hover:-translate-y-1 transition-all duration-300 flex flex-col">
+                                <div className="w-11 h-11 rounded-xl bg-amber-500/10 flex items-center justify-center mb-4">
+                                    <Navigation className="w-5 h-5 text-amber-400" />
+                                </div>
+                                <h3 className="text-white font-bold text-[17px] mb-2">One-Tap Navigation</h3>
+                                <p className="text-[#94A3B8] text-[14px] leading-relaxed mb-4">Google Maps and Apple Maps deep-link with all stops pre-loaded.</p>
+                                <div className="mt-auto space-y-2">
+                                    <div className="rounded-lg bg-[#0D1117] border border-white/[0.06] px-3 py-2.5 space-y-1.5">
+                                        {['St Mary\'s School', 'Riverside Centre', 'Depot Yard'].map((stop, i) => (
+                                            <div key={i} className="flex items-center gap-2 text-[11px]">
+                                                <span className="w-4 h-4 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400 text-[9px] font-bold shrink-0">{i + 1}</span>
+                                                <span className="text-white/60">{stop}</span>
+                                                {i < 2 && <span className="ml-auto text-white/20">↓</span>}
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <div className="flex-1 text-center py-1.5 rounded-md text-[10px] font-bold text-white/60 border border-white/[0.08] bg-white/[0.03]">Apple Maps</div>
+                                        <div className="flex-1 text-center py-1.5 rounded-md text-[10px] font-bold text-[#0D1117] bg-amber-500">Google Maps</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </RevealOnScroll>
+
+                        {/* Stats Dashboard */}
+                        <RevealOnScroll delay={380}>
+                            <div className="group h-full p-7 rounded-2xl bg-[#1E293B]/50 border border-white/[0.06] hover:border-amber-500/25 hover:-translate-y-1 transition-all duration-300 flex flex-col">
+                                <div className="w-11 h-11 rounded-xl bg-amber-500/10 flex items-center justify-center mb-4">
+                                    <BarChart3 className="w-5 h-5 text-amber-400" />
+                                </div>
+                                <h3 className="text-white font-bold text-[17px] mb-2">Stats Dashboard</h3>
+                                <p className="text-[#94A3B8] text-[14px] leading-relaxed mb-4">Track your daily and weekly driving activity at a glance.</p>
+                                <div className="mt-auto rounded-lg bg-[#0D1117] border border-white/[0.06] px-3.5 py-3 space-y-3">
+                                    <div className="grid grid-cols-3 gap-3 text-center">
+                                        <div>
+                                            <p className="text-amber-400 text-[16px] font-bold">47</p>
+                                            <p className="text-white/30 text-[9px] uppercase tracking-wider">Trips</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-amber-400 text-[16px] font-bold">183</p>
+                                            <p className="text-white/30 text-[9px] uppercase tracking-wider">Stops</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-amber-400 text-[16px] font-bold">312</p>
+                                            <p className="text-white/30 text-[9px] uppercase tracking-wider">Miles</p>
+                                        </div>
+                                    </div>
+                                    {/* Mini bar chart */}
+                                    <div className="flex items-end gap-1 h-[28px]">
+                                        {[40, 65, 55, 80, 70, 90, 45].map((h, i) => (
+                                            <div key={i} className="flex-1 rounded-sm bg-amber-500/30 hover:bg-amber-500/50 transition-colors" style={{ height: `${h}%` }} />
+                                        ))}
+                                    </div>
+                                    <p className="text-white/20 text-[9px] text-right">This week</p>
+                                </div>
+                            </div>
+                        </RevealOnScroll>
                     </div>
                 </div>
             </section>
@@ -1251,6 +1313,10 @@ export default function LandingPage() {
                             </p>
                             <p className="text-white text-base lg:text-lg leading-relaxed">
                                 RoutAura fixes that. Describe your route <strong className="text-[#F59E0B] font-bold">once in plain English</strong> — or just say 'my usual morning run' — and the AI handles the rest. It remembers your stops, recalls your saved routes, and launches Google Maps with everything pre-loaded. One conversation. Zero rebuilding.
+                            </p>
+                            {/* JARGON SIMPLIFIED – user-friendly version */}
+                            <p className="text-white text-base lg:text-lg leading-relaxed">
+                                We built this so you never have to type the same addresses again — the AI handles all the complicated stuff behind the scenes.
                             </p>
                         </RevealOnScroll>
 
@@ -1334,93 +1400,238 @@ export default function LandingPage() {
                 SECTION 9: ROADMAP
                ═══════════════════════════════════════ */}
             <section className="py-20 lg:py-28 px-5 sm:px-8 relative z-[1] bg-[#0F172A]/30 overflow-hidden">
-                {/* Road with milestone markers */}
-                <svg className="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="xMidYMid slice" viewBox="0 0 1200 500" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.2 }}>
-                    <path d="M -30 400 C 200 380, 400 350, 600 360 S 900 330, 1250 350" fill="none" stroke="rgba(245,158,11,0.05)" strokeWidth="44" strokeLinecap="round" />
-                    <path d="M -30 400 C 200 380, 400 350, 600 360 S 900 330, 1250 350" fill="none" stroke="rgba(245,158,11,0.12)" strokeWidth="1.2" strokeDasharray="16 30" style={{ animation: 'hero-dash 3s linear infinite' }} />
-                    {/* Milestone flags */}
-                    {[{ x: 200, y: 385 }, { x: 600, y: 358 }, { x: 1000, y: 342 }].map((m, i) => (
-                        <g key={`ms-${i}`}>
-                            <line x1={m.x} y1={m.y} x2={m.x} y2={m.y - 35} stroke="rgba(245,158,11,0.4)" strokeWidth="1.5" />
-                            <rect x={m.x} y={m.y - 35} width="18" height="12" rx="2" fill={i === 0 ? 'rgba(245,158,11,0.3)' : 'rgba(245,158,11,0.1)'} stroke="rgba(245,158,11,0.25)" strokeWidth="0.8" />
-                            <circle cx={m.x} cy={m.y} r="4" fill="rgba(245,158,11,0.2)" stroke="rgba(245,158,11,0.3)" strokeWidth="1" />
-                        </g>
-                    ))}
-                    {!isMobile && <rect x="-6" y="-3" width="12" height="6" rx="2" fill="rgba(245,158,11,0.3)">
-                        <animateMotion dur="16s" repeatCount="indefinite" rotate="auto" path="M -30 400 C 200 380, 400 350, 600 360 S 900 330, 1250 350" />
-                    </rect>}
-                </svg>
-                <div className="max-w-5xl mx-auto relative">
+                {/* CSS for roadmap timeline */}
+                <style>{`
+                    @keyframes roadmap-journey {
+                        0% { transform: translateX(0); }
+                        100% { transform: translateX(-50%); }
+                    }
+                    @keyframes milestone-ping {
+                        0% { transform: scale(1); opacity: 0.6; }
+                        100% { transform: scale(2.5); opacity: 0; }
+                    }
+                    @keyframes road-glow-pulse {
+                        0%, 100% { opacity: 0.4; }
+                        50% { opacity: 0.8; }
+                    }
+                    .roadmap-track {
+                        animation: roadmap-journey 40s linear infinite;
+                        will-change: transform;
+                    }
+                    .roadmap-wrapper:hover .roadmap-track {
+                        animation-play-state: paused;
+                    }
+                    .roadmap-wrapper {
+                        cursor: grab;
+                    }
+                    .roadmap-wrapper:active {
+                        cursor: grabbing;
+                    }
+                `}</style>
+
+                <div className="max-w-6xl mx-auto relative">
                     <RevealOnScroll className="text-center mb-14 lg:mb-20">
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[12px] font-medium mb-6">
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
                             Roadmap
                         </div>
                         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 tracking-tight">What&apos;s coming next</h2>
-                        <p className="text-base sm:text-lg" style={{ color: '#94A3B8' }}>RoutAura is just getting started.</p>
+                        <p className="text-base sm:text-lg" style={{ color: '#94A3B8' }}>Follow the road ahead.</p>
                     </RevealOnScroll>
+                </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-                        {[
-                            {
-                                icon: <Shield className="w-6 h-6" />,
-                                badge: 'Live',
-                                badgeLive: true,
-                                badgeActive: true,
-                                title: 'CDL Compliance Assistant',
-                                desc: 'Ask plain-English questions about CDL rules, HOS regulations, pre-trip inspection, railroad crossings, and school bus protocols. Powered by pgvector RAG over 1,553 chunks from 9 official NY CDL manuals — with cited sources and page numbers.'
-                            },
-                            {
-                                icon: <Zap className="w-6 h-6" />,
-                                badge: 'In Development',
-                                badgeActive: true,
-                                title: 'Smart Route Warnings',
-                                desc: 'Real-time traffic incident alerts for your saved routes. RoutAura automatically checks for accidents, road closures, and major delays along your saved trips every morning — colored severity indicators show which routes are affected before you start your day. Ask the agent "is my school run clear today?" for an instant answer.'
-                            },
-                            {
-                                icon: <MapPin className="w-6 h-6" />,
-                                badge: 'In Development',
-                                badgeActive: true,
-                                title: 'Right-Side Stop Optimisation',
-                                desc: 'For school bus drivers — the AI will automatically detect if a stop is on the left side of the road and suggest an alternative approach so children never have to cross.'
-                            },
-                            {
-                                icon: <Globe className="w-6 h-6" />,
-                                badge: 'Coming Soon',
-                                badgeActive: false,
-                                title: 'Global Expansion',
-                                desc: 'Currently optimised for the USA. Coming soon to Pakistan, UAE, Canada, Australia, and the UK — with local geocoding and region-aware routing.'
-                            },
-                            {
-                                icon: <Truck className="w-6 h-6" />,
-                                badge: 'Coming Soon',
-                                badgeActive: false,
-                                title: 'Fleet Management',
-                                desc: 'Manage multiple drivers and routes from a single dashboard. Assign routes, track launches, and monitor your fleet in real time.'
-                            },
-                        ].map((item, i) => (
-                            <RevealOnScroll key={item.title} delay={i * 150}>
-                                <div className={`group relative p-8 lg:p-10 rounded-2xl transition-all duration-300 flex flex-col h-full ${item.badgeLive
-                                    ? 'bg-amber-500/[0.04] border-2 border-amber-500/30 hover:border-amber-500/50 hover:bg-amber-500/[0.06]'
-                                    : 'bg-white/[0.01] border-2 border-dashed border-amber-500/20 hover:border-amber-500/40 hover:bg-white/[0.02]'
-                                }`}>
-                                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:text-amber-400 transition-all duration-300 ${item.badgeLive
-                                        ? 'bg-amber-500/15 border border-amber-500/25 text-amber-400'
-                                        : 'bg-amber-500/[0.07] border border-dashed border-amber-500/20 text-amber-400/70'
-                                    }`}>
-                                        {item.icon}
+                {/* Scrollable timeline with drag support */}
+                <div
+                    className="relative roadmap-wrapper overflow-hidden"
+                    style={{
+                        maskImage: 'linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)',
+                        WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)',
+                    }}
+                    onMouseDown={(e) => {
+                        const el = e.currentTarget;
+                        const track = el.querySelector('.roadmap-track');
+                        if (!track) return;
+                        const style = getComputedStyle(track);
+                        const matrix = new DOMMatrixReadOnly(style.transform);
+                        const startTranslateX = matrix.m41;
+                        track.style.animation = 'none';
+                        track.style.transform = `translateX(${startTranslateX}px)`;
+                        const startX = e.clientX;
+                        const onMove = (ev) => {
+                            const dx = ev.clientX - startX;
+                            track.style.transform = `translateX(${startTranslateX + dx}px)`;
+                        };
+                        const onUp = () => {
+                            document.removeEventListener('mousemove', onMove);
+                            document.removeEventListener('mouseup', onUp);
+                            track.style.animation = '';
+                            track.style.transform = '';
+                        };
+                        document.addEventListener('mousemove', onMove);
+                        document.addEventListener('mouseup', onUp);
+                    }}
+                >
+                    <div className="roadmap-track flex items-center" style={{ width: 'max-content', paddingTop: '40px', paddingBottom: '40px' }}>
+                        {[...Array(2)].map((_, setIdx) => {
+                            const items = [
+                                {
+                                    icon: <Shield className="w-6 h-6" />,
+                                    badge: 'Live',
+                                    badgeLive: true,
+                                    badgeActive: true,
+                                    title: 'CDL Compliance Assistant',
+                                    desc: 'Ask plain-English questions about CDL rules, HOS regulations, pre-trip inspection, railroad crossings, and school bus protocols. Answers include exact page references from 9 NY CDL manuals.',
+                                },
+                                {
+                                    icon: <Zap className="w-6 h-6" />,
+                                    badge: 'In Development',
+                                    badgeActive: true,
+                                    title: 'Smart Route Warnings',
+                                    desc: 'Real-time traffic alerts for your saved routes. RoutAura checks for accidents, closures, and delays every morning — ask "is my school run clear today?" for an instant answer.',
+                                },
+                                {
+                                    icon: <MapPin className="w-6 h-6" />,
+                                    badge: 'In Development',
+                                    badgeActive: true,
+                                    title: 'Right-Side Stop Optimisation',
+                                    desc: 'For school bus drivers — the AI detects if a stop is on the left side and suggests an alternative approach so children never cross the road.',
+                                },
+                                {
+                                    icon: <Globe className="w-6 h-6" />,
+                                    badge: 'Coming Soon',
+                                    badgeActive: false,
+                                    title: 'Global Expansion',
+                                    desc: 'Coming soon to Pakistan, UAE, Canada, Australia, and the UK — with local geocoding and region-aware routing.',
+                                },
+                                {
+                                    icon: <Truck className="w-6 h-6" />,
+                                    badge: 'Coming Soon',
+                                    badgeActive: false,
+                                    title: 'Fleet Management',
+                                    desc: 'Manage multiple drivers and routes from one dashboard. Assign routes, track launches, and monitor your fleet in real time.',
+                                },
+                            ];
+
+                            return items.map((item, i) => {
+                                const isAbove = i % 2 === 0;
+                                const glowOpacity = item.badgeLive ? 1 : item.badgeActive ? 0.5 : 0.2;
+                                const cardOpacity = item.badgeLive ? 1 : item.badgeActive ? 0.85 : 0.6;
+
+                                return (
+                                    <div key={`${setIdx}-${i}`} className="flex flex-col items-center shrink-0" style={{ width: '360px' }}>
+                                        {/* Card above the line (even indices) */}
+                                        {isAbove && (
+                                            <div
+                                                className={`relative p-7 rounded-2xl transition-all duration-300 flex flex-col w-[320px] mb-6 group ${item.badgeLive
+                                                    ? 'bg-amber-500/[0.06] border-2 border-amber-500/40 hover:border-amber-500/60'
+                                                    : item.badgeActive
+                                                        ? 'bg-white/[0.02] border-2 border-dashed border-amber-500/25 hover:border-amber-500/40'
+                                                        : 'bg-white/[0.01] border border-dashed border-white/[0.08] hover:border-white/[0.15]'
+                                                }`}
+                                                style={{ opacity: cardOpacity, minHeight: '240px' }}
+                                            >
+                                                {/* Amber glow for Live card */}
+                                                {item.badgeLive && (
+                                                    <div className="absolute -inset-[1px] rounded-2xl pointer-events-none" style={{
+                                                        boxShadow: '0 0 30px rgba(245,158,11,0.15), 0 0 60px rgba(245,158,11,0.08)',
+                                                    }} />
+                                                )}
+                                                <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-4 ${item.badgeLive
+                                                    ? 'bg-amber-500/20 border border-amber-500/30 text-amber-400'
+                                                    : item.badgeActive
+                                                        ? 'bg-amber-500/10 border border-dashed border-amber-500/20 text-amber-400/70'
+                                                        : 'bg-white/[0.04] border border-dashed border-white/[0.08] text-white/30'
+                                                }`}>
+                                                    {item.icon}
+                                                </div>
+                                                <span className={`inline-block w-fit px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase mb-3 border ${item.badgeLive
+                                                    ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25'
+                                                    : item.badgeActive
+                                                        ? 'bg-amber-500/15 text-amber-400 border-amber-500/20'
+                                                        : 'bg-white/[0.04] text-white/30 border-white/[0.06]'
+                                                }`}>{item.badge}</span>
+                                                <h3 className={`font-bold text-[16px] mb-2 ${item.badgeLive ? 'text-white' : item.badgeActive ? 'text-white/80' : 'text-white/50'}`}>{item.title}</h3>
+                                                <p className={`text-[12.5px] leading-relaxed flex-grow ${item.badgeLive ? 'text-white/45' : item.badgeActive ? 'text-white/30' : 'text-white/20'}`}>{item.desc}</p>
+                                            </div>
+                                        )}
+
+                                        {/* Connector stem + milestone dot */}
+                                        <div className="flex flex-col items-center" style={{ height: isAbove ? 'auto' : 'auto' }}>
+                                            {/* Stem going down from card (above) or up to card (below) */}
+                                            {isAbove && (
+                                                <div style={{ width: '2px', height: '32px', background: `linear-gradient(to bottom, rgba(245,158,11,${glowOpacity * 0.4}), rgba(245,158,11,${glowOpacity * 0.8}))` }} />
+                                            )}
+
+                                            {/* Milestone dot */}
+                                            <div className="relative flex items-center justify-center">
+                                                <div
+                                                    className="w-4 h-4 rounded-full border-2 z-10"
+                                                    style={{
+                                                        backgroundColor: item.badgeLive ? '#F59E0B' : item.badgeActive ? 'rgba(245,158,11,0.4)' : 'rgba(255,255,255,0.15)',
+                                                        borderColor: item.badgeLive ? '#FBBF24' : item.badgeActive ? 'rgba(245,158,11,0.5)' : 'rgba(255,255,255,0.2)',
+                                                    }}
+                                                />
+                                                {/* Pulse ring for Live milestone */}
+                                                {item.badgeLive && (
+                                                    <div className="absolute w-4 h-4 rounded-full bg-amber-400" style={{ animation: 'milestone-ping 2s ease-out infinite' }} />
+                                                )}
+                                            </div>
+
+                                            {/* Road line segment (horizontal, runs through dots) */}
+                                            <div className="absolute left-0 right-0" style={{ height: '2px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+                                            </div>
+
+                                            {!isAbove && (
+                                                <div style={{ width: '2px', height: '32px', background: `linear-gradient(to bottom, rgba(245,158,11,${glowOpacity * 0.8}), rgba(245,158,11,${glowOpacity * 0.4}))` }} />
+                                            )}
+                                        </div>
+
+                                        {/* Card below the line (odd indices) */}
+                                        {!isAbove && (
+                                            <div
+                                                className={`relative p-7 rounded-2xl transition-all duration-300 flex flex-col w-[320px] mt-6 group ${item.badgeActive
+                                                    ? 'bg-white/[0.02] border-2 border-dashed border-amber-500/25 hover:border-amber-500/40'
+                                                    : 'bg-white/[0.01] border border-dashed border-white/[0.08] hover:border-white/[0.15]'
+                                                }`}
+                                                style={{ opacity: cardOpacity, minHeight: '240px' }}
+                                            >
+                                                <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-4 ${item.badgeActive
+                                                    ? 'bg-amber-500/10 border border-dashed border-amber-500/20 text-amber-400/70'
+                                                    : 'bg-white/[0.04] border border-dashed border-white/[0.08] text-white/30'
+                                                }`}>
+                                                    {item.icon}
+                                                </div>
+                                                <span className={`inline-block w-fit px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase mb-3 border ${item.badgeActive
+                                                    ? 'bg-amber-500/15 text-amber-400 border-amber-500/20'
+                                                    : 'bg-white/[0.04] text-white/30 border-white/[0.06]'
+                                                }`}>{item.badge}</span>
+                                                <h3 className={`font-bold text-[16px] mb-2 ${item.badgeActive ? 'text-white/80' : 'text-white/50'}`}>{item.title}</h3>
+                                                <p className={`text-[12.5px] leading-relaxed flex-grow ${item.badgeActive ? 'text-white/30' : 'text-white/20'}`}>{item.desc}</p>
+                                            </div>
+                                        )}
                                     </div>
-                                    <span className={`inline-block w-fit px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase mb-4 border ${item.badgeLive
-                                        ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25'
-                                        : item.badgeActive
-                                            ? 'bg-amber-500/15 text-amber-400 border-amber-500/20'
-                                            : 'bg-white/[0.04] text-white/40 border-white/[0.08]'
-                                        }`}>{item.badge}</span>
-                                    <h3 className="text-white/90 font-bold text-[18px] mb-3">{item.title}</h3>
-                                    <p className="text-white/35 text-[14px] leading-relaxed flex-grow">{item.desc}</p>
-                                </div>
-                            </RevealOnScroll>
-                        ))}
+                                );
+                            });
+                        })}
+                    </div>
+
+                    {/* Road line running horizontally through the milestone dots */}
+                    <div className="absolute left-0 right-0 pointer-events-none" style={{ top: 'calc(50%)', height: '3px' }}>
+                        <div style={{
+                            width: '100%',
+                            height: '100%',
+                            background: 'linear-gradient(90deg, transparent 0%, rgba(245,158,11,0.3) 10%, rgba(245,158,11,0.5) 20%, rgba(245,158,11,0.3) 40%, rgba(245,158,11,0.15) 70%, rgba(255,255,255,0.05) 100%)',
+                        }} />
+                        {/* Dashed lane markings overlay */}
+                        <div style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            backgroundImage: 'repeating-linear-gradient(90deg, transparent 0px, transparent 12px, rgba(245,158,11,0.15) 12px, rgba(245,158,11,0.15) 28px)',
+                            animation: 'road-glow-pulse 4s ease-in-out infinite',
+                        }} />
                     </div>
                 </div>
             </section>
@@ -1541,6 +1752,28 @@ export default function LandingPage() {
 
                     <div className="border-t border-white/[0.06] pt-6 text-center">
                         <p className="text-white/20 text-[12px]">© 2026 RoutAura. Built for drivers, powered by AI.</p>
+                        {/* Optional: Move tech stack list to footer */}
+                        <p className="text-white/10 text-[10px] mt-2">Built with ❤️ and modern AI tools</p>
+                        <div className="flex items-center gap-4 justify-center mt-2">
+                            <span className="px-2 py-0.5 rounded-full bg-white/[0.03] border border-white/[0.04] text-white/30 text-[10px] font-medium whitespace-nowrap shrink-0 hover:text-white/40 hover:border-white/[0.06] transition-colors">
+                                LangChain
+                            </span>
+                            <span className="px-2 py-0.5 rounded-full bg-white/[0.03] border border-white/[0.04] text-white/30 text-[10px] font-medium whitespace-nowrap shrink-0 hover:text-white/40 hover:border-white/[0.06] transition-colors">
+                                pgvector
+                            </span>
+                            <span className="px-2 py-0.5 rounded-full bg-white/[0.03] border border-white/[0.04] text-white/30 text-[10px] font-medium whitespace-nowrap shrink-0 hover:text-white/40 hover:border-white/[0.06] transition-colors">
+                                Groq AI
+                            </span>
+                            <span className="px-2 py-0.5 rounded-full bg-white/[0.03] border border-white/[0.04] text-white/30 text-[10px] font-medium whitespace-nowrap shrink-0 hover:text-white/40 hover:border-white/[0.06] transition-colors">
+                                Supabase
+                            </span>
+                            <span className="px-2 py-0.5 rounded-full bg-white/[0.03] border border-white/[0.04] text-white/30 text-[10px] font-medium whitespace-nowrap shrink-0 hover:text-white/40 hover:border-white/[0.06] transition-colors">
+                                FastAPI
+                            </span>
+                            <span className="px-2 py-0.5 rounded-full bg-white/[0.03] border border-white/[0.04] text-white/30 text-[10px] font-medium whitespace-nowrap shrink-0 hover:text-white/40 hover:border-white/[0.06] transition-colors">
+                                Fastembed
+                            </span>
+                        </div>
                     </div>
                 </div>
             </footer>
