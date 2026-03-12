@@ -716,7 +716,7 @@ export default function LandingPage() {
         { q: 'Is RoutAura free to use?', a: 'Yes, completely free. No credit card required. Sign up and start planning routes in under 2 minutes.' },
         { q: 'Does it work on my phone?', a: 'Yes. RoutAura is a Progressive Web App (PWA) optimised for iOS Safari and Android Chrome. Add it to your home screen for a native app experience.' },
         { q: 'Do I need to type exact addresses?', a: 'No. That\'s the whole point. Say "the co-op", "main school", or "morning run" and the AI figures out the rest using your saved location history.' },
-        { q: 'What if I drive the same route every day?', a: 'Save it once, re-launch it with one tap. The agent recognises "do my usual run" and retrieves the right route automatically via semantic search.' },
+        { q: 'What if I drive the same route every day?', a: 'Save it once, re-launch it with one tap. The agent recognises "do my usual run" and retrieves the right route automatically from your saved trips.' },
         { q: 'How is this different from just using Google Maps?', a: 'Google Maps has no memory of your routes, no natural language input, and forces you to re-enter every stop manually every single day. RoutAura remembers everything.' },
         { q: 'Is my data private?', a: 'Yes. All your trips and stops are isolated to your account using Supabase PostgreSQL with per-user data partitioning. No data is shared between users.' },
     ];
@@ -967,7 +967,7 @@ export default function LandingPage() {
                     <div className="flex items-center gap-6 overflow-x-auto hide-scrollbar">
                         <span className="text-white/30 text-[12px] font-medium tracking-wider uppercase whitespace-nowrap shrink-0">Built with</span>
                         <div className="w-px h-4 bg-white/10 shrink-0" />
-                        {['LangChain', 'ChromaDB', 'Groq AI', 'Supabase', 'FastAPI', 'Fastembed'].map(tech => (
+                        {['LangChain', 'pgvector', 'Groq AI', 'Supabase', 'FastAPI', 'Fastembed'].map(tech => (
                             <span key={tech} className="px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.06] text-white/40 text-[12px] font-medium whitespace-nowrap shrink-0 hover:text-white/60 hover:border-white/[0.1] transition-colors">
                                 {tech}
                             </span>
@@ -1005,7 +1005,7 @@ export default function LandingPage() {
                 <div className="max-w-5xl mx-auto relative">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
                         {[
-                            { number: 5, suffix: '', label: 'AI Tools', desc: 'Geocoding, semantic memory, trip recall, history retrieval, RAG' },
+                            { number: 8, suffix: '', label: 'AI Tools', desc: 'Geocoding, trip search, stop search, route building, history Q&A, compliance RAG, and more' },
                             { number: 8, suffix: 's', label: 'Avg Response Time', desc: 'Average agent reasoning chain completion', prefix: '< ' },
                             { number: 2, suffix: ' min', label: 'To First Route', desc: 'From sign-up to navigating your first route' },
                         ].map((stat, i) => (
@@ -1155,37 +1155,37 @@ export default function LandingPage() {
                                     </div>
                                     <h3 className="text-white font-bold text-[18px]">LangChain AI Agent</h3>
                                 </div>
-                                <p className="text-[#94A3B8] text-[14px] leading-relaxed mb-5">Reasons through your request step by step using the ReAct architecture with 5 specialised tools.</p>
+                                <p className="text-[#94A3B8] text-[14px] leading-relaxed mb-5">Reasons through your request step by step using the ReAct architecture with 8 specialised tools.</p>
                                 {/* Code snippet */}
                                 <div className="rounded-xl bg-[#0D1117] border border-white/[0.06] p-4 font-mono text-[12px] leading-[1.8] overflow-x-auto">
                                     <p><span className="text-amber-400">THOUGHT:</span> <span className="text-white/60">Sounds like a saved trip recall</span></p>
                                     <p><span className="text-emerald-400">ACTION:</span> <span className="text-white/60">search_saved_trips(</span><span className="text-amber-300">"morning school run"</span><span className="text-white/60">)</span></p>
-                                    <p><span className="text-blue-400">OBSERVATION:</span> <span className="text-white/60">Found "Morning School Run", similarity</span> <span className="text-amber-300">0.91</span></p>
-                                    <p><span className="text-emerald-400">ACTION:</span> <span className="text-white/60">get_trip_by_id(3) → 4 stops returned</span></p>
+                                    <p><span className="text-blue-400">OBSERVATION:</span> <span className="text-white/60">Found </span><span className="text-amber-300">"Morning School Run"</span><span className="text-white/60"> — 4 stops</span></p>
+                                    <p><span className="text-emerald-400">ACTION:</span> <span className="text-white/60">get_trip_by_id(3) → loading route</span></p>
                                 </div>
                             </div>
                         </RevealOnScroll>
 
-                        {/* Tall card (1/3 width) — Semantic Memory */}
+                        {/* Tall card (1/3 width) — CDL Compliance Assistant */}
                         <RevealOnScroll delay={120}>
                             <div className="group h-full p-7 lg:p-9 rounded-2xl bg-[#1E293B]/50 border border-white/[0.06] hover:border-amber-500/25 transition-all duration-300 flex flex-col">
                                 <div className="flex items-center gap-3 mb-5">
                                     <div className="w-11 h-11 rounded-xl bg-amber-500/10 flex items-center justify-center">
-                                        <Search className="w-5 h-5 text-amber-400" />
+                                        <Shield className="w-5 h-5 text-amber-400" />
                                     </div>
-                                    <h3 className="text-white font-bold text-[18px]">Semantic Memory</h3>
+                                    <h3 className="text-white font-bold text-[18px]">CDL Compliance</h3>
                                 </div>
-                                <p className="text-[#94A3B8] text-[14px] leading-relaxed mb-5">Remembers your stops. Say "the co-op" and it knows exactly where you mean.</p>
-                                {/* Mini search demo */}
+                                <p className="text-[#94A3B8] text-[14px] leading-relaxed mb-5">Ask plain-English questions about CDL rules, HOS, inspections, and safety protocols. Cited answers from official manuals.</p>
+                                {/* Mini compliance demo */}
                                 <div className="mt-auto space-y-3">
                                     <div className="rounded-lg bg-[#0D1117] border border-white/[0.06] px-3.5 py-2.5 flex items-center gap-2">
-                                        <Search className="w-3.5 h-3.5 text-white/30" />
-                                        <span className="text-amber-400 text-[13px] font-mono">the co-op</span>
+                                        <Shield className="w-3.5 h-3.5 text-white/30" />
+                                        <span className="text-amber-400 text-[13px] font-mono">air brake checks?</span>
                                         <span className="ml-auto w-1 h-4 bg-amber-400 animate-pulse rounded-sm" />
                                     </div>
                                     <div className="rounded-lg bg-emerald-500/[0.06] border border-emerald-500/20 px-3.5 py-2.5">
-                                        <p className="text-white/80 text-[12px] font-medium">Co-operative Food, 14 Elm Rd</p>
-                                        <p className="text-emerald-400 text-[11px] mt-1">0.94 match ✓</p>
+                                        <p className="text-white/80 text-[12px] font-medium">Check pressure build-up, low air warning, spring brakes…</p>
+                                        <p className="text-emerald-400 text-[11px] mt-1">📚 NY CDL Manual — Air Brakes, p.76</p>
                                     </div>
                                 </div>
                             </div>
@@ -1193,7 +1193,7 @@ export default function LandingPage() {
 
                         {/* Bottom three equal cards */}
                         {[
-                            { icon: <Clock className="w-5 h-5 text-amber-400" />, title: 'RAG Trip History', desc: 'Ask "have I been to Oak Ave before?" Get a real answer from your history.' },
+                            { icon: <Clock className="w-5 h-5 text-amber-400" />, title: 'Trip History Q&A', desc: 'Ask "have I been to Oak Ave before?" and get a real answer from your driving history.' },
                             { icon: <Navigation className="w-5 h-5 text-amber-400" />, title: 'One-Tap Navigation', desc: 'Google Maps and Apple Maps deep-link with all stops pre-loaded.' },
                             { icon: <BarChart3 className="w-5 h-5 text-amber-400" />, title: 'Stats Dashboard', desc: 'Track your daily and weekly trips, stops visited, and total miles driven.' },
                         ].map((f, i) => (
@@ -1360,8 +1360,23 @@ export default function LandingPage() {
                         <p className="text-base sm:text-lg" style={{ color: '#94A3B8' }}>RoutAura is just getting started.</p>
                     </RevealOnScroll>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
                         {[
+                            {
+                                icon: <Shield className="w-6 h-6" />,
+                                badge: 'Live',
+                                badgeLive: true,
+                                badgeActive: true,
+                                title: 'CDL Compliance Assistant',
+                                desc: 'Ask plain-English questions about CDL rules, HOS regulations, pre-trip inspection, railroad crossings, and school bus protocols. Powered by pgvector RAG over 1,553 chunks from 9 official NY CDL manuals — with cited sources and page numbers.'
+                            },
+                            {
+                                icon: <Zap className="w-6 h-6" />,
+                                badge: 'In Development',
+                                badgeActive: true,
+                                title: 'Smart Route Warnings',
+                                desc: 'Real-time traffic incident alerts for your saved routes. RoutAura automatically checks for accidents, road closures, and major delays along your saved trips every morning — colored severity indicators show which routes are affected before you start your day. Ask the agent "is my school run clear today?" for an instant answer.'
+                            },
                             {
                                 icon: <MapPin className="w-6 h-6" />,
                                 badge: 'In Development',
@@ -1385,13 +1400,21 @@ export default function LandingPage() {
                             },
                         ].map((item, i) => (
                             <RevealOnScroll key={item.title} delay={i * 150}>
-                                <div className="group relative p-8 lg:p-10 rounded-2xl bg-white/[0.01] border-2 border-dashed border-amber-500/20 hover:border-amber-500/40 hover:bg-white/[0.02] transition-all duration-300 flex flex-col h-full">
-                                    <div className="w-14 h-14 rounded-xl bg-amber-500/[0.07] border border-dashed border-amber-500/20 flex items-center justify-center text-amber-400/70 mb-6 group-hover:scale-110 group-hover:text-amber-400 transition-all duration-300">
+                                <div className={`group relative p-8 lg:p-10 rounded-2xl transition-all duration-300 flex flex-col h-full ${item.badgeLive
+                                    ? 'bg-amber-500/[0.04] border-2 border-amber-500/30 hover:border-amber-500/50 hover:bg-amber-500/[0.06]'
+                                    : 'bg-white/[0.01] border-2 border-dashed border-amber-500/20 hover:border-amber-500/40 hover:bg-white/[0.02]'
+                                }`}>
+                                    <div className={`w-14 h-14 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 group-hover:text-amber-400 transition-all duration-300 ${item.badgeLive
+                                        ? 'bg-amber-500/15 border border-amber-500/25 text-amber-400'
+                                        : 'bg-amber-500/[0.07] border border-dashed border-amber-500/20 text-amber-400/70'
+                                    }`}>
                                         {item.icon}
                                     </div>
-                                    <span className={`inline-block w-fit px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase mb-4 border ${item.badgeActive
-                                        ? 'bg-amber-500/15 text-amber-400 border-amber-500/20'
-                                        : 'bg-white/[0.04] text-white/40 border-white/[0.08]'
+                                    <span className={`inline-block w-fit px-3 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase mb-4 border ${item.badgeLive
+                                        ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/25'
+                                        : item.badgeActive
+                                            ? 'bg-amber-500/15 text-amber-400 border-amber-500/20'
+                                            : 'bg-white/[0.04] text-white/40 border-white/[0.08]'
                                         }`}>{item.badge}</span>
                                     <h3 className="text-white/90 font-bold text-[18px] mb-3">{item.title}</h3>
                                     <p className="text-white/35 text-[14px] leading-relaxed flex-grow">{item.desc}</p>
@@ -1499,7 +1522,8 @@ export default function LandingPage() {
                             <h4 className="text-white/60 text-[11px] font-bold tracking-widest uppercase mb-4">Built With</h4>
                             <ul className="space-y-2.5">
                                 <li><span className="text-white/40 text-[13px]">LangChain</span></li>
-                                <li><span className="text-white/40 text-[13px]">ChromaDB</span></li>
+                                <li><span className="text-white/40 text-[13px]">pgvector</span></li>
+                                <li><span className="text-white/40 text-[13px]">Supabase</span></li>
                                 <li><span className="text-white/40 text-[13px]">Groq AI</span></li>
                             </ul>
                         </div>
