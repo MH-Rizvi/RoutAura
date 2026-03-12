@@ -13,7 +13,7 @@ from app.services.vector_service import embed
 
 logger = logging.getLogger(__name__)
 
-SIMILARITY_THRESHOLD = 0.70
+SIMILARITY_THRESHOLD = 0.65
 
 splitter = RecursiveCharacterTextSplitter(
     chunk_size=512,
@@ -159,4 +159,5 @@ def query_compliance(question: str, user_state: str, db: Session, top_k: int = 5
         citation = " — ".join(citation_parts)
         context_blocks.append(f"[{citation}]\n{row.content}")
 
-    return "\n\n".join(context_blocks)
+    context_str = "\n\n".join(context_blocks)
+    return f"Here is what the official CDL manual says. Use this to answer the driver's question directly and concisely:\n\n{context_str}"
