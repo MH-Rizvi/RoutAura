@@ -89,7 +89,7 @@ def ingest_document(
             INSERT INTO compliance_chunks
                 (content, embedding, jurisdiction, source, chapter, section, page, doc_type, state)
             VALUES
-                (:content, :embedding::vector, :jurisdiction, :source, :chapter, :section, :page, :doc_type, :state)
+                (:content, CAST(:embedding AS vector), :jurisdiction, :source, :chapter, :section, :page, :doc_type, :state)
         """),
         rows_to_insert,
     )
@@ -118,10 +118,10 @@ def query_compliance(question: str, user_state: str, db: Session, top_k: int = 5
                 chapter,
                 section,
                 page,
-                1 - (embedding <=> :embedding::vector) AS similarity
+                1 - (embedding <=> CAST(:embedding AS vector)) AS similarity
             FROM compliance_chunks
             WHERE jurisdiction IN ('federal', 'all', :state)
-            ORDER BY embedding <=> :embedding::vector
+            ORDER BY embedding <=> CAST(:embedding AS vector)
             LIMIT :top_k
         """),
         {

@@ -54,6 +54,10 @@ class Settings(BaseSettings):
         default="agent_v1",
         env="ACTIVE_PROMPT_VERSION",
     )
+    documents_path: str = Field(
+        default="./documents",
+        env="DOCUMENTS_PATH",
+    )
 
     @property
     def groq_api_keys(self) -> List[str]:
