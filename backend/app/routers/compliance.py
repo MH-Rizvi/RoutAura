@@ -34,6 +34,7 @@ DOCUMENT_MANIFEST = [
 @router.post("/ingest")
 async def ingest_all_documents(
     db: Session = Depends(get_db),
+    _admin=Depends(admin_required),
 ) -> dict[str, Any]:
     """
     Admin endpoint — ingests all documents in DOCUMENT_MANIFEST into compliance_chunks.
