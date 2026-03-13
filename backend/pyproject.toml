@@ -7,6 +7,7 @@ requires-python = ">=3.12"
 dependencies = [
     "asyncpg>=0.31.0",
     "chromadb==0.5.0",
+    "datasets>=4.7.0",
     "fastapi==0.110.0",
     "fastembed>=0.7.4",
     "gotrue>=2.12.4",
@@ -24,6 +25,7 @@ dependencies = [
     "pypdf>=6.8.0",
     "python-dotenv==1.0.1",
     "python-multipart>=0.0.22",
+    "ragas>=0.4.3",
     "sentence-transformers==2.7.0",
     "slowapi>=0.1.9",
     "sqlalchemy==2.0.29",

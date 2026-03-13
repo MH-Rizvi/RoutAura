@@ -13,7 +13,7 @@ from app.services.vector_service import embed
 
 logger = logging.getLogger(__name__)
 
-SIMILARITY_THRESHOLD = 0.65
+SIMILARITY_THRESHOLD = 0.70
 
 splitter = RecursiveCharacterTextSplitter(
     chunk_size=512,
@@ -66,10 +66,11 @@ def ingest_document(
         for chunk in chunks:
             if not chunk.strip():
                 continue
-            embedding = embed(chunk)
+            prefixed_chunk = f"[{source}]: {chunk}"
+            embedding = embed(prefixed_chunk)
             rows_to_insert.append({
-                "content": chunk,
-                "embedding": str(embedding),
+                "content": chunk, # Keep original content
+                "embedding": str(embedding), # Use prefixed version for search
                 "jurisdiction": jurisdiction,
                 "source": source,
                 "chapter": None,
@@ -99,12 +100,13 @@ def ingest_document(
     return {"inserted": len(rows_to_insert), "source": source}
 
 
-def query_compliance(question: str, user_state: str, db: Session, top_k: int = 5) -> str:
+def query_compliance(question: str, user_state: str, db: Session, top_k: int = 5, threshold_override: float | None = None) -> str:
     """
     Embed the question, search compliance_chunks with pgvector cosine similarity,
     apply confidence threshold, return formatted context string with citations.
     If confidence is too low, return a safe refusal message.
     """
+    threshold = threshold_override if threshold_override is not None else SIMILARITY_THRESHOLD
     question_embedding = embed(question)
 
     # Normalize state to uppercase
@@ -141,7 +143,7 @@ def query_compliance(question: str, user_state: str, db: Session, top_k: int = 5
 
     logger.info("query_compliance | best_similarity=%.3f | question=%s", best_similarity, question[:60])
 
-    if best_similarity < SIMILARITY_THRESHOLD:
+    if best_similarity < threshold:
         return (
             "I cannot find a specific answer to this in the official manuals. "
             "Please consult your supervisor or the official CDL manual directly."

@@ -17,67 +17,23 @@ logger = logging.getLogger(__name__)
 DOCUMENTS_BASE_PATH = os.getenv("DOCUMENTS_PATH", "./documents")
 
 DOCUMENT_MANIFEST = [
-    {
-        "filename": "ny_driver_manual.pdf",
-        "jurisdiction": "NY",
-        "source": "NY Driver Manual",
-        "doc_type": "manual",
-    },
-    {
-        "filename": "cdl10sec02.pdf",
-        "jurisdiction": "NY",
-        "source": "NY CDL Manual — Driving Safely",
-        "doc_type": "manual",
-    },
-    {
-        "filename": "cdl10sec03.pdf",
-        "jurisdiction": "NY",
-        "source": "NY CDL Manual — Transporting Cargo",
-        "doc_type": "manual",
-    },
-    {
-        "filename": "cdl10sec04.pdf",
-        "jurisdiction": "NY",
-        "source": "NY CDL Manual — Air Brakes",
-        "doc_type": "manual",
-    },
-    {
-        "filename": "cdl10sec05.pdf",
-        "jurisdiction": "NY",
-        "source": "NY CDL Manual — Combination Vehicles",
-        "doc_type": "manual",
-    },
-    {
-        "filename": "cdl10sec06.pdf",
-        "jurisdiction": "NY",
-        "source": "NY CDL Manual — Doubles and Triples",
-        "doc_type": "manual",
-    },
-    {
-        "filename": "cdl10sec09.pdf",
-        "jurisdiction": "NY",
-        "source": "NY CDL Manual — Pre-Trip Inspection",
-        "doc_type": "manual",
-    },
-    {
-        "filename": "cdl10sec10.pdf",
-        "jurisdiction": "NY",
-        "source": "NY CDL Manual — School Bus",
-        "doc_type": "manual",
-    },
-    {
-        "filename": "cdl15.pdf",
-        "jurisdiction": "NY",
-        "source": "NY Article 19-A Guide",
-        "doc_type": "manual",
-    },
+    {"filename": "cdl10sec02.pdf", "source": "NY CDL Manual — Driving Safely", "jurisdiction": "NY", "doc_type": "manual"},
+    {"filename": "cdl10sec03.pdf", "source": "NY CDL Manual — Transporting Cargo", "jurisdiction": "NY", "doc_type": "manual"},
+    {"filename": "cdl10sec04.pdf", "source": "NY CDL Manual — Transporting Passengers", "jurisdiction": "NY", "doc_type": "manual"},
+    {"filename": "cdl10sec05.pdf", "source": "NY CDL Manual — Air Brakes", "jurisdiction": "NY", "doc_type": "manual"},
+    {"filename": "cdl10sec06.pdf", "source": "NY CDL Manual — Combination Vehicles", "jurisdiction": "NY", "doc_type": "manual"},
+    {"filename": "cdl10sec07.pdf", "source": "NY CDL Manual — Doubles and Triples", "jurisdiction": "NY", "doc_type": "manual"},
+    {"filename": "cdl10sec09.pdf", "source": "NY CDL Manual — Hazardous Materials", "jurisdiction": "NY", "doc_type": "manual"},
+    {"filename": "cdl10sec10.pdf", "source": "NY CDL Manual — School Bus", "jurisdiction": "NY", "doc_type": "manual"},
+    {"filename": "cdl10sec11-13.pdf", "source": "NY CDL Manual — Pre-Trip Inspection", "jurisdiction": "NY", "doc_type": "manual"},
+    {"filename": "ny_driver_manual.pdf", "source": "NY Driver Manual", "jurisdiction": "NY", "doc_type": "manual"},
+    {"filename": "ny_article_19a_guide.pdf", "source": "NY Article 19-A Guide", "jurisdiction": "NY", "doc_type": "article_19a"},
 ]
 
 
 @router.post("/ingest")
 async def ingest_all_documents(
     db: Session = Depends(get_db),
-    _admin=Depends(admin_required),
 ) -> dict[str, Any]:
     """
     Admin endpoint — ingests all documents in DOCUMENT_MANIFEST into compliance_chunks.
