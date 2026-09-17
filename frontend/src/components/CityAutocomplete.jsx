@@ -1,6 +1,6 @@
 /**
  * CityAutocomplete — city input with Google Places suggestions dropdown.
- * Disabled until a state is selected. User must pick from suggestions.
+ * Disabled until a state is selected. User can pick from suggestions or enter manually.
  */
 import { useState, useRef, useEffect } from 'react';
 import { autocompleteCities } from '../api/client';
@@ -12,6 +12,7 @@ export default function CityAutocomplete({ value, onChange, stateAbbr, disabled,
     const [loading, setLoading] = useState(false);
     const debounceRef = useRef(null);
     const wrapperRef = useRef(null);
+    const requestIdRef = useRef(0);
     const [picked, setPicked] = useState(!!value);
 
     // Sync external value changes (e.g. form reset or pre-population)
@@ -19,6 +20,16 @@ export default function CityAutocomplete({ value, onChange, stateAbbr, disabled,
         setQuery(value || '');
         setPicked(!!value);
     }, [value]);
+
+    // Reset autocomplete state if selected state changes
+    useEffect(() => {
+        if (!stateAbbr) {
+            setSuggestions([]);
+            setShowDropdown(false);
+            setLoading(false);
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+        }
+    }, [stateAbbr]);
 
     // Close dropdown on outside click
     useEffect(() => {
@@ -33,24 +44,33 @@ export default function CityAutocomplete({ value, onChange, stateAbbr, disabled,
 
     const fetchSuggestions = (text) => {
         if (debounceRef.current) clearTimeout(debounceRef.current);
+        const currentReqId = ++requestIdRef.current;
 
-        if (text.length < 2 || !stateAbbr) {
+        const trimmedText = text.trim();
+        if (trimmedText.length < 2 || !stateAbbr) {
             setSuggestions([]);
             setShowDropdown(false);
+            setLoading(false);
             return;
         }
 
         debounceRef.current = setTimeout(async () => {
             setLoading(true);
             try {
-                const results = await autocompleteCities(text, stateAbbr);
-                setSuggestions(results);
-                setShowDropdown(results.length > 0);
-            } catch {
-                setSuggestions([]);
-                setShowDropdown(false);
+                const results = await autocompleteCities(trimmedText, stateAbbr);
+                if (currentReqId === requestIdRef.current) {
+                    setSuggestions(results || []);
+                    setShowDropdown(Array.isArray(results) && results.length > 0);
+                }
+            } catch (err) {
+                if (currentReqId === requestIdRef.current) {
+                    setSuggestions([]);
+                    setShowDropdown(false);
+                }
             } finally {
-                setLoading(false);
+                if (currentReqId === requestIdRef.current) {
+                    setLoading(false);
+                }
             }
         }, 300);
     };
@@ -59,7 +79,8 @@ export default function CityAutocomplete({ value, onChange, stateAbbr, disabled,
         const text = e.target.value;
         setQuery(text);
         setPicked(false);
-        onChange(''); // Clear selected city since user is retyping
+        // Allow manual typing fallback so form validation is satisfied as user types
+        onChange(text);
         fetchSuggestions(text);
     };
 
@@ -69,6 +90,14 @@ export default function CityAutocomplete({ value, onChange, stateAbbr, disabled,
         onChange(city);
         setSuggestions([]);
         setShowDropdown(false);
+        setLoading(false);
+    };
+
+    const handleBlur = () => {
+        // Small delay so dropdown clicks fire before dropdown hides
+        setTimeout(() => {
+            setShowDropdown(false);
+        }, 200);
     };
 
     const isDisabled = disabled || !stateAbbr;
@@ -79,6 +108,7 @@ export default function CityAutocomplete({ value, onChange, stateAbbr, disabled,
                 type="text"
                 value={query}
                 onChange={handleInputChange}
+                onBlur={handleBlur}
                 onFocus={() => { if (suggestions.length > 0 && !picked) setShowDropdown(true); }}
                 disabled={isDisabled}
                 placeholder={isDisabled ? 'Select a state first' : 'Start typing a city...'}
@@ -86,7 +116,7 @@ export default function CityAutocomplete({ value, onChange, stateAbbr, disabled,
                 autoComplete="off"
             />
             {loading && (
-                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
                     <div className="w-4 h-4 border-2 border-amber-500/30 border-t-amber-500 rounded-full animate-spin" />
                 </div>
             )}
@@ -96,8 +126,11 @@ export default function CityAutocomplete({ value, onChange, stateAbbr, disabled,
                         <button
                             key={s.place_id || i}
                             type="button"
+                            onMouseDown={(e) => {
+                                e.preventDefault(); // Prevent blur before select
+                                handleSelect(s.city);
+                            }}
                             onClick={() => handleSelect(s.city)}
-                            onTouchStart={() => handleSelect(s.city)}
                             className="w-full text-left px-4 py-3 text-[14px] text-white/80 hover:bg-amber-500/10 hover:text-white transition-colors flex items-center gap-2 border-b border-white/[0.04] last:border-0"
                         >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500/60 shrink-0">
@@ -111,3 +144,4 @@ export default function CityAutocomplete({ value, onChange, stateAbbr, disabled,
         </div>
     );
 }
+

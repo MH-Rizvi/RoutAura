@@ -5,10 +5,14 @@ ensure results are scoped to the selected US state.
 """
 from __future__ import annotations
 
+import logging
+
 import httpx
 from fastapi import APIRouter, Query
 
 from app.config import get_settings
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/places", tags=["places"])
 
@@ -109,13 +113,17 @@ async def autocomplete_cities(
         params["location"] = f"{center[0]},{center[1]}"
         params["radius"] = "300000"
 
-    async with httpx.AsyncClient() as client:
-        resp = await client.get(
-            "https://maps.googleapis.com/maps/api/place/autocomplete/json",
-            params=params,
-            timeout=5.0,
-        )
-        data = resp.json()
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(
+                "https://maps.googleapis.com/maps/api/place/autocomplete/json",
+                params=params,
+                timeout=5.0,
+            )
+            data = resp.json()
+    except Exception as e:
+        logger.error(f"Google Places API autocomplete error: {e}")
+        return {"predictions": []}
 
     # Server-side filter: only keep predictions from the selected state.
     # Google returns structured data we can leverage:
