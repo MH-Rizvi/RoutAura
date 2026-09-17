@@ -72,10 +72,15 @@ class LLMKeyRotator:
 
         self.groq_models = [
             "llama-3.3-70b-versatile",
-            "moonshotai/kimi-k2-instruct",
-            "qwen/qwen3-32b",
-            "llama-3.1-8b-instant"
+            "llama-3.1-8b-instant",
+            "llama-3.3-70b-specdec",
+            "llama-3.1-70b-versatile",
+            "mixtral-8x7b-32768",
+            "gemma2-9b-it",
         ]
+        
+        # Attempt to dynamically populate available Groq models from API if reachable
+        self._refresh_groq_models()
             
         self._current_key_idx: int = 0
         self._current_model_idx: int = 0
@@ -88,6 +93,29 @@ class LLMKeyRotator:
             "LLMKeyRotator initialised with %d key(s) (%d Groq, %d Gemini)",
             len(self._keys), len(groq_keys), len(gemini_keys)
         )
+
+    def _refresh_groq_models(self) -> None:
+        """Dynamically query Groq API for active models if a key is available."""
+        groq_keys = [k for p, k in self._keys if p == "groq"]
+        if not groq_keys:
+            return
+        try:
+            import httpx
+            headers = {"Authorization": f"Bearer {groq_keys[0]}"}
+            resp = httpx.get("https://api.groq.com/openai/v1/models", headers=headers, timeout=3.0)
+            if resp.status_code == 200:
+                data = resp.json()
+                api_models = [m["id"] for m in data.get("data", []) if "id" in m]
+                if api_models:
+                    # Keep models that are suitable for chat/text completion
+                    chat_models = [m for m in api_models if any(kw in m.lower() for kw in ("llama", "mixtral", "gemma", "qwen"))]
+                    if chat_models:
+                        preferred = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
+                        ordered = [m for m in preferred if m in chat_models] + [m for m in chat_models if m not in preferred]
+                        self.groq_models = ordered
+                        logger.info(f"Dynamically loaded {len(ordered)} Groq models from API.")
+        except Exception as e:
+            logger.debug(f"Dynamic Groq model lookup skipped: {e}")
 
     @property
     def current_provider(self) -> str:

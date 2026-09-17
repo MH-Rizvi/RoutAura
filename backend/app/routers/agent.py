@@ -66,6 +66,8 @@ async def chat(
             user_city=user_city,
             session_id=payload.session_id,
         )
+        if result is None or not isinstance(result, dict):
+            return schemas.AgentChatResponse(reply="Something went wrong while processing your route. Please try again.")
         return schemas.AgentChatResponse(**result)
     except Exception as exc:
         # Log the full error but return a friendly message
@@ -110,6 +112,8 @@ async def demo_chat(
             user_id=0,
             user_city="Hicksville, NY",
         )
+        if result is None or not isinstance(result, dict):
+            return schemas.AgentChatResponse(reply="Something went wrong. Please try again.")
 
         # Intercept save_trip attempts — demo users cannot save
         reply_text = result.get("reply", "")
