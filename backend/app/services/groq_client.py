@@ -25,14 +25,28 @@ def _mask(key: str) -> str:
 
 
 def _is_rate_limit_error(exc: Exception) -> bool:
-    """Check if an exception is a rate-limit / daily-limit / capacity / 404 missing model error."""
+    """Check if an exception is a rate-limit / daily-limit / capacity / 403 / 404 missing or forbidden model error."""
     exc_type = type(exc).__name__
-    if "RateLimitError" in exc_type or "ResourceExhausted" in exc_type or "InternalServerError" in exc_type or "APIStatusError" in exc_type or "NotFoundError" in exc_type:
+    if (
+        "RateLimitError" in exc_type
+        or "ResourceExhausted" in exc_type
+        or "InternalServerError" in exc_type
+        or "APIStatusError" in exc_type
+        or "NotFoundError" in exc_type
+        or "PermissionDeniedError" in exc_type
+        or "ForbiddenError" in exc_type
+    ):
         return True
     msg = str(exc).lower()
     return any(
         token in msg
-        for token in ("rate_limit", "rate limit", "429", "503", "500", "502", "504", "404", "not found", "daily limit", "token limit", "tokens_remaining", "quota exceeded", "resource exhausted", "capacity", "overloaded", "service unavailable", "internal server error")
+        for token in (
+            "rate_limit", "rate limit", "429", "503", "500", "502", "504", "404", "403",
+            "forbidden", "permission_denied", "permission denied", "not found",
+            "daily limit", "token limit", "tokens_remaining", "quota exceeded",
+            "resource exhausted", "capacity", "overloaded", "service unavailable",
+            "internal server error"
+        )
     )
 
 
@@ -95,7 +109,7 @@ class LLMKeyRotator:
         )
 
     def _refresh_groq_models(self) -> None:
-        """Dynamically query Groq API for active models if a key is available."""
+        """Dynamically query Groq API for active chat completion models if a key is available."""
         groq_keys = [k for p, k in self._keys if p == "groq"]
         if not groq_keys:
             return
@@ -107,13 +121,23 @@ class LLMKeyRotator:
                 data = resp.json()
                 api_models = [m["id"] for m in data.get("data", []) if "id" in m]
                 if api_models:
-                    # Keep models that are suitable for chat/text completion
-                    chat_models = [m for m in api_models if any(kw in m.lower() for kw in ("llama", "mixtral", "gemma", "qwen"))]
+                    # Ignore utility, guard, whisper, embedding, safetensors models
+                    ignored_keywords = ("guard", "whisper", "embedding", "safetensors")
+                    chat_models = [
+                        m for m in api_models
+                        if not any(ik in m.lower() for ik in ignored_keywords)
+                        and any(kw in m.lower() for kw in ("llama", "mixtral", "gemma", "qwen"))
+                    ]
                     if chat_models:
-                        preferred = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
+                        preferred = [
+                            "llama-3.3-70b-versatile",
+                            "llama-3.1-8b-instant",
+                            "mixtral-8x7b-32768",
+                            "gemma2-9b-it",
+                        ]
                         ordered = [m for m in preferred if m in chat_models] + [m for m in chat_models if m not in preferred]
                         self.groq_models = ordered
-                        logger.info(f"Dynamically loaded {len(ordered)} Groq models from API.")
+                        logger.info(f"Dynamically loaded {len(ordered)} Groq chat models from API: {ordered}")
         except Exception as e:
             logger.debug(f"Dynamic Groq model lookup skipped: {e}")
 
