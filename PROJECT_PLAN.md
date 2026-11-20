@@ -2,13 +2,13 @@
 ## Phased Task Breakdown (Agentic AI Edition)
 
 **Version:** 2.1  
-**Date:** March 2026
-**Status:** Phase 0-27 Complete
+**Date:** March 2026  
+**Status:** Phase 0–27 Complete (28 Phases Total)
 
 ---
 
 ## Build Philosophy
-Ship the agentic AI core natively first — establishing absolute structural stability using local variables before deploying enterprise identities. Next, upgrade and solidify cloud environments using Supabase Postgres and Auth clusters to prepare the deployment layers, wrapping the functionality within premium Glassmorphism dashboards spanning 23 carefully orchestrated architectural phases.
+Ship the agentic AI core natively first — establishing structural stability using local variables before deploying enterprise identities. Next, upgrade and solidify cloud environments using Supabase Postgres and Auth clusters to prepare the deployment layers, wrapping the functionality within premium Glassmorphism dashboards spanning 28 carefully orchestrated architectural phases.
 
 ---
 
@@ -17,10 +17,10 @@ Ship the agentic AI core natively first — establishing absolute structural sta
 
 - [x] **T001** — Create monorepo: `RoutAura/frontend/` and `RoutAura/backend/`
 - [x] **T002** — Init React + Vite frontend
-- [x] **T003** — Install frontend deps: `react-router-dom tailwindcss zustand axios leaflet react-leaflet`
+- [x] **T003** — Install frontend deps: `react-router-dom tailwindcss zustand axios leaflet react-leaflet recharts lucide-react`
 - [x] **T004** — Configure Tailwind CSS
 - [x] **T005** — Init FastAPI backend, create `requirements.txt`
-- [x] **T006** — Install all Python deps: `pip install -r requirements.txt`
+- [x] **T006** — Install Python deps: `pip install -r requirements.txt` (or `uv pip install -r requirements.txt`)
 - [x] **T007** — Create `.env` mappings
 - [x] **T008** — Create `backend/app/config.py` using `pydantic-settings`
 - [x] **T009** — Create `backend/app/main.py`
@@ -42,14 +42,13 @@ Ship the agentic AI core natively first — establishing absolute structural sta
 ---
 
 ## Phase 2 — Embedding Service
-*Goal: Text can be embedded locally without heavy PyTorch servers.*
+*Goal: Text can be embedded locally without heavy PyTorch servers (serves Compliance RAG).*
 
 - [x] **T018** — Orchestrate `backend/app/services/vector_service.py`
 - [x] **T019** — Load `TextEmbedding("BAAI/bge-small-en-v1.5")` via `fastembed` natively 
 - [x] **T020** — Implement root `embed(text: str)` hook
-- [x] **T021** — Configure string concatenations natively into cosine arrays
-- [x] **T022** — Implement multi-dimensional `add_trip` definitions
-- [x] **T023** — Expand logic into QA semantic mapping logs via `add_history_entry`
+- [x] **T021** — Configure vector extraction into cosine arrays
+- [x] **T022** — Benchmark lightweight in-process vector latency
 
 ---
 
@@ -68,7 +67,7 @@ Ship the agentic AI core natively first — establishing absolute structural sta
 *Goal: The Zero-Shot ReAct agent processes complex logical permutations autonomously.*
 
 - [x] **T033** — Define System Prompt mappings restricting AI to single-bound routing rules
-- [x] **T034** — Expose 5 native agent tools bridging SQL bounds and Vector memory
+- [x] **T034** — Expose native agent tools bridging SQL bounds, geocoding, and memory
 - [x] **T035** — Inject `LLMOpsCallbackHandler` tracking multi-stage processing performance
 - [x] **T036** — Bind `ChatGroq` parameters targeting 70B intensive logical arrays
 - [x] **T037** — Test tool fallback extraction structures internally
@@ -77,7 +76,7 @@ Ship the agentic AI core natively first — establishing absolute structural sta
 ---
 
 ## Phase 5 — Input Moderation (Responsible AI)
-*Goal: AI interfaces cannot be broken via native injection tactics.*
+*Goal: AI interfaces cannot be broken via prompt injection tactics.*
 
 - [x] **T042** — Formulate `moderation_service.py`
 - [x] **T043** — Expose `is_safe()` boolean checks globally 
@@ -87,23 +86,23 @@ Ship the agentic AI core natively first — establishing absolute structural sta
 
 ---
 
-## Phase 6 — RAG Pipeline
-*Goal: Drivers parse massive data lakes natively via voice text prompts.*
+## Phase 6 — RAG Pipeline (History Q&A)
+*Goal: Drivers parse past route history natively via conversational queries.*
 
-- [x] **T047** — Initialize `rag_service.py` context vectors
-- [x] **T048** — Isolate generic LLM processing via the `RAG_SYSTEM_PROMPT` bounding logic
-- [x] **T049** — Integrate top-k retrieving bounds preventing conversational dilution
-- [x] **T050** — Verify semantic tracking across edge cases
+- [x] **T047** — Initialize `rag_service.py` pure SQL extraction routines
+- [x] **T048** — Isolate generic LLM processing via the `RAG_SYSTEM_PROMPT_v1` bounding logic
+- [x] **T049** — Integrate SQL limit bounds preventing conversational token dilution
+- [x] **T050** — Verify factual tracking across edge cases without hallucinations
 
 ---
 
 ## Phase 7 — APIs + Internal Database Binding
-*Goal: Establish robust multi-state persistence endpoints handling complex UUID routing queries.*
+*Goal: Establish robust multi-state persistence endpoints handling relational routing queries.*
 
 - [x] **T053** — Define robust generic CRUD routing clusters securely passing database arguments
 - [x] **T054** — Hook logical bindings deleting orphaned data definitions dynamically 
 - [x] **T055** — Bind user context headers implicitly preventing cross-tenant leakage 
-- [x] **T056** — Verify RAG logging architectures successfully process active JSON variables
+- [x] **T056** — Verify logging architectures successfully process active JSON variables
 - [x] **T057** — Expose `/api/v1` routes matching exact frontend signatures
 
 ---
@@ -118,25 +117,25 @@ Ship the agentic AI core natively first — establishing absolute structural sta
 
 ---
 
-## Phase 9 — Interactive Agent Chat UI
+## Phase 9 — Interactive Agent Chat UI & Voice Input
 *Goal: Fluid iOS-like conversation design showcasing granular LangChain step processing.*
 
 - [x] **T071** — Rebuild Chat grids mapping multi-role flex arrays 
 - [x] **T072** — Support prompt injection UI bounding targets
-- [x] **T073** — Integrate voice interfaces targeting generic inputs
-- [x] **T074** — Bind deep visual routing configurations tracking LLM context cycles
-- [x] **T075** — Verify UX constraints under intensive mobile scrolling behaviors
+- [x] **T073** — Integrate voice transcription targeting Groq Whisper (`whisper-large-v3`)
+- [x] **T074** — Bind visual route card configurations tracking LLM context cycles
+- [x] **T075** — Verify UX constraints under mobile scrolling behaviors
 
 ---
 
-## Phase 10 — Mapping Grid Preview Architectures
-*Goal: Driver can review, edit, and natively launch external polyline domains out via the PWA architecture.*
+## Phase 10 — Mapping Grid Preview & Directions ETA
+*Goal: Driver can review, edit, and launch external navigation maps out via the PWA architecture.*
 
 - [x] **T080** — Boot interactive `PreviewScreen` UI logic
 - [x] **T081** — Link React-Leaflet geometries via interactive mapping arrays 
 - [x] **T082** — Implement multi-touch Drag-n-Drop functionality targeting list elements
-- [x] **T083** — Generate dynamic Maps sequences launching internal iOS URL Scheme arrays (`dirflg=d`) vs generic Google links natively.
-- [x] **T084** — Launch `history_history` array records directly upon external window mapping triggers 
+- [x] **T083** — Generate dynamic Maps sequences launching internal iOS URL Scheme arrays (`dirflg=d`) vs generic Google links
+- [x] **T084** — Wire `/api/v1/directions/stats` via Google Directions API for real-time distance and ETA duration
 
 ---
 
@@ -150,22 +149,23 @@ Ship the agentic AI core natively first — establishing absolute structural sta
 
 ---
 
-## Phase 13 & 14 — Semantic Search + Embedded History Q&A 
+## Phase 13 & 14 — Fuzzy Search + Embedded History Q&A
 *Goal: SQL fuzzy search architectures mapped explicitly against human-readable GUI elements.*
 
 - [x] **T100** — Construct global Library parameters executing real-time similarity clustering
 - [x] **T101** — Process search delays protecting API bounds through custom Debounce algorithms 
-- [x] **T102** — Visually broadcast cosine mapping scores natively on rendering cards
+- [x] **T102** — Visually display matching stops and trips on rendering cards
 - [x] **T103** — Integrate active RAG QA input domains onto user history arrays rendering formatted responses instantly
 
 ---
 
-## Phase 15 — LLMOps Analytics Showcase
-*Goal: Live LLM parameter monitoring actively projecting underlying Cloud operations safely.* 
+## Phase 15 — LLMOps Analytics & Admin RBAC
+*Goal: Live LLM parameter monitoring actively projecting underlying operations safely.*
 
 - [x] **T111** — Intersect `admin/llm-logs` queries mapping token variations against model architectures
-- [x] **T112** — Design simple grid metrics outlining token density parameters vs overall application lag instances
-- [x] **T113** — Showcase agent tool configurations dynamically 
+- [x] **T112** — Design simple grid metrics outlining token density parameters vs overall application latency
+- [x] **T113** — Implement `admin_required` route dependency enforcing `user_profiles.role == 'admin'`
+- [x] **T114** — Wire `api_usage` tracking table capturing daily API volume
 
 ---
 
@@ -182,8 +182,8 @@ Ship the agentic AI core natively first — establishing absolute structural sta
 *Goal: Shift application architectures entirely toward true persistent identity providers targeting robust deployments.*
 
 - [x] **T124** — Bind Supabase configurations capturing backend API variables natively
-- [x] **T125** — Connect local FastAPI parameters mapping specific JWT injection hooks bypassing external latency calls
-- [x] **T126** — Eradicate custom User logic transferring explicitly to Postgres Auth relationships
+- [x] **T125** — Connect FastAPI dependencies validating Supabase Auth Bearer tokens via `supabase.auth.get_user()`
+- [x] **T126** — Eradicate custom User logic transferring explicitly to Postgres `user_profiles` referencing `auth.users(id)`
 - [x] **T127** — Expose PKCE Google OAuth boundaries bypassing manual Auth input screens 
 
 ---
@@ -191,9 +191,9 @@ Ship the agentic AI core natively first — establishing absolute structural sta
 ## Phase 18 — Supabase Postgres Architecture Matrix 
 *Goal: Core schema variables completely separated eliminating localized `.db` instances from memory natively.*
 
-- [x] **T134** — Update Model targets executing `UUID` explicit string arrays bounding relational queries natively 
+- [x] **T134** — Update Model targets migrating `user_id` foreign keys to Postgres `UUID` (preserving integer primary keys on `trips`, `stops`, `trip_history`, `llm_logs`)
 - [x] **T135** — Alter local FastAPI engine executing remote PGSQL parameters securely mapping external DSN variables
-- [x] **T136** — Remap all internal `service` definitions targeting `str` variables replacing raw integers completely 
+- [x] **T136** — Remap all internal `service` definitions targeting `str` user identifiers
 - [x] **T137** — Support asynchronous user cascade drops triggering data isolation logic flawlessly 
 
 ---
@@ -202,34 +202,34 @@ Ship the agentic AI core natively first — establishing absolute structural sta
 *Goal: Distinct Public API scopes mapping Demo Logic separated securely from restricted application logic.*
 
 - [x] **T149** — Generate isolated `LandingPage` bounds capturing core feature sets safely
-- [x] **T150** — Bind rate-limited endpoint queries executing raw Agent chat demonstrations preventing application hijacking 
-- [x] **T151** — Structure Route parameters trapping destructive DOM calls securely inside React `<Link>` arrays natively.
+- [x] **T150** — Bind rate-limited endpoint queries (`/agent/demo-chat`, 10 req/IP/hour) preventing application hijacking
+- [x] **T151** — Structure Route parameters trapping DOM calls securely inside React `<Link>` arrays natively
 
 ---
 
 ## Phase 20 — Production Cloud Architecture 
 *Goal: Fully stable CI/CD environment binding explicit Docker logic bridging frontend CDN boundaries.*
 
-- [x] **T157** — Migrate core operations toward Vercel targets securing base frontends
+- [x] **T157** — Migrate core frontend operations toward Vercel targets securing base frontends
 - [x] **T158** — Implement backend configuration profiles matching Railway executing targets successfully 
 - [x] **T159** — Pass rigorous Environment variables protecting Supabase identity parameters
 
 ---
 
 ## Phase 21 & 22 — Scale-Out Rate Limit Engines
-*Goal: Intercept massive LLM payload requirements transferring traffic limits flawlessly natively.* 
+*Goal: Intercept LLM payload requirements transferring traffic limits flawlessly natively.* 
 
 - [x] **T168** — Code logic explicitly catching server side 503 limits triggering `groq_rotator` array targets natively
-- [x] **T169** — Secure fallback chains transferring generation requirements towards identical Gemini models bridging `gemini-2.5-flash` natively
+- [x] **T169** — Secure fallback chains transferring generation requirements towards Google Gemini (`gemini-2.0-flash-lite`)
 
 ---
 
 ## Phase 23 — Master Dashboard UI/UX Polish
 *Goal: Premium Aesthetic architectures driving final project presentations across multiple hardware variations flawlessly.*
 
-- [x] **T170** — Refactor pure `Trips Screen` execution grids converting row values targeting true Glass Card aesthetics. 
+- [x] **T170** — Refactor pure `Trips Screen` execution grids converting row values targeting true Glass Card aesthetics
 - [x] **T171** — Update CSS keyframes natively generating sub-second interface navigation logic
-- [x] **T172** — Enhance deep scroll behavior fixing Mobile container overrides securely executing inputs explicitly matching software keyboards. 
+- [x] **T172** — Enhance desktop layout with fixed Glassmorphism Sidebar alongside responsive Mobile Bottom Tab Bar
 
 ---
 
@@ -252,6 +252,8 @@ Ship the agentic AI core natively first — establishing absolute structural sta
 - [x] **T180** — Attach explicit `session_id` structures to backend MD5 hashing preventing duplicate request false-positives across manual page refreshes seamlessly.
 - [x] **T181** — Apply strict System Prompts preventing bare-brand context hallucinations (e.g., "Target" without a city) detached from explicit geographical bounds.
 
+---
+
 ## Phase 26 — SQL Search Migration (Architectural Hardening)
 *Goal: Remove dependency on local vector storage for business-critical trip and stop searches.*
 
@@ -272,7 +274,7 @@ Ship the agentic AI core natively first — establishing absolute structural sta
 - [x] **T190** — Execute fastembed `BAAI/bge-small-en-v1.5` to store `vector(384)` embeddings.
 - [x] **T191** — Expose `check_compliance` tool to the ReAct agent.
 - [x] **T192** — Harden agent prompt with PRE-ANSWER COMPLIANCE GATE to eradicate LLM memory hallucinations.
-- [x] **T193** — Tune threshold to 0.65 (cosine) and enforce `📚 Source: ` formatting on responses.
+- [x] **T193** — Tune threshold to 0.70 (cosine) and enforce `📚 Source: ` formatting on responses.
 
 ---
 _END OF ROADMAP_
